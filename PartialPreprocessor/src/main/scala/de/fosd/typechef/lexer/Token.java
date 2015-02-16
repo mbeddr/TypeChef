@@ -38,8 +38,7 @@ public abstract class Token implements LexerToken {
     /**
      * Returns the semantic type of this token.
      */
-    /*package*/
-    abstract int getType();
+    public abstract int getType();
 
     public abstract void setLocation(int line, int column);
 
@@ -94,6 +93,14 @@ public abstract class Token implements LexerToken {
         return getType() == Token.EOF;
     }
 
+    @Override
+    public boolean isComment() {
+        return getType() == Token.CCOMMENT || getType() == Token.CPPCOMMENT;
+    }
+
+    public boolean isInclude() {
+        return getType() == Token.INCLUDE;
+    }
 
     /**
      * properties of tokens used by other clients like the C parser
@@ -106,8 +113,8 @@ public abstract class Token implements LexerToken {
                 && getText().equals("__extension__"))
                 && getType() != Token.NL
                 && getType() != Token.P_IF
-                && getType() != Token.CCOMMENT
-                && getType() != Token.CPPCOMMENT
+                //&& getType() != Token.CCOMMENT
+                //&& getType() != Token.CPPCOMMENT
                 && getType() != Token.P_ENDIF
                 && getType() != Token.P_ELIF;
     }
@@ -343,6 +350,8 @@ public abstract class Token implements LexerToken {
      * Please note that not all token types below 255 are used.
      */
     /*package*/ static final int _TOKENS = 304;
+
+    /*package*/ static final int INCLUDE = 305;
 
     /**
      * The position-less space token.

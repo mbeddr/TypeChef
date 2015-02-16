@@ -1597,9 +1597,9 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
 
     private Token parse_include(boolean next) throws IOException,
             LexerException {
-        LexerSource lexer = (LexerSource) sourceManager.getSource();
+        LexerSource currentSource = (LexerSource) sourceManager.getSource();
         try {
-            lexer.setInclude(true);
+            currentSource.setInclude(true);
             processing_include = true;
             Token tok = getNextNonwhiteToken();
 
@@ -1611,7 +1611,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                 /*
                      * XXX Use the original text, not the value. Backslashes must
                      * not be treated as escapes here.
-                     * PG: the above is no more needed, because the lexer does
+                     * PG: the above is no more needed, because the currentSource does
                      * not handle backslashes as escapes when processing includes.
                      */
                 buf.append((String) tok.getValue());
@@ -1685,17 +1685,24 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
             include(sourceManager.getSource().getPath(), tok.getLine(), name,
                     quoted, next);
 
-            /*
-                * 'tok' is the 'nl' after the include. We use it after the #line
-                * directive.
-                */
-            if (getFeature(Feature.LINEMARKERS))
-                return OutputHelper.line_token(1, sourceManager.getSource()
-                        .getName(), " 1");
-            return tok;
+            // if the current source's parent is null, then this is the source used for the
+            // original file input, otherwise this is transitively reached from other included headers
+            if (currentSource.getParent() == null) {
+                return new SimpleToken(Token.INCLUDE, 1, 0, name, currentSource);
+            } else {
+                /*
+                 * 'tok' is the 'nl' after the include. We use it after the #line
+                 * directive.
+                 */
+                if (getFeature(Feature.LINEMARKERS)) {
+                    return OutputHelper.line_token(1, sourceManager.getSource()
+                            .getName(), " 1");
+                }
+                return tok;
+            }
         } finally {
             processing_include = false;
-            lexer.setInclude(false);
+            currentSource.setInclude(false);
         }
     }
 

@@ -63,6 +63,7 @@ trait AST extends Product with Serializable with Cloneable with WithPosition {
 
 trait CFGStmt extends AST
 trait CDef extends AST
+trait Comment extends AST
 
 sealed abstract class Expr extends AST with CFGStmt
 
@@ -153,9 +154,11 @@ case class DefaultStatement() extends Statement with CFGStmt
 
 case class IfStatement(condition: Conditional[Expr], thenBranch: Conditional[Statement], elifs: List[Opt[ElifStatement]], elseBranch: Option[Conditional[Statement]]) extends Statement
 
-case class ElifStatement(condition: Conditional[Expr], thenBranch: Conditional[Statement]) extends AST
+case class ElifStatement(condition: Conditional[Expr], thenBranch: Conditional[Statement]) extends Statement
 
 case class SwitchStatement(expr: Expr, s: Conditional[Statement]) extends Statement
+
+case class StatementLevelComment(value : String) extends Statement with Comment
 
 sealed abstract class CompoundDeclaration extends Statement with CFGStmt
 
@@ -348,8 +351,11 @@ case class NestedFunctionDef(isAuto: Boolean, specifiers: List[Opt[Specifier]], 
     def getName = declarator.getName
 }
 
-
 trait ExternalDef extends AST with CFGStmt
+
+case class Include(path : String) extends ExternalDef
+
+case class ExternalDefLevelComment(value : String) extends ExternalDef with Comment
 
 case class EmptyExternalDef() extends ExternalDef
 

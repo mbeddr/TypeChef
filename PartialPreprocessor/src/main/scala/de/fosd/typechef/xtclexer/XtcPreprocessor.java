@@ -362,6 +362,16 @@ public class XtcPreprocessor implements VALexer {
             return xtcToken.kind() == Syntax.Kind.EOF;
         }
 
+        @Override
+        public boolean isComment() {
+            return false;
+        }
+
+        @Override
+        public boolean isInclude() {
+            return false;
+        }
+
         /**
          * is a language identifier (or type in C)
          * <p/>

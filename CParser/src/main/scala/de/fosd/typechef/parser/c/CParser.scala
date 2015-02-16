@@ -1,13 +1,10 @@
 package de.fosd.typechef.parser.c
 
 
-import de.fosd.typechef.parser._
-import de.fosd.typechef.conditional._
+import de.fosd.typechef.conditional.{Opt, _}
 import de.fosd.typechef.featureexpr.FeatureExprFactory.True
-import de.fosd.typechef.featureexpr.{FeatureModel, FeatureExpr}
-import scala.Some
-import de.fosd.typechef.parser.~
-import de.fosd.typechef.conditional.Opt
+import de.fosd.typechef.featureexpr.{FeatureExpr, FeatureModel}
+import de.fosd.typechef.parser.{~, _}
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  * based on ANTLR grammar from John D. Mitchell (john@non.net), Jul 12, 1997
@@ -49,7 +46,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
             case _ ~ r => r
         } |
             asm_expr | declaration |
-            functionDef | typelessDeclaration | pragma | expectType | expectNotType | (SEMI ^^ {
+            functionDef | typelessDeclaration | pragma | expectType | expectNotType | externalDefComment | include | (SEMI ^^ {
             x => EmptyExternalDef()
         })) !
 
@@ -359,6 +356,8 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     })
         | (expr <~ SEMI ^^ {
         ExprStatement(_)
+    })  | (token("comment", _.isComment) ^^ {
+        t => new StatementLevelComment(t.getText)
     }) // Expressions
         | fail("statement expected")) !
 
@@ -548,7 +547,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     //  ...
     //  ( type-name ) { initializer-list }
     //  ( type-name ) { initializer-list , }
-    private def castAndInitializer = (LPAREN ~> typeName <~ RPAREN) ~ lcurlyInitializer  ^^ { case tn~init => CastExpr(tn, init) }
+    private def castAndInitializer = (LPAREN ~> typeName <~ RPAREN) ~ lcurlyInitializer ^^ { case tn ~ init => CastExpr(tn, init)}
 
     //
     def functionCall: MultiParser[FunctionCall] =
@@ -560,21 +559,21 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
 
     def primaryExpr: MultiParser[Expr] = castAndInitializer |
         (textToken("__builtin_offsetof") ~ LPAREN ~! typeName ~ COMMA ~ offsetofMemberDesignator ~ RPAREN ^^ {
-        case _ ~ _ ~ tn ~ _ ~ d ~ _ => BuiltinOffsetof(tn, d)
-    }
-        | (textToken("__builtin_types_compatible_p") ~ LPAREN ~ typeName ~ COMMA ~ typeName ~ RPAREN ^^ {
-        case _ ~ _ ~ tn ~ _ ~ tn2 ~ _ => BuiltinTypesCompatible(tn, tn2)
-    })
-        | (textToken("__builtin_va_arg") ~ LPAREN ~ assignExpr ~ COMMA ~ typeName ~ RPAREN ^^ {
-        case _ ~ _ ~ tn ~ _ ~ tn2 ~ _ => BuiltinVaArgs(tn, tn2)
-    })
-        | ID
-        | numConst
-        | stringConst
-        | (LPAREN ~> ((compoundStatement ^^ {
-        CompoundStatementExpr(_)
-    }) | expr) <~ RPAREN)
-        | fail("primary expression expected"))
+            case _ ~ _ ~ tn ~ _ ~ d ~ _ => BuiltinOffsetof(tn, d)
+        }
+            | (textToken("__builtin_types_compatible_p") ~ LPAREN ~ typeName ~ COMMA ~ typeName ~ RPAREN ^^ {
+            case _ ~ _ ~ tn ~ _ ~ tn2 ~ _ => BuiltinTypesCompatible(tn, tn2)
+        })
+            | (textToken("__builtin_va_arg") ~ LPAREN ~ assignExpr ~ COMMA ~ typeName ~ RPAREN ^^ {
+            case _ ~ _ ~ tn ~ _ ~ tn2 ~ _ => BuiltinVaArgs(tn, tn2)
+        })
+            | ID
+            | numConst
+            | stringConst
+            | (LPAREN ~> ((compoundStatement ^^ {
+            CompoundStatementExpr(_)
+        }) | expr) <~ RPAREN)
+            | fail("primary expression expected"))
 
     def typeName: MultiParser[TypeName] =
         specifierQualifierList ~ opt(nonemptyAbstractDeclarator) ^^ {
@@ -592,6 +591,16 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
             ^^ {
             (list: List[Opt[AbstractToken]]) => StringLit(list.map(o => Opt(o.condition, o.entry.getText)))
         })
+
+    def include : MultiParser[Include] =
+        token("include", _.isInclude) ^^ {
+            t => Include(t.getText)
+        }
+
+    def externalDefComment: MultiParser[ExternalDefLevelComment] =
+        token("comment", _.isComment) ^^ {
+            t => ExternalDefLevelComment(t.getText)
+        }
 
     def numConst: MultiParser[Constant] =
         ((token("number", _.isInteger) ^^ {

@@ -601,7 +601,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     def define : MultiParser[Define] =
         token("define", _.isDefine) ^^ {
             t => {
-                if (t.token.isInstanceOf[TokenSequenceToken] && t.token.asInstanceOf[TokenSequenceToken].getTokens.size() == 2) {
+                if (t.token.isInstanceOf[TokenSequenceToken] && t.token.asInstanceOf[TokenSequenceToken].getTokens.size() >= 2) {
                     val seq  = t.token.asInstanceOf[TokenSequenceToken]
                     val key = seq.getTokens.get(0)
                     val value = seq.getTokens.get(1)

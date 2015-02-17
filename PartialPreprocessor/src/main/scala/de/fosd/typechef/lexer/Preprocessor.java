@@ -1317,6 +1317,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
 
     /* processes a #define directive */
     private Token parse_define() throws IOException, LexerException {
+        Source currentSource = getSource();
         Token tok = source_token_nonwhite();
         if (tok.getType() != IDENTIFIER) {
             error(tok, "Expected identifier");
@@ -1415,12 +1416,12 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         logger.info("#define " + name + " " + m);
         addMacro(name, state.getFullPresenceCondition(), m);
 
-        Token key = new SimpleToken(Token.DEFINE_KEY, name, getSource());
-        Token value = new SimpleToken(Token.DEFINE_VALUE, m.getText(), getSource());
+        Token key = new SimpleToken(Token.DEFINE_KEY, name, currentSource);
+        Token value = new SimpleToken(Token.DEFINE_VALUE, m.getText(), currentSource);
         List<Token> tokens = new ArrayList<Token>();
         tokens.add(key);
         tokens.add(value);
-        Token ret_tok = new TokenSequenceToken(Token.DEFINE, 0, 0, tokens, getSource());
+        Token ret_tok = new TokenSequenceToken(Token.DEFINE, 0, 0, tokens, currentSource);
         return ret_tok;
     }
 
@@ -1440,6 +1441,8 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                 case EOF:
                     break EXPANSION;
                 case NL:
+                    break EXPANSION;
+                case P_LINE:
                     break EXPANSION;
 
                 case CCOMMENT:

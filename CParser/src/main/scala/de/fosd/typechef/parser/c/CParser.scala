@@ -4,6 +4,7 @@ package de.fosd.typechef.parser.c
 import de.fosd.typechef.conditional.{Opt, _}
 import de.fosd.typechef.featureexpr.FeatureExprFactory.True
 import de.fosd.typechef.featureexpr.{FeatureExpr, FeatureModel}
+import de.fosd.typechef.lexer.TokenSequenceToken
 import de.fosd.typechef.parser.{~, _}
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -45,7 +46,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         (lookahead(textToken("typedef")) ~! declaration ^^ {
             case _ ~ r => r
         } |
-            outerToken | asm_expr | declaration |
+            outerToken | define | asm_expr | declaration |
             functionDef | typelessDeclaration | pragma | expectType | expectNotType | externalDefComment | include | (SEMI ^^ {
             x => EmptyExternalDef()
         })) !
@@ -596,6 +597,21 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         token("include", _.isInclude) ^^ {
             t => Include(t.getText)
         }
+
+    def define : MultiParser[Define] =
+        token("define", _.isDefine) ^^ {
+            t => {
+                if (t.token.isInstanceOf[TokenSequenceToken] && t.token.asInstanceOf[TokenSequenceToken].getTokens.size() == 2) {
+                    val seq  = t.token.asInstanceOf[TokenSequenceToken]
+                    val key = seq.getTokens.get(0)
+                    val value = seq.getTokens.get(1)
+                    Define(key.getText, value.getText)
+                } else {
+                    Define(t.getText, null)
+                }
+            }
+        }
+
 
     def outerToken : MultiParser[OuterToken] =
         token("outer", _.getPosition.getFile != null) ^^ {

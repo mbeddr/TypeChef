@@ -1415,7 +1415,13 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         logger.info("#define " + name + " " + m);
         addMacro(name, state.getFullPresenceCondition(), m);
 
-        return tok; /* NL or EOF. */
+        Token key = new SimpleToken(Token.DEFINE_KEY, name, getSource());
+        Token value = new SimpleToken(Token.DEFINE_VALUE, m.getText(), getSource());
+        List<Token> tokens = new ArrayList<Token>();
+        tokens.add(key);
+        tokens.add(value);
+        Token ret_tok = new TokenSequenceToken(Token.DEFINE, 0, 0, tokens, getSource());
+        return ret_tok;
     }
 
     private Token parse_macroBody(MacroData m, List<String> args)
@@ -2521,10 +2527,11 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                         case PP_DEFINE:
                             if (!isActive())
                                 return source_skipline(false);
-                            else
-                                return parse_define();
-                            // break;
-
+                            else {
+                                Token ret_tok = parse_define();
+                                return ret_tok;
+                                // break;
+                            }
                         case PP_UNDEF:
                             if (!isActive())
                                 return source_skipline(false);

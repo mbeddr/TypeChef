@@ -52,8 +52,7 @@ public class SimpleToken extends Token {
         this.text = text;
         this.value = value;
         this.source = source;
-        if (source == null) sourceName = null;
-        else sourceName = source.getName();
+        this.sourceName = (source == null ? null : source.getName());
     }
 
     public SimpleToken(int type, int line, int column, String text,

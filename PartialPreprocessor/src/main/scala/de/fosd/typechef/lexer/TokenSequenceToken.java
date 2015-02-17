@@ -5,6 +5,7 @@ import de.fosd.typechef.featureexpr.FeatureExpr;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -17,14 +18,14 @@ import java.util.List;
  *
  * @author kaestner
  */
-class TokenSequenceToken extends Token {
+public class TokenSequenceToken extends Token {
 
     private List<Token> internalTokens;
     private int type;
     private int line;
     private int column;
     private Source source;
-    private String sourceStr;
+    private String sourceName;
 
     public TokenSequenceToken(int type, int line, int column,
                               List<Token> tokenList, Source source) {
@@ -34,8 +35,11 @@ class TokenSequenceToken extends Token {
         this.column = column;
         this.source = source;
         this.internalTokens = tokenList;
-        if (source == null) sourceStr = null;
-        else sourceStr = source.toString();
+        this.sourceName = (source == null ? null : source.getName());
+    }
+
+    public List<Token> getTokens() {
+        return Collections.unmodifiableList(internalTokens);
     }
 
     private Token firstToken() {
@@ -64,12 +68,12 @@ class TokenSequenceToken extends Token {
 
     @Override
     public String getSourceName() {
-        return sourceStr;
+        return sourceName;
     }
 
     @Override
     public void setSourceName(String src) {
-        this.sourceStr = src;
+        this.sourceName = src;
     }
 
     @Override

@@ -12,7 +12,7 @@ import de.fosd.typechef.parser._
  * @author kaestner
  *
  */
-class CToken(token: LexerToken, number: Int) extends ProfilingToken with AbstractToken {
+class CToken(val token: LexerToken, val number: Int) extends ProfilingToken with AbstractToken {
 
     def getFeature = token.getFeature
 
@@ -29,6 +29,8 @@ class CToken(token: LexerToken, number: Int) extends ProfilingToken with Abstrac
     def isComment: Boolean = token.isComment
 
     def isInclude: Boolean = token.isInclude
+
+    def isDefine : Boolean = token.isDefine
 
     override def toString = "\"" + token.getText + "\"" + (if (!getFeature.isTautology) getFeature else "")
 

@@ -361,6 +361,10 @@ public abstract class Token implements LexerToken {
 
     /*package*/ static final int DEFINE = 306;
 
+    /*package*/ static final int DEFINE_KEY = 307;
+
+    /*package*/ static final int DEFINE_VALUE = 308;
+
     /**
      * The position-less space token.
      */

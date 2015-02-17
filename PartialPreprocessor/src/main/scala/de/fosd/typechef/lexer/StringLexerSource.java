@@ -70,6 +70,6 @@ public class StringLexerSource extends LexerSource {
     }
 
     public String getName() {
-        return "string input";
+        return "";
     }
 }

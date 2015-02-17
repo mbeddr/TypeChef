@@ -355,6 +355,8 @@ trait ExternalDef extends AST with CFGStmt
 
 case class Include(path : String) extends ExternalDef
 
+case class OuterToken(text : String) extends ExternalDef
+
 case class ExternalDefLevelComment(value : String) extends ExternalDef with Comment
 
 case class EmptyExternalDef() extends ExternalDef

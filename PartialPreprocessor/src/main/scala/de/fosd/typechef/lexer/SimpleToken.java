@@ -42,7 +42,7 @@ public class SimpleToken extends Token {
     protected String text;
     protected Source source;// for debugging purposes only
     private FeatureExpr presenceCondition = FeatureExprLib.True();
-    private String sourceStr;
+    private String sourceName;
 
     public SimpleToken(int type, int line, int column, String text,
                        Object value, Source source) {
@@ -52,8 +52,8 @@ public class SimpleToken extends Token {
         this.text = text;
         this.value = value;
         this.source = source;
-        if (source == null) sourceStr = null;
-        else sourceStr = source.toString();
+        if (source == null) sourceName = null;
+        else sourceName = source.getName();
     }
 
     public SimpleToken(int type, int line, int column, String text,
@@ -176,12 +176,12 @@ public class SimpleToken extends Token {
 
     @Override
     public String getSourceName() {
-        return sourceStr;
+        return sourceName;
     }
 
     @Override
     public void setSourceName(String src) {
-        this.sourceStr = src;
+        this.sourceName = src;
     }
 
     public Source getSource() {

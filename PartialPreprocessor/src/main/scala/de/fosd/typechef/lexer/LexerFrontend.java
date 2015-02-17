@@ -319,7 +319,8 @@ public class LexerFrontend {
 
     public List<LexerToken> parse(String code, List<String> systemIncludePath, FeatureModel featureModel) throws LexerException,
             IOException {
-        return parse(new VALexer.TextSource(code), systemIncludePath, featureModel);
+        VALexer.TextSource source = new VALexer.TextSource(code);
+        return parse(source, systemIncludePath, featureModel);
     }
 
     public List<LexerToken> parseFile(String fileName, List<String> systemIncludePath, FeatureModel featureModel)

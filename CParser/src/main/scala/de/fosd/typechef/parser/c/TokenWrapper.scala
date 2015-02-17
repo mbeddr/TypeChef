@@ -1,10 +1,10 @@
 package de.fosd.typechef.parser.c
 
-import de.fosd.typechef.parser._
-import de.fosd.typechef.featureexpr._
-import de.fosd.typechef.lexer._
 import de.fosd.typechef.LexerToken
 import de.fosd.typechef.error.Position
+import de.fosd.typechef.featureexpr._
+import de.fosd.typechef.lexer._
+import de.fosd.typechef.parser._
 
 
 /**
@@ -26,30 +26,29 @@ class CToken(token: LexerToken, number: Int) extends ProfilingToken with Abstrac
 
     def isCharacter: Boolean = token.isCharacterLiteral
 
-    def isComment : Boolean = token.isComment
+    def isComment: Boolean = token.isComment
 
-    def isInclude : Boolean = token.isInclude
+    def isInclude: Boolean = token.isInclude
 
     override def toString = "\"" + token.getText + "\"" + (if (!getFeature.isTautology) getFeature else "")
 
     private lazy val pos = new TokenPosition(
-        if (token.getSourceName == null) null else token.getSourceName,
+        if (token.getSourceName == null || token.getSourceName.isEmpty) null else token.getSourceName,
         token.getLine,
         token.getColumn,
         number
     )
 
-    def getPosition = pos
+    def getPosition = {
+        pos
+    }
 }
 
 class TokenPosition(file: String, line: Int, column: Int, tokenNr: Int) extends Position {
     def getFile = file
-
     def getLine = line
-
     def getColumn = column
-
-    //    override def toString = "token no. " + tokenNr + " (line: " + getLine + ")"
+    override def toString = "file: " + file + " token: " + tokenNr + " line: " + getLine
 }
 
 

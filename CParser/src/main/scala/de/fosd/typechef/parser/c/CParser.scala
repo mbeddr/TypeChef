@@ -45,7 +45,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         (lookahead(textToken("typedef")) ~! declaration ^^ {
             case _ ~ r => r
         } |
-            asm_expr | declaration |
+            outerToken | asm_expr | declaration |
             functionDef | typelessDeclaration | pragma | expectType | expectNotType | externalDefComment | include | (SEMI ^^ {
             x => EmptyExternalDef()
         })) !
@@ -597,8 +597,13 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
             t => Include(t.getText)
         }
 
+    def outerToken : MultiParser[OuterToken] =
+        token("outer", _.getPosition.getFile != null) ^^ {
+            t => OuterToken(t.getText)
+        }
+
     def externalDefComment: MultiParser[ExternalDefLevelComment] =
-        token("comment", _.isComment) ^^ {
+        token("comment", t => t.isComment && t.getPosition.getFile == null) ^^ {
             t => ExternalDefLevelComment(t.getText)
         }
 

@@ -98,8 +98,14 @@ public abstract class Token implements LexerToken {
         return getType() == Token.CCOMMENT || getType() == Token.CPPCOMMENT;
     }
 
+    @Override
     public boolean isInclude() {
         return getType() == Token.INCLUDE;
+    }
+
+    @Override
+    public boolean isDefine() {
+        return getType() == Token.DEFINE;
     }
 
     /**
@@ -113,8 +119,6 @@ public abstract class Token implements LexerToken {
                 && getText().equals("__extension__"))
                 && getType() != Token.NL
                 && getType() != Token.P_IF
-                //&& getType() != Token.CCOMMENT
-                //&& getType() != Token.CPPCOMMENT
                 && getType() != Token.P_ENDIF
                 && getType() != Token.P_ELIF;
     }
@@ -352,6 +356,8 @@ public abstract class Token implements LexerToken {
     /*package*/ static final int _TOKENS = 304;
 
     /*package*/ static final int INCLUDE = 305;
+
+    /*package*/ static final int DEFINE = 306;
 
     /**
      * The position-less space token.

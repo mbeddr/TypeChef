@@ -372,6 +372,11 @@ public class XtcPreprocessor implements VALexer {
             return false;
         }
 
+        @Override
+        public boolean isDefine() {
+            return false;
+        }
+
         /**
          * is a language identifier (or type in C)
          * <p/>

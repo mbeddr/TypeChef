@@ -37,6 +37,7 @@ trait LexerToken {
     def isEOF: Boolean
     def isComment : Boolean
     def isInclude : Boolean
+    def isDefine : Boolean
 
     /**
      * is a language identifier (or type in C)

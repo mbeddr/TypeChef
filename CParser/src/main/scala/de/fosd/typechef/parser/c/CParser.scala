@@ -43,13 +43,17 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
 
     def externalDef: MultiParser[Conditional[ExternalDef]] =
     // first part (with lookahead) only for error reporting, i.e.don 't try to parse anything else after a typedef
-        (lookahead(textToken("typedef")) ~! declaration ^^ {
-            case _ ~ r => r
-        } |
-            outerToken | define | asm_expr | declaration |
-            functionDef | typelessDeclaration | pragma | expectType | expectNotType | externalDefComment | include | (SEMI ^^ {
-            x => EmptyExternalDef()
-        })) !
+        (       outerToken
+            |
+                (lookahead(textToken("typedef")) ~! declaration ^^ {
+                    case _ ~ r => r
+                })
+            |
+                define | asm_expr | declaration |
+                functionDef | typelessDeclaration | pragma | expectType | expectNotType | externalDefComment | include | (SEMI ^^ {
+                    x => EmptyExternalDef()
+                })
+        ) !
 
     //parse with LPAREN instead of LCURLY in antlr grammar. seems to be the correct gnuc impl according to gcc
     def asm_expr: MultiParser[AsmExpr] =
@@ -128,7 +132,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     def typedefName =
         tokenWithContext("type",
             (token, featureContext, typeContext) =>
-                isIdentifier(token) && (predefinedTypedefs.contains(token.getText) || typeContext.knowsType(token.getText, featureContext, featureModel))) ^^ {
+                isIdentifier(token) /*&& (predefinedTypedefs.contains(token.getText) || typeContext.knowsType(token.getText, featureContext, featureModel))*/) ^^ {
             t => Id(t.getText)
         } ^^ {
             TypeDefTypeSpecifier(_)

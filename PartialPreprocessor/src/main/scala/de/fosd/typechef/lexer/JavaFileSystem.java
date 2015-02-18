@@ -29,7 +29,26 @@ public class JavaFileSystem implements VirtualFileSystem {
     }
 
     public VirtualFile getFile(String dir, String name) {
-        return new JavaFile(dir, name);
+        String[] tokens = name.split("/");
+        if (tokens.length == 1) {
+            return new JavaFile(dir, name);
+        } else {
+            return getFile(dir, tokens);
+        }
+    }
+
+    private VirtualFile getFile(String dir, String[] tokens) {
+        JavaFile current = new JavaFile(dir);
+        for (String token : tokens) {
+            if (token.equals("..")) {
+                current = current.getParentFile();
+            } else if (token.equals(".")) {
+                // do nothing
+            } else {
+                current = current.getChildFile(token);
+            }
+        }
+        return current;
     }
 
     @SuppressWarnings("serial")

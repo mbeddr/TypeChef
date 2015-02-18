@@ -23,6 +23,7 @@
 
 package de.fosd.typechef.lexer;
 
+import com.mbeddr.core.importer.PartialCodeChecker;
 import de.fosd.typechef.VALexer;
 import de.fosd.typechef.featureexpr.FeatureExpr;
 import de.fosd.typechef.featureexpr.FeatureExprTree;
@@ -153,10 +154,11 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
     private Set<Warning> warnings;
     private VirtualFileSystem filesystem;
     PreprocessorListener listener;
+    private PartialCodeChecker codeChecker;
 
     private List<MacroConstraint> macroConstraints = new ArrayList<MacroConstraint>();
 
-    public Preprocessor(MacroFilter macroFilter, FeatureModel fm) {
+    public Preprocessor(MacroFilter macroFilter, FeatureModel fm, PartialCodeChecker codeChecker) {
         this.featureModel = fm;
         macros = new MacroContext<MacroData>(featureModel, macroFilter);
         for (String name : new String[]{
@@ -176,6 +178,11 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         this.warnings = EnumSet.noneOf(Warning.class);
         this.filesystem = new JavaFileSystem();
         this.listener = null;
+        this.codeChecker = codeChecker;
+    }
+
+    public Preprocessor(MacroFilter macroFilter, FeatureModel fm) {
+        this(macroFilter, fm, null);
     }
 
     public Preprocessor() {
@@ -318,6 +325,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
             throws LexerException {
         error(line, column, msg, null);
     }
+
     /**
      * Handles an error.
      * <p/>
@@ -1411,21 +1419,24 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
             source_untoken(tok);
         }
 
-        tok = parse_macroBody(m, args);
-
-        logger.info("#define " + name + " " + m);
-        addMacro(name, state.getFullPresenceCondition(), m);
+        parse_macroBody(name, m, args);
 
         Token key = new SimpleToken(Token.DEFINE_KEY, name, currentSource);
         Token value = new SimpleToken(Token.DEFINE_VALUE, m.getText(), currentSource);
         List<Token> tokens = new ArrayList<Token>();
         tokens.add(key);
         tokens.add(value);
+
+        if (!(codeChecker != null && codeChecker.canParseExpression(m.getText()))) {
+            logger.info("#define " + name + " " + m);
+            addMacro(name, state.getFullPresenceCondition(), m);
+        }
+
         Token ret_tok = new TokenSequenceToken(Token.DEFINE, 0, 0, tokens, currentSource);
         return ret_tok;
     }
 
-    private Token parse_macroBody(MacroData m, List<String> args)
+    private Token parse_macroBody(String label, MacroData m, List<String> args)
             throws IOException, LexerException {
         Token tok;
         /* Get an expansion for the macro, using indexOf. */
@@ -1460,7 +1471,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                     paste = true;
                     try {
                         m.addPaste(new SimpleToken(M_PASTE, tok.getLine(), tok
-                                .getColumn(), "#" + "#", null));
+                                .getColumn(), "#" + "#", null, null, label));
                     } catch (LexerException le) {
                         error(tok, le.getMessage());
                     }
@@ -1476,7 +1487,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                             && ((idx = args.indexOf(la.getText())) != -1)) {
                         m.addToken(new SimpleToken(M_STRING, la.getLine(), la
                                 .getColumn(), "#" + la.getText(), Integer
-                                .valueOf(idx), null));
+                                .valueOf(idx), null, label));
                     } else {
                         m.addToken(tok);
                         /* Allow for special processing. */
@@ -1495,7 +1506,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                     else
                         m.addToken(new SimpleToken(M_ARG, tok.getLine(), tok
                                 .getColumn(), tok.getText(), Integer.valueOf(idx),
-                                null));
+                                null, label));
                     break;
 
                 default:

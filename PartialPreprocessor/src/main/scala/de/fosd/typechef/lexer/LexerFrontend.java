@@ -4,6 +4,7 @@
 
 package de.fosd.typechef.lexer;
 
+import com.mbeddr.core.importer.PartialCodeChecker;
 import de.fosd.typechef.LexerToken;
 import de.fosd.typechef.VALexer;
 import de.fosd.typechef.conditional.Choice;
@@ -26,6 +27,15 @@ import java.util.*;
  */
 public class LexerFrontend {
 
+    private PartialCodeChecker codeChecker;
+
+    public LexerFrontend(PartialCodeChecker codeChecker) {
+        this.codeChecker = codeChecker;
+    }
+
+    public LexerFrontend() {
+        this(null);
+    }
 
     /**
      * shorthand with few default options, avoiding all command-line parsing
@@ -98,7 +108,7 @@ public class LexerFrontend {
 
         @Override
         public String toString() {
-            return "Lexer Error: "+getMessage();
+            return "Lexer Error: " + getMessage();
         }
     }
 
@@ -109,7 +119,7 @@ public class LexerFrontend {
             public VALexer create(FeatureModel featureModel) {
                 if (options.useXtcLexer())
                     return new XtcPreprocessor(options.getMacroFilter(), featureModel);
-                return new Preprocessor(options.getMacroFilter(), featureModel);
+                return new Preprocessor(options.getMacroFilter(), featureModel, codeChecker);
             }
         }, options, returnTokenList);
     }
@@ -480,6 +490,7 @@ public class LexerFrontend {
         public FeatureModel getSmallFeatureModel() {
             return featureModel;
         }
+
         @Override
         public FeatureModel getFullFeatureModel() {
             return featureModel;
@@ -608,6 +619,7 @@ public class LexerFrontend {
         public FeatureModel getSmallFeatureModel() {
             return featureModel;
         }
+
         @Override
         public FeatureModel getFullFeatureModel() {
             return featureModel;

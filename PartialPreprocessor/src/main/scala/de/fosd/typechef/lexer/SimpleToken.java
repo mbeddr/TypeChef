@@ -45,7 +45,7 @@ public class SimpleToken extends Token {
     private String sourceName;
 
     public SimpleToken(int type, int line, int column, String text,
-                       Object value, Source source) {
+                       Object value, Source source, String label) {
         this.type = type;
         this.line = line;
         this.column = column;
@@ -53,6 +53,12 @@ public class SimpleToken extends Token {
         this.value = value;
         this.source = source;
         this.sourceName = (source == null ? null : source.getName());
+        this.label = label;
+    }
+
+    public SimpleToken(int type, int line, int column, String text,
+                       Object value, Source source) {
+        this(type, line, column, text, value, source, null);
     }
 
     public SimpleToken(int type, int line, int column, String text,

@@ -60,7 +60,9 @@ private[featureexpr] object Value {
 }
 
 private[featureexpr] class ErrorValue[T](val msg: String) extends FeatureExprTree[T] {
-    override def toString = "###Error: " + msg + " ###"
+    override def toString = {
+        "###Error: " + msg + " ###"
+    }
 }
 
 private[featureexpr] object ErrorValue {

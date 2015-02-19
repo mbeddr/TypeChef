@@ -37,7 +37,7 @@ public class FileLexerSource extends LexerSource {
     private String path;
 
     private FileLexerSource(Reader reader, String path) throws IOException {
-        super(new BufferedReader(reader), true);
+        super(new BufferedReader(reader), true, new SourceIdentifier(new File(path)));
         this.path = path;
     }
     /**

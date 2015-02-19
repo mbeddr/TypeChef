@@ -4,7 +4,6 @@
 
 package de.fosd.typechef.lexer;
 
-import com.mbeddr.core.importer.PartialCodeChecker;
 import de.fosd.typechef.LexerToken;
 import de.fosd.typechef.VALexer;
 import de.fosd.typechef.conditional.Choice;
@@ -17,6 +16,7 @@ import de.fosd.typechef.lexer.macrotable.MacroFilter;
 import de.fosd.typechef.lexer.options.ILexerOptions;
 import de.fosd.typechef.lexer.options.PartialConfiguration;
 import de.fosd.typechef.xtclexer.XtcPreprocessor;
+import com.mbeddr.core.importer.PartialCodeChecker;
 
 import java.io.*;
 import java.util.*;
@@ -28,13 +28,15 @@ import java.util.*;
 public class LexerFrontend {
 
     private PartialCodeChecker codeChecker;
+    private LexerSource.SourceIdentifier identifier;
 
-    public LexerFrontend(PartialCodeChecker codeChecker) {
+    public LexerFrontend(PartialCodeChecker codeChecker, LexerSource.SourceIdentifier identifier) {
         this.codeChecker = codeChecker;
+        this.identifier = identifier;
     }
 
     public LexerFrontend() {
-        this(null);
+        this(null, LexerSource.SourceIdentifier.BASE_SOURCE);
     }
 
     /**
@@ -119,7 +121,7 @@ public class LexerFrontend {
             public VALexer create(FeatureModel featureModel) {
                 if (options.useXtcLexer())
                     return new XtcPreprocessor(options.getMacroFilter(), featureModel);
-                return new Preprocessor(options.getMacroFilter(), featureModel, codeChecker);
+                return new Preprocessor(options.getMacroFilter(), featureModel, codeChecker, identifier);
             }
         }, options, returnTokenList);
     }

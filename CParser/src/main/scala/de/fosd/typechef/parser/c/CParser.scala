@@ -1,21 +1,66 @@
 package de.fosd.typechef.parser.c
 
 
+import com.mbeddr.core.importer.PartialCodeChecker
 import de.fosd.typechef.conditional.{Opt, _}
 import de.fosd.typechef.featureexpr.FeatureExprFactory.True
-import de.fosd.typechef.featureexpr.{FeatureExpr, FeatureModel}
-import de.fosd.typechef.lexer.TokenSequenceToken
+import de.fosd.typechef.featureexpr.{FeatureExprFactory, FeatureExpr, FeatureModel}
+import de.fosd.typechef.lexer.LexerSource.SourceIdentifier
+import de.fosd.typechef.lexer.{LexerFrontend, TokenSequenceToken}
+import de.fosd.typechef.parser.c.CLexerAdapter._
 import de.fosd.typechef.parser.{~, _}
+
+import scala.collection.JavaConversions._
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  * based on ANTLR grammar from John D. Mitchell (john@non.net), Jul 12, 1997
  * and Monty Zukowski (jamz@cdsnet.net) April 28, 1998
  */
 
-class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) extends MultiFeatureParser(featureModel, debugOutput) {
+class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) extends MultiFeatureParser(featureModel, debugOutput) with PartialCodeChecker {
     type Elem = CToken
     type AbstractToken = CToken
     type TypeContext = CTypeContext
+
+    override def canParseExpression(code: String): Boolean = {
+        canParse(code, this.expr)
+    }
+
+    override def canParseStatement(code: String): Boolean = {
+        canParse(code, this.statement)
+    }
+
+    protected def canParse[T](code: String, production: MultiParser[T]): Boolean = {
+        try {
+            val tokens = lex(code.stripMargin, List(), FeatureExprFactory.empty, SourceIdentifier.BASE_SOURCE)
+            val parseResult = parse(tokens, production)
+            checkResultRecursive(parseResult)
+        }
+        catch {
+            case e: Any => false
+        }
+    }
+
+    protected def checkResultRecursive[T](result: MultiParseResult[T]): Boolean = {
+        result match {
+            case Success(node, nextInput) if nextInput.atEnd => {
+                true
+            }
+            case SplittedParseResult(feature: FeatureExpr, ra, rb) => {
+                checkResultRecursive(ra) || checkResultRecursive(rb)
+            }
+            case _ => {
+                false
+            }
+        }
+    }
+
+    protected def lex(text: String, includes: List[String], featureModel: FeatureModel = FeatureExprFactory.empty, identifier : SourceIdentifier): TokenReader[TokenWrapper, CTypeContext] = {
+        val lexer = new LexerFrontend(this, identifier)
+        val tokens = lexer.parse(text, includes, featureModel)
+        val reader = CLexerAdapter.prepareTokens(tokens)
+        reader
+    }
 
     def parse[T](tokenStream: TokenReader[AbstractToken, CTypeContext], mainProduction: (TokenReader[AbstractToken, CTypeContext], FeatureExpr) => MultiParseResult[T]): MultiParseResult[T] =
         mainProduction(tokenStream, True)
@@ -43,8 +88,8 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
 
     def externalDef: MultiParser[Conditional[ExternalDef]] =
     // first part (with lookahead) only for error reporting, i.e.don 't try to parse anything else after a typedef
-        (       outerToken
-            |
+        (       /*outerToken
+            |*/
                 (lookahead(textToken("typedef")) ~! declaration ^^ {
                     case _ ~ r => r
                 })
@@ -623,7 +668,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         }
 
     def externalDefComment: MultiParser[ExternalDefLevelComment] =
-        token("comment", t => t.isComment && t.getPosition.getFile == null) ^^ {
+        token("comment", t => t.isComment) ^^ {
             t => ExternalDefLevelComment(t.getText)
         }
 

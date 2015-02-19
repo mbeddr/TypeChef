@@ -26,6 +26,7 @@ package de.fosd.typechef.lexer;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Iterator;
+import java.io.File;
 
 import static de.fosd.typechef.lexer.Token.*;
 
@@ -40,6 +41,7 @@ import static de.fosd.typechef.lexer.Token.*;
  * BUG: Error messages are not handled properly.
  */
 public abstract class Source implements Iterable<Token>, Closeable {
+
     private Source parent;
     private Source sibling;// see SourceManager
     private boolean autopop;

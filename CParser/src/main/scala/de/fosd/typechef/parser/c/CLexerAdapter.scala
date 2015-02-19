@@ -1,6 +1,7 @@
 package de.fosd.typechef.parser.c
 
 
+import de.fosd.typechef.lexer.LexerSource.SourceIdentifier
 import de.fosd.typechef.parser._
 import de.fosd.typechef.lexer._
 import scala.collection.mutable.ListBuffer

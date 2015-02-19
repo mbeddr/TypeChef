@@ -114,8 +114,8 @@ public class SourceManager {
             pp.listener.handleSourceChange(this.source, "resume");
     }
 
-    public void addInput(Source source2) {
-        inputs.add(source2);
+    public void addInput(Source source) {
+        inputs.add(source);
     }
 
     public void reinit() {

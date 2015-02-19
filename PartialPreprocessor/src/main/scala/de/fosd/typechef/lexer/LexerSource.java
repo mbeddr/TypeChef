@@ -23,6 +23,7 @@
 
 package de.fosd.typechef.lexer;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -34,8 +35,52 @@ import static de.fosd.typechef.lexer.Token.*;
  * Does not handle digraphs.
  */
 public class LexerSource extends Source {
+
+    public static class SourceIdentifier {
+
+        public static SourceIdentifier BASE_SOURCE = new SourceIdentifier((File) null);
+        private File file;
+        private String fileName;
+        private static final String H_EXTENSION = ".h";
+        private static final String C_EXTENSION = ".c";
+
+        public SourceIdentifier(String path) {
+            this(new File(path));
+        }
+
+        public SourceIdentifier(File file) {
+            this.file = file;
+            this.fileName = getFileName();
+        }
+
+        private String getFileName() {
+            if (file == null || file.isDirectory()) {
+                return null;
+            } else {
+                String name = file.getName();
+                int index = name.lastIndexOf('.');
+                if (index == -1) {
+                    return null;
+                } else {
+                    return name.substring(0, index - 1);
+                }
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "Identifier: " + this.file;
+        }
+
+        public boolean sameUnit(SourceIdentifier that) {
+            return (this.fileName != null && that.fileName != null && this.fileName.equals(that.fileName) && this.file.getName().endsWith(C_EXTENSION) && that.file.getName().endsWith(H_EXTENSION));
+        }
+    }
+
+
     private static final boolean DEBUG = false;
 
+    private SourceIdentifier identifier;
     private JoinReader reader;
     private boolean ppvalid;
     private boolean bol;
@@ -52,23 +97,29 @@ public class LexerSource extends Source {
     private int lastcolumn;
     private boolean cr;
 
+    public LexerSource(Reader reader, boolean ppvalid) {
+        this(reader, ppvalid, SourceIdentifier.BASE_SOURCE);
+    }
+
     /*
       * ppvalid is: false in StringLexerSource, true in FileLexerSource
       */
-    public LexerSource(Reader r, boolean ppvalid) {
-        this.reader = new JoinReader(r);
+    public LexerSource(Reader reader, boolean ppvalid, SourceIdentifier identifier) {
+        this.reader = new JoinReader(reader);
         this.ppvalid = ppvalid;
         this.bol = true;
         this.include = false;
-
+        this.identifier = identifier;
         this.digraphs = true;
-
         this.ucount = 0;
-
         this.line = 1;
         this.column = 0;
         this.lastcolumn = -1;
         this.cr = false;
+    }
+
+    public SourceIdentifier getIdentifier() {
+        return identifier;
     }
 
     @Override
@@ -387,7 +438,7 @@ public class LexerSource extends Source {
         if (e != '\'') {
             // error("Illegal character constant");
             /* We consume up to the next ' or the rest of the line. */
-            for (; ;) {
+            for (; ; ) {
                 if (isLineSeparator(e)) {
                     unread(e);
                     break;
@@ -415,7 +466,7 @@ public class LexerSource extends Source {
 
         StringBuilder buf = new StringBuilder();
 
-        for (; ;) {
+        for (; ; ) {
             int c = read();
             if (c == close) {
                 break;
@@ -450,7 +501,7 @@ public class LexerSource extends Source {
     private Token _number(StringBuilder text, long val, int d)
             throws IOException, LexerException {
         int bits = 0;
-        for (; ;) {
+        for (; ; ) {
             /* XXX Error check duplicate bits. */
             if (d == 'E' || d == 'e') {
                 text.append((char) d);
@@ -573,7 +624,7 @@ public class LexerSource extends Source {
         StringBuilder text = new StringBuilder();
         int d;
         text.append((char) c);
-        for (; ;) {
+        for (; ; ) {
             d = read();
             if (Character.isIdentifierIgnorable(d))
                 ;
@@ -590,7 +641,7 @@ public class LexerSource extends Source {
         StringBuilder text = new StringBuilder();
         int d;
         text.append((char) c);
-        for (; ;) {
+        for (; ; ) {
             d = read();
             if (ppvalid && isLineSeparator(d)) /* XXX Ugly. */
                 break;

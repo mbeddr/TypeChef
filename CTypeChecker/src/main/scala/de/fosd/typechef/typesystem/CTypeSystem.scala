@@ -1,9 +1,9 @@
 package de.fosd.typechef.typesystem
 
 import de.fosd.typechef.conditional._
+import de.fosd.typechef.error._
 import de.fosd.typechef.featureexpr._
 import de.fosd.typechef.parser.c._
-import de.fosd.typechef.error._
 
 /**
  * checks an AST (from CParser) for type errors (especially dangling references)
@@ -341,6 +341,7 @@ trait CTypeSystem extends CTypes with CEnv with CDeclTyping with CTypeEnv with C
             case GotoStatement(_) => nop //TODO check goto against labels
             case LabelStatement(_, _) => nop
             case LocalLabelDeclaration(ids) => nop
+            case _ => nop
         }
     }
 

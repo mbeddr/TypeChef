@@ -62,6 +62,9 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         reader
     }
 
+    def parse[T](tokenStream : TokenReader[AbstractToken, CTypeContext], mainProduction : MultiParser[T]) : MultiParseResult[T] =
+        mainProduction(tokenStream, True)
+
     def parse[T](tokenStream: TokenReader[AbstractToken, CTypeContext], mainProduction: (TokenReader[AbstractToken, CTypeContext], FeatureExpr) => MultiParseResult[T]): MultiParseResult[T] =
         mainProduction(tokenStream, True)
 

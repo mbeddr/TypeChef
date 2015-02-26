@@ -1345,7 +1345,11 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         List<String> args;
 
         tok = retrieveTokenFromSource();
+
+        boolean isFunction = false;
+
         if (tok.getType() == '(') {
+            isFunction = true;
             tok = source_token_nonwhite();
             boolean seenParamName = false;
             if (tok.getType() != ')') {
@@ -1422,12 +1426,27 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         }
 
         parse_macroBody(name, m, args);
+        StringBuilder key = new StringBuilder();
+        key.append(name);
 
-        Token key = new SimpleToken(Token.DEFINE_KEY, name, currentSource);
-        Token value = new SimpleToken(Token.DEFINE_VALUE, m.getText(), currentSource);
+        if (isFunction) {
+            boolean first = true;
+            key.append("(");
+            for (String arg: args) {
+                if (first) {
+                    first = false;
+                } else {
+                    key.append(",");
+                }
+                key.append(arg);
+            }
+            key.append(")");
+        }
+
+        String value = m.getText();
         List<Token> tokens = new ArrayList<Token>();
-        tokens.add(key);
-        tokens.add(value);
+        tokens.add(new SimpleToken(Token.DEFINE_KEY, key.toString(), currentSource));
+        tokens.add(new SimpleToken(Token.DEFINE_VALUE, value, currentSource));
 
         if (!(codeChecker != null && codeChecker.canParseExpression(m.getText()))) {
             logger.info("#define " + name + " " + m);

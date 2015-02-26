@@ -50,10 +50,14 @@ public class LexerSource extends Source {
 
         public SourceIdentifier(File file) {
             this.file = file;
-            this.fileName = getFileName();
+            this.fileName = computeFileName();
         }
 
-        private String getFileName() {
+        public String getFileName() {
+            return fileName;
+        }
+
+        private String computeFileName() {
             if (file == null || file.isDirectory()) {
                 return null;
             } else {
@@ -62,7 +66,7 @@ public class LexerSource extends Source {
                 if (index == -1) {
                     return null;
                 } else {
-                    return name.substring(0, index - 1);
+                    return name.substring(0, index);
                 }
             }
         }

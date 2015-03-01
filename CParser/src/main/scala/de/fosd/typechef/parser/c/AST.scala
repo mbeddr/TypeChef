@@ -140,6 +140,8 @@ case class DoStatement(expr: Expr, s: Conditional[Statement]) extends Statement
 
 case class ForStatement(expr1: Option[Expr], expr2: Option[Expr], expr3: Option[Expr], s: Conditional[Statement]) extends Statement
 
+case class ForStatementDecl(expr1: Option[Declaration], expr2: Option[Expr], expr3: Option[Expr], s: Conditional[Statement]) extends Statement
+
 case class GotoStatement(target: Expr) extends Statement with CFGStmt
 
 case class ContinueStatement() extends Statement with CFGStmt

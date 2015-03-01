@@ -110,10 +110,10 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         }
 
     def declaration: MultiParser[Declaration] =
-        (declSpecifiers ~~ optList(initDeclList) ~~ rep1(SEMI) ^^ {
+        declSpecifiers ~~ optList(initDeclList) ~~ rep1(SEMI) ^^ {
             case d ~ i ~ _ => Declaration(d, i)
-        } changeContext ({
-            (result: Declaration, featureCtx, typeCtx: TypeContext) => {
+        } changeContext {
+            (result, featureCtx, typeCtx) => {
                 var c = typeCtx
                 if (result.declSpecs.exists(o => o.entry == TypedefSpecifier()))
                     for (decl: Opt[InitDeclarator] <- result.init) {
@@ -122,7 +122,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
                     }
                 c
             }
-        }))
+        }
 
     //gnu
     def typelessDeclaration: MultiParser[TypelessDeclaration] =
@@ -372,6 +372,10 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     })
         | (textToken("for") ~! LPAREN ~ opt(expr) ~ SEMI ~ opt(expr) ~ SEMI ~ opt(expr) ~ RPAREN ~ statement ^^ {
         case _ ~ _ ~ e1 ~ _ ~ e2 ~ _ ~ e3 ~ _ ~ s => ForStatement(e1, e2, e3, s)
+    })
+        // Declaration consumes the SEMI
+        | (textToken("for") ~! LPAREN ~ opt(declaration) ~ opt(expr) ~ SEMI ~ opt(expr) ~ RPAREN ~ statement ^^ {
+        case _ ~ _ ~ e1 ~ e2 ~ _ ~ e3 ~ _ ~ s => ForStatementDecl(e1, e2, e3, s)
     })
         //// Jump statements:
         | (textToken("goto") ~!> expr <~ SEMI ^^ {

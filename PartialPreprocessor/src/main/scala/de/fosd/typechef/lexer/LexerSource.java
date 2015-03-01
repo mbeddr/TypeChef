@@ -57,6 +57,10 @@ public class LexerSource extends Source {
             return fileName;
         }
 
+        public File getFile() {
+            return file;
+        }
+
         private String computeFileName() {
             if (file == null || file.isDirectory()) {
                 return null;

@@ -472,8 +472,6 @@ public abstract class Token implements LexerToken {
 
     public abstract boolean mayExpand();
 
-    public abstract Source getSource();
-
     public abstract String getSourceName();
 
     public abstract void setSourceName(String src);

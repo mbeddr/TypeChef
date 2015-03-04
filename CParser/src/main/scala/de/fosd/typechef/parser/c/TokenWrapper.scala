@@ -32,6 +32,10 @@ class CToken(val token: LexerToken, val number: Int) extends ProfilingToken with
 
     def isDefine : Boolean = token.isDefine
 
+    def isHeaderElement : Boolean = {
+        token.getSource != null && token.getSource.isInstanceOf[LexerSource] && token.getSource.asInstanceOf[LexerSource].getIdentifier.isHeaderFileSource
+    }
+
     override def toString = "\"" + token.getText + "\"" + (if (!getFeature.isTautology) getFeature else "")
 
     private lazy val pos = new TokenPosition(

@@ -17,6 +17,7 @@ import de.fosd.typechef.lexer.options.ILexerOptions;
 import de.fosd.typechef.lexer.options.PartialConfiguration;
 import de.fosd.typechef.xtclexer.XtcPreprocessor;
 import com.mbeddr.core.importer.PartialCodeChecker;
+import de.fosd.typechef.VALexer.*;
 
 import java.io.*;
 import java.util.*;
@@ -28,15 +29,15 @@ import java.util.*;
 public class LexerFrontend {
 
     private PartialCodeChecker codeChecker;
-    private LexerSource.SourceIdentifier identifier;
+    private SourceIdentifier identifier;
 
-    public LexerFrontend(PartialCodeChecker codeChecker, LexerSource.SourceIdentifier identifier) {
+    public LexerFrontend(PartialCodeChecker codeChecker, SourceIdentifier identifier) {
         this.codeChecker = codeChecker;
         this.identifier = identifier;
     }
 
     public LexerFrontend() {
-        this(null, LexerSource.SourceIdentifier.BASE_SOURCE);
+        this(null, SourceIdentifier.BASE_SOURCE);
     }
 
     /**
@@ -331,22 +332,20 @@ public class LexerFrontend {
 
     public List<LexerToken> parse(String code, List<String> systemIncludePath, FeatureModel featureModel) throws LexerException,
             IOException {
-        VALexer.TextSource source = new VALexer.TextSource(code);
-        return parse(source, systemIncludePath, featureModel);
+        return parse(new TextSource(code), systemIncludePath, featureModel);
     }
 
     public List<LexerToken> parseFile(String fileName, List<String> systemIncludePath, FeatureModel featureModel)
             throws LexerException, IOException {
-        return parse(new VALexer.FileSource(new File(fileName)), systemIncludePath, featureModel);
+        return parse(new FileSource(new File(fileName)), systemIncludePath, featureModel);
     }
-
 
     public List<LexerToken> parseStream(InputStream stream, String filePath, List<String> systemIncludePath, FeatureModel featureModel)
             throws LexerException, IOException {
-        return parse(new VALexer.StreamSource(stream, filePath), systemIncludePath, featureModel);
+        return parse(new StreamSource(stream, filePath), systemIncludePath, featureModel);
     }
 
-    private List<LexerToken> parse(VALexer.LexerInput source, List<String> systemIncludePath, FeatureModel featureModel)
+    public List<LexerToken> parse(LexerInput source, List<String> systemIncludePath, FeatureModel featureModel)
             throws LexerException, IOException {
         Conditional<LexerResult> result = run(new DebugLexerOptions(source, systemIncludePath, featureModel), true);
         if (result instanceof One) {

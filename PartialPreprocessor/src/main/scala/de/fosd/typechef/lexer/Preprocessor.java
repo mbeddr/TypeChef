@@ -155,11 +155,11 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
     private VirtualFileSystem filesystem;
     PreprocessorListener listener;
     private PartialCodeChecker codeChecker;
-    private LexerSource.SourceIdentifier identifier;
+    private SourceIdentifier identifier;
 
     private List<MacroConstraint> macroConstraints = new ArrayList<MacroConstraint>();
 
-    public Preprocessor(MacroFilter macroFilter, FeatureModel fm, PartialCodeChecker codeChecker, LexerSource.SourceIdentifier identifier) {
+    public Preprocessor(MacroFilter macroFilter, FeatureModel fm, PartialCodeChecker codeChecker, SourceIdentifier identifier) {
         this.featureModel = fm;
         macros = new MacroContext<MacroData>(featureModel, macroFilter);
         for (String name : new String[]{
@@ -184,7 +184,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
     }
 
     public Preprocessor(MacroFilter macroFilter, FeatureModel fm) {
-        this(macroFilter, fm, null, LexerSource.SourceIdentifier.BASE_SOURCE);
+        this(macroFilter, fm, null, SourceIdentifier.BASE_SOURCE);
     }
 
     public Preprocessor() {
@@ -1574,7 +1574,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
             System.err.println("pp: including " + file);
 
         // only include the header file for the given c file, nothing else
-        if (this.identifier.sameUnit(new LexerSource.SourceIdentifier(file.getPath()))) {
+        if (this.identifier.sameUnit(new SourceIdentifier(file.getPath()))) {
             sourceManager.push_source(file.getSource(), true);
         }
         return true;

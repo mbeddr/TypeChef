@@ -2,11 +2,11 @@ package de.fosd.typechef.parser.c
 
 
 import com.mbeddr.core.importer.PartialCodeChecker
+import de.fosd.typechef.VALexer.{TextSource, FileSource, LexerInput}
 import de.fosd.typechef.conditional.{Opt, _}
 import de.fosd.typechef.featureexpr.FeatureExprFactory.True
 import de.fosd.typechef.featureexpr.{FeatureExprFactory, FeatureExpr, FeatureModel}
-import de.fosd.typechef.lexer.LexerSource.SourceIdentifier
-import de.fosd.typechef.lexer.{LexerFrontend, TokenSequenceToken}
+import de.fosd.typechef.lexer.{SourceIdentifier, LexerFrontend, TokenSequenceToken}
 import de.fosd.typechef.parser.c.CLexerAdapter._
 import de.fosd.typechef.parser.{~, _}
 
@@ -57,7 +57,8 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
 
     protected def lex(text: String, includes: List[String], featureModel: FeatureModel = FeatureExprFactory.empty, identifier : SourceIdentifier): TokenReader[TokenWrapper, CTypeContext] = {
         val lexer = new LexerFrontend(this, identifier)
-        val tokens = lexer.parse(text, includes, featureModel)
+        val lexerSource = (if (identifier.getFile != null ) new FileSource(identifier.getFile) else new TextSource(text)).asInstanceOf[LexerInput]
+        val tokens = lexer.parse(lexerSource, includes, featureModel)
         val reader = CLexerAdapter.prepareTokens(tokens)
         reader
     }
@@ -638,7 +639,13 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         }
 
     def ID: MultiParser[Id] = token("id", isIdentifier(_)) ^^ {
-        t => Id(t.getText)
+        t => {
+            if (t.isHeaderElement) {
+                Id(t.getText + "___exported")
+            } else {
+                Id(t.getText)
+            }
+        }
     }
 
     def isIdentifier(token: AbstractToken) = token.isKeywordOrIdentifier && !keywords.contains(token.getText)

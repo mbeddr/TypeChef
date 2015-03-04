@@ -519,10 +519,14 @@ public class XtcPreprocessor implements VALexer {
         }
 
         @Override
+        public Source getSource() {
+            return null;
+        }
+
+        @Override
         public void setSourceName(String src) {
             this.sourceStr = src;
         }
-
 
     }
 

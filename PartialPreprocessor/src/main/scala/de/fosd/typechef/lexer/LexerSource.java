@@ -36,56 +36,6 @@ import static de.fosd.typechef.lexer.Token.*;
  */
 public class LexerSource extends Source {
 
-    public static class SourceIdentifier {
-
-        public static SourceIdentifier BASE_SOURCE = new SourceIdentifier((File) null);
-        private File file;
-        private String fileName;
-        private static final String H_EXTENSION = ".h";
-        private static final String C_EXTENSION = ".c";
-
-        public SourceIdentifier(String path) {
-            this(new File(path));
-        }
-
-        public SourceIdentifier(File file) {
-            this.file = file;
-            this.fileName = computeFileName();
-        }
-
-        public String getFileName() {
-            return fileName;
-        }
-
-        public File getFile() {
-            return file;
-        }
-
-        private String computeFileName() {
-            if (file == null || file.isDirectory()) {
-                return null;
-            } else {
-                String name = file.getName();
-                int index = name.lastIndexOf('.');
-                if (index == -1) {
-                    return null;
-                } else {
-                    return name.substring(0, index);
-                }
-            }
-        }
-
-        @Override
-        public String toString() {
-            return "Identifier: " + this.file;
-        }
-
-        public boolean sameUnit(SourceIdentifier that) {
-            return (this.fileName != null && that.fileName != null && this.fileName.equals(that.fileName) && this.file.getName().endsWith(C_EXTENSION) && that.file.getName().endsWith(H_EXTENSION));
-        }
-    }
-
-
     private static final boolean DEBUG = false;
 
     private SourceIdentifier identifier;
@@ -310,7 +260,7 @@ public class LexerSource extends Source {
     }
 
     private Token ccomment() throws IOException, LexerException {
-        StringBuilder text = new StringBuilder("/*");
+        StringBuilder text = new StringBuilder("");
         int d;
         do {
             do {
@@ -327,14 +277,16 @@ public class LexerSource extends Source {
             } while (d == '*');
         } while (d != '/' && d != -1);
 
-        if (d == -1)
+        if (d == -1) {
             return unterminated(d, text);
-
-        return new SimpleToken(CCOMMENT, text.toString(), this);
+        } else {
+            String value = text.toString();
+            return new SimpleToken(CCOMMENT, value.substring(0, value.length() - 2), this);
+        }
     }
 
     private Token cppcomment() throws IOException, LexerException {
-        StringBuilder text = new StringBuilder("//");
+        StringBuilder text = new StringBuilder("");
         int d = read();
         while (!isLineSeparator(d)) {
             text.append((char) d);

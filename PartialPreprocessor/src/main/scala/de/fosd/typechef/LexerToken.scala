@@ -1,5 +1,6 @@
 package de.fosd.typechef
 
+import de.fosd.typechef.lexer.Source
 import featureexpr.FeatureExpr
 import java.io.PrintWriter
 
@@ -27,6 +28,7 @@ trait LexerToken {
     def getColumn: Int
     def getSourceName: String
     def setSourceName(src: String)
+    def getSource : Source
 
     /**
      * properties of tokens used by other clients like the C parser

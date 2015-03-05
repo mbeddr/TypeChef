@@ -2,11 +2,11 @@ package de.fosd.typechef.parser.c
 
 
 import com.mbeddr.core.importer.PartialCodeChecker
-import de.fosd.typechef.VALexer.{TextSource, FileSource, LexerInput}
+import de.fosd.typechef.VALexer.{FileSource, LexerInput, TextSource}
 import de.fosd.typechef.conditional.{Opt, _}
 import de.fosd.typechef.featureexpr.FeatureExprFactory.True
-import de.fosd.typechef.featureexpr.{FeatureExprFactory, FeatureExpr, FeatureModel}
-import de.fosd.typechef.lexer.{SourceIdentifier, LexerFrontend, TokenSequenceToken}
+import de.fosd.typechef.featureexpr.{FeatureExpr, FeatureExprFactory, FeatureModel}
+import de.fosd.typechef.lexer.{LexerFrontend, SourceIdentifier, TokenSequenceToken}
 import de.fosd.typechef.parser.c.CLexerAdapter._
 import de.fosd.typechef.parser.{~, _}
 
@@ -55,15 +55,15 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         }
     }
 
-    protected def lex(text: String, includes: List[String], featureModel: FeatureModel = FeatureExprFactory.empty, identifier : SourceIdentifier): TokenReader[TokenWrapper, CTypeContext] = {
+    protected def lex(text: String, includes: List[String], featureModel: FeatureModel = FeatureExprFactory.empty, identifier: SourceIdentifier): TokenReader[TokenWrapper, CTypeContext] = {
         val lexer = new LexerFrontend(this, identifier)
-        val lexerSource = (if (identifier.getFile != null ) new FileSource(identifier.getFile) else new TextSource(text)).asInstanceOf[LexerInput]
+        val lexerSource = (if (identifier.getFile != null) new FileSource(identifier.getFile) else new TextSource(text)).asInstanceOf[LexerInput]
         val tokens = lexer.parse(lexerSource, includes, featureModel)
         val reader = CLexerAdapter.prepareTokens(tokens)
         reader
     }
 
-    def parse[T](tokenStream : TokenReader[AbstractToken, CTypeContext], mainProduction : MultiParser[T]) : MultiParseResult[T] =
+    def parse[T](tokenStream: TokenReader[AbstractToken, CTypeContext], mainProduction: MultiParser[T]): MultiParseResult[T] =
         mainProduction(tokenStream, True)
 
     def parse[T](tokenStream: TokenReader[AbstractToken, CTypeContext], mainProduction: (TokenReader[AbstractToken, CTypeContext], FeatureExpr) => MultiParseResult[T]): MultiParseResult[T] =
@@ -92,17 +92,17 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
 
     def externalDef: MultiParser[Conditional[ExternalDef]] =
     // first part (with lookahead) only for error reporting, i.e.don 't try to parse anything else after a typedef
-        (       /*outerToken
+        (/*outerToken
             |*/
-                (lookahead(textToken("typedef")) ~! declaration ^^ {
-                    case _ ~ r => r
-                })
-            |
+            (lookahead(textToken("typedef")) ~! declaration ^^ {
+                case _ ~ r => r
+            })
+                |
                 define | asm_expr | declaration |
                 functionDef | typelessDeclaration | pragma | expectType | expectNotType | externalDefComment | include | (SEMI ^^ {
-                    x => EmptyExternalDef()
-                })
-        ) !
+                x => EmptyExternalDef()
+            })
+            ) !
 
     //parse with LPAREN instead of LCURLY in antlr grammar. seems to be the correct gnuc impl according to gcc
     def asm_expr: MultiParser[AsmExpr] =
@@ -182,7 +182,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         tokenWithContext("type",
             (token, featureContext, typeContext) =>
                 isIdentifier(token) /*&& (predefinedTypedefs.contains(token.getText) || typeContext.knowsType(token.getText, featureContext, featureModel))*/) ^^ {
-            t => Id(t.getText)
+            t => Id(t.getExtendedText)
         } ^^ {
             TypeDefTypeSpecifier(_)
         }
@@ -347,8 +347,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     def compoundDeclaration: MultiParser[Conditional[CompoundDeclaration]] =
         declaration ^^ {
             DeclarationStatement(_)
-        } | nestedFunctionDef | localLabelDeclaration |
-            fail("expected compoundDeclaration") !
+        } | nestedFunctionDef | localLabelDeclaration | fail("expected compoundDeclaration") !
 
     def compoundStatement: MultiParser[CompoundStatement] =
         LCURLY ~> statementList <~ RCURLY ^^ {
@@ -367,6 +366,9 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         //// Iteration statements:
         | (textToken("while") ~! LPAREN ~ expr ~ RPAREN ~ statement ^^ {
         case _ ~ _ ~ e ~ _ ~ s => WhileStatement(e, s)
+    })
+        | (declaration ^^ {
+        DeclarationStatement(_)
     })
         | (textToken("do") ~! statement ~ textToken("while") ~ LPAREN ~ expr ~ RPAREN ~ SEMI ^^ {
         case _ ~ s ~ _ ~ _ ~ e ~ _ ~ _ => DoStatement(e, s)
@@ -414,7 +416,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     })
         | (expr <~ SEMI ^^ {
         ExprStatement(_)
-    })  | (token("comment", _.isComment) ^^ {
+    }) | (token("comment", _.isComment) ^^ {
         t => new StatementLevelComment(t.getText)
     }) // Expressions
         | fail("statement expected")) !
@@ -640,11 +642,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
 
     def ID: MultiParser[Id] = token("id", isIdentifier(_)) ^^ {
         t => {
-            if (t.isHeaderElement) {
-                Id(t.getText + "___exported")
-            } else {
-                Id(t.getText)
-            }
+            Id(t.getExtendedText)
         }
     }
 
@@ -656,16 +654,16 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
             (list: List[Opt[AbstractToken]]) => StringLit(list.map(o => Opt(o.condition, o.entry.getText)))
         })
 
-    def include : MultiParser[Include] =
+    def include: MultiParser[Include] =
         token("include", _.isInclude) ^^ {
             t => Include(t.getText)
         }
 
-    def define : MultiParser[Define] =
+    def define: MultiParser[Define] =
         token("define", _.isDefine) ^^ {
             t => {
                 if (t.token.isInstanceOf[TokenSequenceToken] && t.token.asInstanceOf[TokenSequenceToken].getTokens.size() >= 2) {
-                    val seq  = t.token.asInstanceOf[TokenSequenceToken]
+                    val seq = t.token.asInstanceOf[TokenSequenceToken]
                     val key = seq.getTokens.get(0)
                     val value = seq.getTokens.get(1)
                     Define(key.getText, value.getText)
@@ -676,7 +674,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         }
 
 
-    def outerToken : MultiParser[OuterToken] =
+    def outerToken: MultiParser[OuterToken] =
         token("outer", _.getPosition.getFile != null) ^^ {
             t => OuterToken(t.getText)
         }

@@ -8,8 +8,8 @@ public class SourceIdentifier {
     private File file;
     private String fileName;
     private String fileExtension;
-    public static final String H_EXTENSION = ".h";
-    public static final String C_EXTENSION = ".c";
+    public static final String H_EXTENSION = "h";
+    public static final String C_EXTENSION = "c";
 
     public SourceIdentifier(String path) {
         this(new File(path));
@@ -65,8 +65,29 @@ public class SourceIdentifier {
             int index = name.lastIndexOf('.');
             if (index != -1) {
                 fileName = name.substring(0, index);
-                fileExtension = name.substring(index);
+                fileExtension = name.substring(index + 1).toLowerCase();
             }
+        }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        } else if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        } else {
+            SourceIdentifier that = (SourceIdentifier) obj;
+            return (this.file == null && that.file == null) || (this.file != null && that.file != null && this.file.equals(that.file));
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        if (file != null) {
+            return file.hashCode();
+        } else {
+            return super.hashCode();
         }
     }
 
@@ -76,6 +97,6 @@ public class SourceIdentifier {
     }
 
     public boolean sameUnit(SourceIdentifier that) {
-        return (this.fileName != null && that.fileName != null && this.fileName.equals(that.fileName) && this.file.getName().endsWith(C_EXTENSION) && that.file.getName().endsWith(H_EXTENSION));
+        return (this.fileName != null && that.fileName != null && this.fileName.equals(that.fileName) && this.fileExtension.equals(C_EXTENSION) && that.fileExtension.equals(H_EXTENSION));
     }
 }

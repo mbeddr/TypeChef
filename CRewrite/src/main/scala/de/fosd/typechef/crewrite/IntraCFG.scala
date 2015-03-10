@@ -133,7 +133,7 @@ trait IntraCFG extends ASTNavigation with ConditionalNavigation {
                             // goto statements
                             // in general only label statements can be the source of goto statements
                             // and only the ones that have the same name
-                            case s@GotoStatement(Id(name)) => {
+                            case s@GotoStatement(Id(name, _)) => {
                                 if (source.isInstanceOf[LabelStatement]) {
                                     val lname = source.asInstanceOf[LabelStatement].id.name
                                     if (name == lname) add2newres = List((env.featureExpr(s), env.featureExpr(s), s))
@@ -295,7 +295,7 @@ trait IntraCFG extends ASTNavigation with ConditionalNavigation {
                 res
             }
 
-            case t@LabelStatement(Id(n), _) => {
+            case t@LabelStatement(Id(n, _), _) => {
                 findPriorASTElem[FunctionDef](t, env) match {
                     case None => assert(assertion = false, message = "label statements should always occur within a function definition"); List()
                     case Some(f) => {
@@ -303,7 +303,7 @@ trait IntraCFG extends ASTNavigation with ConditionalNavigation {
                         // filter gotostatements with the same id as the labelstatement
                         // and all gotostatements with dynamic target
                         val l_gotos_filtered = l_gotos.filter({
-                            case GotoStatement(Id(name)) => if (n == name) true else false
+                            case GotoStatement(Id(name, _)) => if (n == name) true else false
                             case _ => true
                         })
                         val l_preds = getStmtPred(t, ctx, oldres, env)
@@ -462,7 +462,7 @@ trait IntraCFG extends ASTNavigation with ConditionalNavigation {
                     case _ => List()
                 }
             }
-            case t@GotoStatement(Id(l)) => {
+            case t@GotoStatement(Id(l, _)) => {
                 findPriorASTElem[FunctionDef](t, env) match {
                     case None => assert(assertion = false, message = "goto statement should always occur within a function definition"); oldres
                     case Some(f) => {

@@ -71,7 +71,7 @@ sealed abstract class Expr extends AST with CFGStmt
 
 sealed abstract class PrimaryExpr extends Expr
 
-case class Id(name: String) extends PrimaryExpr
+case class Id(name: String, token : CToken = null) extends PrimaryExpr
 
 case class Constant(value: String) extends PrimaryExpr
 
@@ -162,7 +162,7 @@ case class ElifStatement(condition: Conditional[Expr], thenBranch: Conditional[S
 
 case class SwitchStatement(expr: Expr, s: Conditional[Statement]) extends Statement
 
-case class StatementLevelComment(value: String) extends Statement with Comment
+case class StatementComment(value: String) extends Statement with Comment
 
 sealed abstract class CompoundDeclaration extends Statement with CFGStmt
 
@@ -357,18 +357,15 @@ case class NestedFunctionDef(isAuto: Boolean, specifiers: List[Opt[Specifier]], 
 
 trait ExternalDef extends AST with CFGStmt
 
-case class Include(path: String) extends ExternalDef
+case class Include(path: String, fromHeader : Boolean) extends ExternalDef
 
 case class Define(key: String, value: String) extends ExternalDef
 
-case class OuterToken(text: String) extends ExternalDef
-
-case class ExternalDefLevelComment(value: String) extends ExternalDef with Comment
+case class ExternalDefComment(value: String) extends ExternalDef with Comment
 
 case class EmptyExternalDef() extends ExternalDef
 
 case class TypelessDeclaration(declList: List[Opt[InitDeclarator]]) extends ExternalDef
-
 
 case class TypeName(specifiers: List[Opt[Specifier]], decl: Option[AbstractDeclarator]) extends AST
 

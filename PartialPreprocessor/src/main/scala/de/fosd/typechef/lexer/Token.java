@@ -127,8 +127,8 @@ public abstract class Token implements LexerToken {
                 && getType() != Token.WHITESPACE
                 && !(getType() != Token.P_FEATUREEXPR
                 && getText().equals("__extension__"))
-//                && getType() != Token.CCOMMENT
-//                && getType() != Token.CPPCOMMENT
+                //&& getType() != Token.CCOMMENT
+                //&& getType() != Token.CPPCOMMENT
                 && getType() != Token.NL
                 && getType() != Token.P_IF
                 && getType() != Token.P_ENDIF

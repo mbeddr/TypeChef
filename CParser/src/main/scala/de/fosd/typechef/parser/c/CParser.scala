@@ -92,16 +92,24 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
 
     def externalDef: MultiParser[Conditional[ExternalDef]] =
     // first part (with lookahead) only for error reporting, i.e.don 't try to parse anything else after a typedef
-        (/*outerToken
-            |*/
+        (
             (lookahead(textToken("typedef")) ~! declaration ^^ {
                 case _ ~ r => r
             })
                 |
-                define | asm_expr | declaration |
-                functionDef | typelessDeclaration | pragma | expectType | expectNotType | externalDefComment | include | (SEMI ^^ {
-                x => EmptyExternalDef()
-            })
+                define |
+                asm_expr |
+                declaration |
+                functionDef |
+                typelessDeclaration |
+                pragma |
+                expectType |
+                expectNotType |
+                comment(t => ExternalDefComment(t.getText)) |
+                include |
+                (SEMI ^^ {
+                    x => EmptyExternalDef()
+                })
             ) !
 
     //parse with LPAREN instead of LCURLY in antlr grammar. seems to be the correct gnuc impl according to gcc
@@ -182,7 +190,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         tokenWithContext("type",
             (token, featureContext, typeContext) =>
                 isIdentifier(token) /*&& (predefinedTypedefs.contains(token.getText) || typeContext.knowsType(token.getText, featureContext, featureModel))*/) ^^ {
-            t => Id(t.getExtendedText)
+            t => Id(t.getText, t)
         } ^^ {
             TypeDefTypeSpecifier(_)
         }
@@ -416,9 +424,9 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     })
         | (expr <~ SEMI ^^ {
         ExprStatement(_)
-    }) | (token("comment", _.isComment) ^^ {
-        t => new StatementLevelComment(t.getText)
-    }) // Expressions
+    }) |
+        comment(t => StatementComment(t.getText))
+        // Expressions
         | fail("statement expected")) !
 
     private def elifs: MultiParser[List[Opt[ElifStatement]]] =
@@ -642,7 +650,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
 
     def ID: MultiParser[Id] = token("id", isIdentifier(_)) ^^ {
         t => {
-            Id(t.getExtendedText)
+            Id(t.getText, t)
         }
     }
 
@@ -656,7 +664,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
 
     def include: MultiParser[Include] =
         token("include", _.isInclude) ^^ {
-            t => Include(t.getText)
+            t => Include(t.getText, t.isHeaderElement)
         }
 
     def define: MultiParser[Define] =
@@ -673,16 +681,11 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
             }
         }
 
-
-    def outerToken: MultiParser[OuterToken] =
-        token("outer", _.getPosition.getFile != null) ^^ {
-            t => OuterToken(t.getText)
+    def comment[T <: Comment](fun: (Elem => T)): MultiParser[T] = {
+        token("comment", _.isComment) ^^ {
+            t => fun(t)
         }
-
-    def externalDefComment: MultiParser[ExternalDefLevelComment] =
-        token("comment", t => t.isComment) ^^ {
-            t => ExternalDefLevelComment(t.getText)
-        }
+    }
 
     def numConst: MultiParser[Constant] =
         ((token("number", _.isInteger) ^^ {

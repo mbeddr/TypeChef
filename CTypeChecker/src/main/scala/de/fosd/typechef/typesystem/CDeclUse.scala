@@ -258,7 +258,7 @@ trait CDeclUse extends CDeclUseInterface with CEnv with CEnvCache {
 
     override def addEnumUse(entry: AST, env: Env, feature: FeatureExpr) {
         entry match {
-            case i@Id(name) =>
+            case i@Id(name, _) =>
                 if (env.enumEnv.containsKey(name)) {
                     val enumDeclarationFeature = env.enumEnv.get(name).get._1
                     val enumDeclarationId = env.enumEnv.get(name).get._2
@@ -287,7 +287,7 @@ trait CDeclUse extends CDeclUseInterface with CEnv with CEnvCache {
         }
 
         entry match {
-            case i@Id(name) =>
+            case i@Id(name, _) =>
                 if (env.typedefEnv.contains(name)) {
                     env.typedefEnv.getAstOrElse(name, null) match {
                         case o@One(_) =>
@@ -396,7 +396,7 @@ trait CDeclUse extends CDeclUseInterface with CEnv with CEnvCache {
                                         case k => addUse(k, feature, env)
                                     })
                             })
-                        case TypeDefTypeSpecifier(i@Id(name)) =>
+                        case TypeDefTypeSpecifier(i@Id(name, _)) =>
                             typedefspecifier = i
                         //addTypeUse(i, env, x.feature)
                         case k => addUse(k, feature, env)
@@ -560,7 +560,7 @@ trait CDeclUse extends CDeclUseInterface with CEnv with CEnvCache {
 
     override def addStructUse(entry: AST, featureExpr: FeatureExpr, env: Env, structName: String, isUnion: Boolean) {
         entry match {
-            case i@Id(name) => {
+            case i@Id(name, _) => {
                 if (env.structEnv.someDefinition(structName, isUnion)) {
                     val validFields = getFieldsForFeature(env.structEnv, structName, isUnion, featureExpr).map(x => x.getAstOrElse(i.name, null))
                     validFields.foreach(x => x match {
@@ -610,7 +610,7 @@ trait CDeclUse extends CDeclUseInterface with CEnv with CEnvCache {
             one match {
                 case One(AtomicNamedDeclarator(_, key, _)) => addToDeclUseMap(key, use)
                 case One(NestedNamedDeclarator(_, declarator, _, _)) => addToDeclUseMap(declarator.getId, use)
-                case One(i@Id(_)) => addToDeclUseMap(i, use)
+                case One(i@Id(_, _)) => addToDeclUseMap(i, use)
                 case _ =>
             }
         }
@@ -634,7 +634,7 @@ trait CDeclUse extends CDeclUseInterface with CEnv with CEnvCache {
         }
 
         entry match {
-            case use@Id(name) => {
+            case use@Id(name, _) => {
                 if (env.structEnv.someDefinition(name, isUnion)) {
                     env.structEnv.getId(name, isUnion) match {
                         case o@One(key: Id) =>
@@ -712,7 +712,7 @@ trait CDeclUse extends CDeclUseInterface with CEnv with CEnvCache {
         })
         get[GotoStatement](f).foreach(goto =>
             goto.entry.target match {
-                case usage@Id(name) => labelMap.keySet().toArray.foreach(declaration =>
+                case usage@Id(name, _) => labelMap.keySet().toArray.foreach(declaration =>
                     if (declaration.asInstanceOf[Id].name.equals(name) && (goto.condition.equivalentTo(FeatureExprFactory.True) || labelMap.get(declaration).implies(goto.condition).isTautology))
                         addToDeclUseMap(declaration.asInstanceOf[Id], usage))
                 case k => logger.error("Missing GotoStatement: " + k)

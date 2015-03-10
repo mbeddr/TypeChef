@@ -1626,8 +1626,10 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         if (include(path, name))
             return;
 
+        // Error reporting is turned off, because the mbeddr importer does not
+        // need the additional headers to be included
         // Report error
-        StringBuilder buf = new StringBuilder();
+        /*StringBuilder buf = new StringBuilder();
         buf.append("File not found: ").append(name);
         buf.append(" in");
         if (quoted) {
@@ -1637,7 +1639,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         }
         for (String dir : getSystemIncludePath())
             buf.append(" ").append(dir);
-        error(line, 0, buf.toString());
+        error(line, 0, buf.toString());*/
     }
 
     private Token parse_include(boolean next) throws IOException,

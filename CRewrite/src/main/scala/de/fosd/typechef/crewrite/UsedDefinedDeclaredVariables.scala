@@ -31,7 +31,7 @@ trait UsedDefinedDeclaredVariables {
             case ExprStatement(_: Id) => List()
             case ExprStatement(PointerDerefExpr(_)) => List()
             case ExprStatement(expr) => defines(expr)
-            case PostfixExpr(i@Id(_), SimplePostfixSuffix(_)) => List(i) // a++; or a--;
+            case PostfixExpr(i@Id(_, _), SimplePostfixSuffix(_)) => List(i) // a++; or a--;
             case UnaryExpr(kind, i: Id) => if (kind == "++" || kind == "--") List(i) else List() // ++a; or --a;
             case Opt(_, entry) => defines(entry.asInstanceOf[AnyRef])
             case PointerDerefExpr(i: Id) => List(i)

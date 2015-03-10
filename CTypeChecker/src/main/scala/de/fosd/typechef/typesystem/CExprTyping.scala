@@ -48,7 +48,7 @@ trait CExprTyping extends CTypes with CEnv with CDeclTyping with CTypeSystemInte
                         if (v.last.toUpper == 'L') One(CSigned(CLong()))
                         else One(CSigned(CInt()))
                     //variable or function ref
-                    case id@Id(name) =>
+                    case id@Id(name, _) =>
                         var ctype = env.varEnv(name)
 
                         ctype = markSecurityRelevantFunctions(name, ctype)
@@ -89,7 +89,7 @@ trait CExprTyping extends CTypes with CEnv with CDeclTyping with CTypeSystemInte
                                 reportTypeError(f, "invalid * on " + expr + " (" + e + ")", pd)
                         }).toObj.toConst(false).toVolatile(false))
                     //e.n notation
-                    case p@PostfixExpr(expr, PointerPostfixSuffix(".", i@Id(id))) =>
+                    case p@PostfixExpr(expr, PointerPostfixSuffix(".", i@Id(id, _))) =>
                         def lookup(fields: ConditionalTypeMap, fexpr: FeatureExpr): Conditional[CType] = {
                             val rt = fields.getOrElse(id, CUnknown("field not found: (" + expr + ")." + id + "; has " + fields))
                             rt.vmap(fexpr, (f, t) => if (t.isUnknown && f.isSatisfiable()) issueTypeError(Severity.FieldLookupError, f, "unknown field " + id, i))
@@ -115,7 +115,7 @@ trait CExprTyping extends CTypes with CEnv with CDeclTyping with CTypeSystemInte
                                 One(reportTypeError(f, "request for member " + id + " in something not a structure or union (" + p + "; " + e + ")", p))
                         })
                     //e->n (by rewrite to *e.n)
-                    case p@PostfixExpr(expr, PointerPostfixSuffix("->", i@Id(id))) =>
+                    case p@PostfixExpr(expr, PointerPostfixSuffix("->", i@Id(id, _))) =>
                         val newExpr = PostfixExpr(PointerDerefExpr(expr).setPositionRange(p), PointerPostfixSuffix(".", i).setPositionRange(p)).setPositionRange(p)
                         newExpr.setPositionRange(p.getPositionFrom, p.getPositionTo) //enable line reporting in error messages
                         newExpr.p.setPositionRange(expr.getPositionFrom, expr.getPositionTo) //enable line reporting in error messages
@@ -509,7 +509,7 @@ trait CExprTyping extends CTypes with CEnv with CDeclTyping with CTypeSystemInte
      */
     def sizeofType(env: Env, x: AST, featureExpr: FeatureExpr): Conditional[CType] = {
         x match {
-            case p@PostfixExpr(expr, PointerPostfixSuffix(_, i@Id(id))) =>
+            case p@PostfixExpr(expr, PointerPostfixSuffix(_, i@Id(id, _))) =>
                 addStructUsageFromSizeOfExprU(p, featureExpr, env)
             case p@PostfixExpr(i: Id, _) =>
                 addUse(i, featureExpr, env)
@@ -531,7 +531,7 @@ trait CExprTyping extends CTypes with CEnv with CDeclTyping with CTypeSystemInte
     private def addStructUsageFromSizeOfExprU(a: AST, featureExpr: FeatureExpr, env: Env) = {
         val et = getExprTypeRec(_: Expr, featureExpr, env, true)
         a match {
-            case p@PostfixExpr(expr, PointerPostfixSuffix(_, i@Id(id))) =>
+            case p@PostfixExpr(expr, PointerPostfixSuffix(_, i@Id(id, _))) =>
                 et(expr).map(_.atype).vflatMap(featureExpr, {
                     case (f, CAnonymousStruct(fields, _)) =>
                         addAnonStructUse(i, fields)

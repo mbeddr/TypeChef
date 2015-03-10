@@ -8,8 +8,8 @@ public class SourceIdentifier {
     private File file;
     private String fileName;
     private String fileExtension;
-    private static final String H_EXTENSION = ".h";
-    private static final String C_EXTENSION = ".c";
+    public static final String H_EXTENSION = ".h";
+    public static final String C_EXTENSION = ".c";
 
     public SourceIdentifier(String path) {
         this(new File(path));
@@ -32,12 +32,31 @@ public class SourceIdentifier {
         return fileExtension;
     }
 
+    public SourceIdentifier getChild(String name) {
+        if (this.file != null && this.file.isDirectory()) {
+            for (File file : this.file.listFiles()) {
+                if (file.isFile() && file.getName().equals(name)) {
+                    return new SourceIdentifier(file);
+                }
+            }
+        }
+        return BASE_SOURCE;
+    }
+
     public boolean isSourceFileSource() {
         return this.fileExtension != null && this.fileExtension.equals(C_EXTENSION);
     }
 
     public boolean isHeaderFileSource() {
         return this.fileExtension != null && this.fileExtension.equals(H_EXTENSION);
+    }
+
+    public SourceIdentifier getParent() {
+        if (this.file != null && this.file.getParentFile() != null) {
+            return new SourceIdentifier(this.file.getParentFile());
+        } else {
+            return BASE_SOURCE;
+        }
     }
 
     private void initialize() {

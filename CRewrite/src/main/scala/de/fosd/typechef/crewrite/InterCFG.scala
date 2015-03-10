@@ -47,7 +47,7 @@ trait InterCFG extends IntraCFG {
     override private[crewrite] def findMethodCalls(t: AST, env: ASTEnv, oldres: CFGRes, ctx: FeatureExpr, _res: CFGRes): CFGRes = {
         var res: CFGRes = _res
         val postfixExprs = filterAllASTElems[PostfixExpr](t)
-        for (pf@PostfixExpr(Id(funName), FunctionCall(_)) <- postfixExprs) {
+        for (pf@PostfixExpr(Id(funName, _), FunctionCall(_)) <- postfixExprs) {
             val fexpr = env.featureExpr(pf)
             val newresctx = getNewResCtx(oldres, ctx, fexpr)
             val targetFun = lookupFunctionDef(funName)

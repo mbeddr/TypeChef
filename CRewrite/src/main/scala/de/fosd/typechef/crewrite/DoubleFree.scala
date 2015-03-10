@@ -91,7 +91,7 @@ class DoubleFree(env: ASTEnv, dum: DeclUseMap, udm: UseDeclMap, fm: FeatureModel
 
         val freedpointers = manytd(query[AST] {
             // realloc(*ptr, size) is used for reallocation of memory
-            case PostfixExpr(Id("realloc"), FunctionCall(l)) => {
+            case PostfixExpr(Id("realloc", _), FunctionCall(l)) => {
                 // realloc has two arguments but more than two elements may be passed to
                 // the function. this is the case when elements form alternative groups, such as,
                 // realloc(#ifdef A aptr #else naptr endif, ...)
@@ -119,7 +119,7 @@ class DoubleFree(env: ASTEnv, dum: DeclUseMap, udm: UseDeclMap, fm: FeatureModel
 
             }
             // calls to free or to derivatives of free
-            case PostfixExpr(Id(n), FunctionCall(l)) => {
+            case PostfixExpr(Id(n, _), FunctionCall(l)) => {
 
                 if (freecalls.contains(n)) {
                     for (e <- l.exprs) {

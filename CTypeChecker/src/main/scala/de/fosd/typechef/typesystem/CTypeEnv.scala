@@ -73,7 +73,7 @@ trait CTypeEnv extends CTypes with CTypeSystemInterface with CEnv with CDeclTypi
     }
 
     def addStructDeclarationToEnv(specifier: Specifier, featureExpr: FeatureExpr, initEnv: Env, declareIncompleteTypes: Boolean): Env = specifier match {
-        case e@StructOrUnionSpecifier(isUnion, Some(i@Id(name)), Some(attributes), _, _) => {
+        case e@StructOrUnionSpecifier(isUnion, Some(i@Id(name, _)), Some(attributes), _, _) => {
             /**
              * CDeclUse:
              * Struct declaration to an existing struct forward declaration in a context where
@@ -97,7 +97,7 @@ trait CTypeEnv extends CTypes with CTypeSystemInterface with CEnv with CDeclTypi
             env.updateStructEnv(env.structEnv.addComplete(i, isUnion, featureExpr, members, env.scope))
         }
         //incomplete struct
-        case e@StructOrUnionSpecifier(isUnion, Some(i@Id(name)), None, _, _) => {
+        case e@StructOrUnionSpecifier(isUnion, Some(i@Id(name, _)), None, _, _) => {
             if (declareIncompleteTypes) {
                 //CDeclUse: Struct usage and declaration
                 val isAlreadyDefined = initEnv.structEnv.whenHasDefinitionWithId(name, isUnion)
@@ -178,7 +178,7 @@ trait CTypeEnv extends CTypes with CTypeSystemInterface with CEnv with CDeclTypi
                 val specFeature = opt.condition
                 val typeSpec = opt.entry
                 typeSpec match {
-                    case EnumSpecifier(Some(i@Id(name)), l) if (isHeadless || !l.isEmpty) =>
+                    case EnumSpecifier(Some(i@Id(name, _)), l) if (isHeadless || !l.isEmpty) =>
                         addDefinition(i, env, specFeature and featureExpr)
                         var ft = FeatureExprFactory.False
                         b.getOrElse(name, FeatureExprFactory.False) match {

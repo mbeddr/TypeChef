@@ -399,10 +399,10 @@ trait CTypeSystem extends CTypes with CEnv with CDeclTyping with CTypeEnv with C
             } catch {
                 case _: NumberFormatException => One(VUnknown())
             }
-            case Id(name) =>
+            case Id(name, _) =>
                 val varDecl = env.varEnv.getAstOrElse(name, null)
                 varDecl vflatMap(context, (f, v) => v match {
-                    case Enumerator(Id(enumName), Some(initExpr)) if (name == enumName) =>
+                    case Enumerator(Id(enumName, _), Some(initExpr)) if (name == enumName) =>
                         //TODO: env is not correct (currently dynamic scoping instead of lexical scoping), but we keep this as approximation here
                         evalExpr(One(initExpr), f, env)
                     case _ => One(VUnknown())

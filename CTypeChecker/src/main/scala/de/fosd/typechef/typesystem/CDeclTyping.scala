@@ -107,7 +107,7 @@ trait CDeclTyping extends CTypes with CEnv with CTypeSystemInterface with CDeclU
                     types = types :+ One(CIgnore().toCType) //ignore transparent union for now
                 else
                     types = types :+ One(CAnonymousStruct(parseStructMembers(members.getOrElse(Nil), featureExpr, env), isUnion).toCType)
-            case e@TypeDefTypeSpecifier(i@Id(typedefname)) => {
+            case e@TypeDefTypeSpecifier(i@Id(typedefname, _)) => {
                 // CDeclUse: Add typedef usage to usages.
                 addTypeUse(i, env, featureExpr)
 

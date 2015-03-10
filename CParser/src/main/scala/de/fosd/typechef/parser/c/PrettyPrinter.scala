@@ -302,7 +302,7 @@ object PrettyPrinter {
 
         ast match {
             case TranslationUnit(ext) => sep(ext, _ * _)
-            case Id(name) => name
+            case Id(name, token) => name
             case Constant(v) => v
             case StringLit(v) => sepVaware(v, "", prettyOptStr)
             case SimplePostfixSuffix(t) => t

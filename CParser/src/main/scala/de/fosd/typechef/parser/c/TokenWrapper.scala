@@ -22,10 +22,6 @@ class CToken(val token: LexerToken, val number: Int) extends ProfilingToken with
 
     def getText: String = token.getText
 
-    def getExtendedText : String = {
-        getText + (if (isHeaderElement) "___exported" else "")
-    }
-
     def isString: Boolean = token.isStringLiteral
 
     def isCharacter: Boolean = token.isCharacterLiteral

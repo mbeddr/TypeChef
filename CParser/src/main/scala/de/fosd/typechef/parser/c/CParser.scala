@@ -2,6 +2,7 @@ package de.fosd.typechef.parser.c
 
 
 import com.mbeddr.core.importer.PartialCodeChecker
+import de.fosd.typechef.LexerToken
 import de.fosd.typechef.VALexer.{FileSource, LexerInput, TextSource}
 import de.fosd.typechef.conditional.{Opt, _}
 import de.fosd.typechef.featureexpr.FeatureExprFactory.True
@@ -33,7 +34,8 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     protected def canParse[T](code: String, production: MultiParser[T]): Boolean = {
         try {
             val tokens = lex(code.stripMargin, List(), FeatureExprFactory.empty, SourceIdentifier.BASE_SOURCE)
-            val parseResult = parse(tokens, production)
+            val reader = CLexerAdapter.prepareTokens(tokens)
+            val parseResult = parse(reader, production)
             checkResultRecursive(parseResult)
         }
         catch {
@@ -55,12 +57,11 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         }
     }
 
-    protected def lex(text: String, includes: List[String], featureModel: FeatureModel = FeatureExprFactory.empty, identifier: SourceIdentifier): TokenReader[TokenWrapper, CTypeContext] = {
+    protected def lex(text: String, includes: List[String], featureModel: FeatureModel = FeatureExprFactory.empty, identifier: SourceIdentifier) = {
         val lexer = new LexerFrontend(this, identifier)
         val lexerSource = (if (identifier.getFile != null) new FileSource(identifier.getFile) else new TextSource(text)).asInstanceOf[LexerInput]
         val tokens = lexer.parse(lexerSource, includes, featureModel)
-        val reader = CLexerAdapter.prepareTokens(tokens)
-        reader
+        tokens
     }
 
     def parse[T](tokenStream: TokenReader[AbstractToken, CTypeContext], mainProduction: MultiParser[T]): MultiParseResult[T] =
@@ -674,9 +675,9 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
                     val seq = t.token.asInstanceOf[TokenSequenceToken]
                     val key = seq.getTokens.get(0)
                     val value = seq.getTokens.get(1)
-                    Define(key.getText, value.getText)
+                    Define(key.getText, value.getText, t.isHeaderElement)
                 } else {
-                    Define(t.getText, null)
+                    Define(t.getText, null, t.isHeaderElement)
                 }
             }
         }

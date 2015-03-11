@@ -359,7 +359,7 @@ trait ExternalDef extends AST with CFGStmt
 
 case class Include(path: String, fromHeader : Boolean) extends ExternalDef
 
-case class Define(key: String, value: String) extends ExternalDef
+case class Define(key: String, value: String, fromHeader : Boolean) extends ExternalDef
 
 case class ExternalDefComment(value: String) extends ExternalDef with Comment
 

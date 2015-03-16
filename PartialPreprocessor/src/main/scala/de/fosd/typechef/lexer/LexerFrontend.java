@@ -4,8 +4,13 @@
 
 package de.fosd.typechef.lexer;
 
+import com.mbeddr.core.importer.PartialCodeChecker;
 import de.fosd.typechef.LexerToken;
 import de.fosd.typechef.VALexer;
+import de.fosd.typechef.VALexer.FileSource;
+import de.fosd.typechef.VALexer.LexerInput;
+import de.fosd.typechef.VALexer.StreamSource;
+import de.fosd.typechef.VALexer.TextSource;
 import de.fosd.typechef.conditional.Choice;
 import de.fosd.typechef.conditional.Conditional;
 import de.fosd.typechef.conditional.One;
@@ -16,8 +21,6 @@ import de.fosd.typechef.lexer.macrotable.MacroFilter;
 import de.fosd.typechef.lexer.options.ILexerOptions;
 import de.fosd.typechef.lexer.options.PartialConfiguration;
 import de.fosd.typechef.xtclexer.XtcPreprocessor;
-import com.mbeddr.core.importer.PartialCodeChecker;
-import de.fosd.typechef.VALexer.*;
 
 import java.io.*;
 import java.util.*;
@@ -30,14 +33,20 @@ public class LexerFrontend {
 
     private PartialCodeChecker codeChecker;
     private SourceIdentifier identifier;
+    private TokenSelector tokenSelector;
 
-    public LexerFrontend(PartialCodeChecker codeChecker, SourceIdentifier identifier) {
+    public LexerFrontend(PartialCodeChecker codeChecker, SourceIdentifier identifier, TokenSelector tokenSelector) {
         this.codeChecker = codeChecker;
         this.identifier = identifier;
+        this.tokenSelector = tokenSelector;
+    }
+
+    public LexerFrontend(PartialCodeChecker codeChecker, SourceIdentifier identifier) {
+        this(codeChecker, identifier, DefaultTokenSelector.INSTANCE);
     }
 
     public LexerFrontend() {
-        this(null, SourceIdentifier.BASE_SOURCE);
+        this(null, SourceIdentifier.BASE_SOURCE, DefaultTokenSelector.INSTANCE);
     }
 
     /**
@@ -184,6 +193,8 @@ public class LexerFrontend {
 
         LexerError crash = null;
         List<LexerToken> resultTokenList = new ArrayList<LexerToken>();
+        List<LexerToken> attachableTokens = new ArrayList<LexerToken>();
+
         int outputLine = 1;
         try {
             // TokenFilter tokenFilter = new TokenFilter();
@@ -194,9 +205,12 @@ public class LexerFrontend {
                 if (tok.isEOF())
                     break;
 
-
-                if (returnTokenList && (!options.isReturnLanguageTokensOnly() || tok.isLanguageToken())) {
+                if (returnTokenList && (!options.isReturnLanguageTokensOnly() || (tokenSelector != null && tokenSelector.isLanguageToken(tok)))) {
+                    for (LexerToken token : attachableTokens) tok.attachToken(token);
+                    attachableTokens.clear();
                     resultTokenList.add(tok);
+                } else if (tokenSelector != null && tokenSelector.isAttachableToken(tok)) {
+                    attachableTokens.add(tok);
                 }
 
                 if (output != null) {

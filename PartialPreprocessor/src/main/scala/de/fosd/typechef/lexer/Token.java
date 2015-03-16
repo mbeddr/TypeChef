@@ -27,6 +27,10 @@ import de.fosd.typechef.LexerToken;
 import de.fosd.typechef.featureexpr.FeatureExpr;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+
+import scala.collection.*;
 
 /**
  * A Preprocessor token.
@@ -36,6 +40,21 @@ import java.io.PrintWriter;
 public abstract class Token implements LexerToken {
 
     protected String label;
+    protected List<LexerToken> attachedTokens;
+
+    protected Token() {
+        this.attachedTokens = new ArrayList<LexerToken>();
+    }
+
+    @Override
+    public void attachToken(LexerToken token) {
+        this.attachedTokens.add(token);
+    }
+
+    @Override
+    public scala.collection.Iterable<LexerToken> getAttachedTokens() {
+        return JavaConversions.collectionAsScalaIterable(attachedTokens);
+    }
 
     public String getLabel() {
         return label;
@@ -127,8 +146,8 @@ public abstract class Token implements LexerToken {
                 && getType() != Token.WHITESPACE
                 && !(getType() != Token.P_FEATUREEXPR
                 && getText().equals("__extension__"))
-                //&& getType() != Token.CCOMMENT
-                //&& getType() != Token.CPPCOMMENT
+                && getType() != Token.CCOMMENT
+                && getType() != Token.CPPCOMMENT
                 && getType() != Token.NL
                 && getType() != Token.P_IF
                 && getType() != Token.P_ENDIF
@@ -175,205 +194,205 @@ public abstract class Token implements LexerToken {
     /**
      * The token type AND_EQ.
      */
-    /*package*/ static final int AND_EQ = 257;
+    public static final int AND_EQ = 257;
     /**
      * The token type ARROW.
      */
-    /*package*/ static final int ARROW = 258;
+    public static final int ARROW = 258;
     /**
      * The token type CHARACTER.
      */
-    /*package*/ static final int CHARACTER = 259;
+    public static final int CHARACTER = 259;
     /**
      * The token type CCOMMENT.
      */
-    /*package*/ static final int CCOMMENT = 260;
+    public static final int CCOMMENT = 260;
     /**
      * The token type CPPCOMMENT.
      */
-    /*package*/ static final int CPPCOMMENT = 261;
+    public static final int CPPCOMMENT = 261;
     /**
      * The token type DEC.
      */
-    /*package*/ static final int DEC = 262;
+    public static final int DEC = 262;
     /**
      * The token type DIV_EQ.
      */
-    /*package*/ static final int DIV_EQ = 263;
+    public static final int DIV_EQ = 263;
     /**
      * The token type ELLIPSIS.
      */
-    /*package*/ static final int ELLIPSIS = 264;
+    public static final int ELLIPSIS = 264;
     /**
      * The token type EOF.
      */
-    /*package*/ static final int EOF = 265;
+    public static final int EOF = 265;
     /**
      * The token type EQ.
      */
-    /*package*/ static final int EQ = 266;
+    public static final int EQ = 266;
     /**
      * The token type GE.
      */
-    /*package*/ static final int GE = 267;
+    public static final int GE = 267;
     /**
      * The token type HASH.
      */
-    /*package*/ static final int HASH = 268;
+    public static final int HASH = 268;
     /**
      * The token type HEADER.
      */
-    /*package*/ static final int HEADER = 269;
+    public static final int HEADER = 269;
     /**
      * The token type IDENTIFIER.
      */
-    /*package*/ static final int IDENTIFIER = 270;
+    public static final int IDENTIFIER = 270;
     /**
      * The token type INC.
      */
-    /*package*/ static final int INC = 271;
+    public static final int INC = 271;
     /**
      * The token type INTEGER.
      */
-    /*package*/ static final int INTEGER = 272;
+    public static final int INTEGER = 272;
     /**
      * The token type LAND.
      */
-    /*package*/ static final int LAND = 273;
+    public static final int LAND = 273;
     /**
      * The token type LAND_EQ.
      */
-    /*package*/ static final int LAND_EQ = 274;
+    public static final int LAND_EQ = 274;
     /**
      * The token type LE.
      */
-    /*package*/ static final int LE = 275;
+    public static final int LE = 275;
     /**
      * The token type LITERAL.
      */
-    /*package*/ static final int LITERAL = 276;
+    public static final int LITERAL = 276;
     /**
      * The token type LOR.
      */
-    /*package*/ static final int LOR = 277;
+    public static final int LOR = 277;
     /**
      * The token type LOR_EQ.
      */
-    /*package*/ static final int LOR_EQ = 278;
+    public static final int LOR_EQ = 278;
     /**
      * The token type LSH.
      */
-    /*package*/ static final int LSH = 279;
+    public static final int LSH = 279;
     /**
      * The token type LSH_EQ.
      */
-    /*package*/ static final int LSH_EQ = 280;
+    public static final int LSH_EQ = 280;
     /**
      * The token type MOD_EQ.
      */
-    /*package*/ static final int MOD_EQ = 281;
+    public static final int MOD_EQ = 281;
     /**
      * The token type MULT_EQ.
      */
-    /*package*/ static final int MULT_EQ = 282;
+    public static final int MULT_EQ = 282;
     /**
      * The token type NE.
      */
-    /*package*/ static final int NE = 283;
+    public static final int NE = 283;
     /**
      * The token type NL.
      */
-    /*package*/ static final int NL = 284;
+    public static final int NL = 284;
     /**
      * The token type OR_EQ.
      */
-    /*package*/ static final int OR_EQ = 285;
+    public static final int OR_EQ = 285;
     /**
      * The token type PASTE.
      */
-    /*package*/ static final int PASTE = 286;
+    public static final int PASTE = 286;
     /**
      * The token type PLUS_EQ.
      */
-    /*package*/ static final int PLUS_EQ = 287;
+    public static final int PLUS_EQ = 287;
     /**
      * The token type RANGE.
      */
-    /*package*/ static final int RANGE = 288;
+    public static final int RANGE = 288;
     /**
      * The token type RSH.
      */
-    /*package*/ static final int RSH = 289;
+    public static final int RSH = 289;
     /**
      * The token type RSH_EQ.
      */
-    /*package*/ static final int RSH_EQ = 290;
+    public static final int RSH_EQ = 290;
     /**
      * The token type STRING.
      */
-    /*package*/ static final int STRING = 291;
+    public static final int STRING = 291;
     /**
      * The token type SUB_EQ.
      */
-    /*package*/ static final int SUB_EQ = 292;
+    public static final int SUB_EQ = 292;
     /**
      * The token type WHITESPACE.
      */
-    /*package*/ static final int WHITESPACE = 293;
+    public static final int WHITESPACE = 293;
     /**
      * The token type XOR_EQ.
      */
-    /*package*/ static final int XOR_EQ = 294;
+    public static final int XOR_EQ = 294;
     /**
      * The token type M_ARG.
      */
-    /*package*/ static final int M_ARG = 295;
+    public static final int M_ARG = 295;
     /**
      * The token type M_PASTE.
      */
-    /*package*/ static final int M_PASTE = 296;
+    public static final int M_PASTE = 296;
     /**
      * The token type M_STRING.
      */
-    /*package*/ static final int M_STRING = 297;
+    public static final int M_STRING = 297;
     /**
      * The token type P_LINE.
      */
-    /*package*/ static final int P_LINE = 298;
+    public static final int P_LINE = 298;
     /**
      * The token type INVALID.
      */
-    /*package*/ static final int INVALID = 299;
+    public static final int INVALID = 299;
     /**
      * The token type P_LINE.
      */
-    /*package*/ static final int P_IF = 300;
+    public static final int P_IF = 300;
     /**
      * The token type P_LINE.
      */
-    /*package*/ static final int P_ENDIF = 301;
+    public static final int P_ENDIF = 301;
     /**
      * The token type P_LINE.
      */
-    /*package*/ static final int P_ELIF = 302;
+    public static final int P_ELIF = 302;
     /**
      * The token type P_LINE.
      */
-    /*package*/ static final int P_FEATUREEXPR = 303;
+    public static final int P_FEATUREEXPR = 303;
     /**
      * The number of possible semantic token types.
      * <p/>
      * Please note that not all token types below 255 are used.
      */
-    /*package*/ static final int _TOKENS = 304;
+    public static final int _TOKENS = 304;
 
-    /*package*/ static final int INCLUDE = 305;
+    public static final int INCLUDE = 305;
 
-    /*package*/ static final int DEFINE = 306;
+    public static final int DEFINE = 306;
 
-    /*package*/ static final int DEFINE_KEY = 307;
+    public static final int DEFINE_KEY = 307;
 
-    /*package*/ static final int DEFINE_VALUE = 308;
+    public static final int DEFINE_VALUE = 308;
 
     /**
      * The position-less space token.

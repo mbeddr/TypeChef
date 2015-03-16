@@ -16,6 +16,9 @@ import java.io.PrintWriter
  */
 trait LexerToken {
     // used to determine splitting and joining
+    def getAttachedTokens : Iterable[LexerToken]
+    def attachToken(token: LexerToken)
+
     def getFeature: FeatureExpr
     def setFeature(fexpr: FeatureExpr)
 

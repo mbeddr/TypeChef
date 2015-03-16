@@ -23,6 +23,8 @@ class TokenReader[+T <: AbstractToken, U](val tokens: List[T], val offst: Int, v
       */
     def pos: Position = first.getPosition
 
+    def comments : List[String] = first.getComments
+
     /** true iff there are no more elements in this reader
       */
     def atEnd: Boolean = tokens.isEmpty

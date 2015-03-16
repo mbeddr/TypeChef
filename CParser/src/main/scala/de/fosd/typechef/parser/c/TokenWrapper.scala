@@ -48,6 +48,10 @@ class CToken(val token: LexerToken, val number: Int) extends ProfilingToken with
     def getPosition = {
         pos
     }
+
+    def getComments : List[String] = {
+        token.getAttachedTokens.map(_.getText).toList
+    }
 }
 
 class TokenPosition(file: String, line: Int, column: Int, tokenNr: Int) extends Position {

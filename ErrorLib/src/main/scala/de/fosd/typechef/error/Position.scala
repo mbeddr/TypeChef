@@ -48,4 +48,3 @@ trait WithPosition {
     def getPositionTo: Position = rangeClean._2
     def rangeClean = if (hasPosition) range.get else (NoPosition, NoPosition)
 }
-

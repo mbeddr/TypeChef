@@ -13,6 +13,8 @@ trait AbstractToken {
     // used to propagate position information to AST elements
     def getPosition: Position
 
+    def getComments: List[String]
+
     // profiling
     def countSuccess(context: FeatureExpr) = {}
 

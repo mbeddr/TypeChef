@@ -2,13 +2,11 @@ package de.fosd.typechef.parser.c
 
 
 import com.mbeddr.core.importer.PartialCodeChecker
-import de.fosd.typechef.LexerToken
 import de.fosd.typechef.VALexer.{FileSource, LexerInput, TextSource}
 import de.fosd.typechef.conditional.{Opt, _}
 import de.fosd.typechef.featureexpr.FeatureExprFactory.True
 import de.fosd.typechef.featureexpr.{FeatureExpr, FeatureExprFactory, FeatureModel}
 import de.fosd.typechef.lexer.{LexerFrontend, SourceIdentifier, TokenSequenceToken}
-import de.fosd.typechef.parser.c.CLexerAdapter._
 import de.fosd.typechef.parser.{~, _}
 
 import scala.collection.JavaConversions._
@@ -33,9 +31,8 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
 
     protected def canParse[T](code: String, production: MultiParser[T]): Boolean = {
         try {
-            val tokens = lex(code.stripMargin, List(), FeatureExprFactory.empty, SourceIdentifier.BASE_SOURCE)
-            val reader = CLexerAdapter.prepareTokens(tokens)
-            val parseResult = parse(reader, production)
+            val tokenReader = lex(code.stripMargin, List(), FeatureExprFactory.empty, SourceIdentifier.BASE_SOURCE)
+            val parseResult = parse(tokenReader, production)
             checkResultRecursive(parseResult)
         }
         catch {
@@ -61,7 +58,8 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         val lexer = new LexerFrontend(this, identifier)
         val lexerSource = (if (identifier.getFile != null) new FileSource(identifier.getFile) else new TextSource(text)).asInstanceOf[LexerInput]
         val tokens = lexer.parse(lexerSource, includes, featureModel)
-        tokens
+        val tokenReader = CLexerAdapter.prepareTokens(tokens)
+        tokenReader
     }
 
     def parse[T](tokenStream: TokenReader[AbstractToken, CTypeContext], mainProduction: MultiParser[T]): MultiParseResult[T] =
@@ -106,7 +104,6 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
                 pragma |
                 expectType |
                 expectNotType |
-                comment(t => ExternalDefComment(t.getText)) |
                 include |
                 (SEMI ^^ {
                     x => EmptyExternalDef()
@@ -382,12 +379,12 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         | (textToken("do") ~! statement ~ textToken("while") ~ LPAREN ~ expr ~ RPAREN ~ SEMI ^^ {
         case _ ~ s ~ _ ~ _ ~ e ~ _ ~ _ => DoStatement(e, s)
     })
-        | (textToken("for") ~! LPAREN ~ opt(expr) ~ SEMI ~ opt(expr) ~ SEMI ~ opt(expr) ~ RPAREN ~ statement ^^ {
-        case _ ~ _ ~ e1 ~ _ ~ e2 ~ _ ~ e3 ~ _ ~ s => ForStatement(e1, e2, e3, s)
-    })
         // Declaration consumes the SEMI
         | (textToken("for") ~! LPAREN ~ opt(declaration) ~ opt(expr) ~ SEMI ~ opt(expr) ~ RPAREN ~ statement ^^ {
         case _ ~ _ ~ e1 ~ e2 ~ _ ~ e3 ~ _ ~ s => ForStatementDecl(e1, e2, e3, s)
+    })
+        | (textToken("for") ~! LPAREN ~ opt(expr) ~ SEMI ~ opt(expr) ~ SEMI ~ opt(expr) ~ RPAREN ~ statement ^^ {
+        case _ ~ _ ~ e1 ~ _ ~ e2 ~ _ ~ e3 ~ _ ~ s => ForStatement(e1, e2, e3, s)
     })
         //// Jump statements:
         | (textToken("goto") ~!> expr <~ SEMI ^^ {
@@ -425,8 +422,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     })
         | (expr <~ SEMI ^^ {
         ExprStatement(_)
-    }) |
-        comment(t => StatementComment(t.getText))
+    })
         // Expressions
         | fail("statement expected")) !
 

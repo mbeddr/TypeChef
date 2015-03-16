@@ -30,6 +30,8 @@ class TokenWrapper(
 
     def getPosition(): Position = position
 
+    override def getComments: List[String] = List()
+
     override def toString = "\"" + image + "\"" + (if (!getFeature.isTautology()) getFeature else "")
 
     def isInteger: Boolean = false

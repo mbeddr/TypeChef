@@ -9,11 +9,11 @@ import de.fosd.typechef.featureexpr.FeatureModel;
 import de.fosd.typechef.lexer.*;
 import de.fosd.typechef.lexer.macrotable.MacroFilter;
 import net.sf.javabdd.BDD;
+import scala.collection.Iterable;
 import xtc.LexerInterface;
 import xtc.XtcMacroFilter;
 import xtc.lang.cpp.CTag;
 import xtc.lang.cpp.PresenceConditionManager;
-import xtc.lang.cpp.Stream;
 import xtc.lang.cpp.Syntax;
 import xtc.tree.Locatable;
 
@@ -170,7 +170,7 @@ public class XtcPreprocessor implements VALexer {
         if (lexers == null) {
             assert (file == null) == (fileReader == null) : "no file given";
 
-            if (file != null && file.getParentFile()!=null)
+            if (file != null && file.getParentFile() != null)
                 I.add(file.getParentFile().getAbsolutePath());
             lexers = LexerInterface.createLexer(commandLine.toString(), fileReader, file, exceptionErrorHandler, iquIncludes, I, sysIncludes, macroFilter);
             stack = new Stack<FeatureExpr>();
@@ -298,6 +298,16 @@ public class XtcPreprocessor implements VALexer {
 
 
         int localLine = Integer.MIN_VALUE;
+
+        @Override
+        public void attachToken(LexerToken token) {
+
+        }
+
+        @Override
+        public Iterable<LexerToken> getAttachedTokens() {
+            return null;
+        }
 
         @Override
         public int getLine() {

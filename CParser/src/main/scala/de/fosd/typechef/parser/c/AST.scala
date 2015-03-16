@@ -2,6 +2,7 @@ package de.fosd.typechef.parser.c
 
 import de.fosd.typechef.conditional._
 import de.fosd.typechef.error.{Position, WithPosition}
+import de.fosd.typechef.parser.WithComment
 
 /**
  * AST for C
@@ -57,7 +58,7 @@ LocalLabelDeclaration -- label names
   */
 
 //Expressions
-trait AST extends Product with Serializable with Cloneable with WithPosition {
+trait AST extends Product with Serializable with Cloneable with WithPosition with WithComment {
     override def clone(): AST.this.type = super.clone().asInstanceOf[AST.this.type]
 }
 
@@ -161,8 +162,6 @@ case class IfStatement(condition: Conditional[Expr], thenBranch: Conditional[Sta
 case class ElifStatement(condition: Conditional[Expr], thenBranch: Conditional[Statement]) extends Statement
 
 case class SwitchStatement(expr: Expr, s: Conditional[Statement]) extends Statement
-
-case class StatementComment(value: String) extends Statement with Comment
 
 sealed abstract class CompoundDeclaration extends Statement with CFGStmt
 
@@ -360,8 +359,6 @@ trait ExternalDef extends AST with CFGStmt
 case class Include(path: String, fromHeader : Boolean) extends ExternalDef
 
 case class Define(key: String, value: String, fromHeader : Boolean) extends ExternalDef
-
-case class ExternalDefComment(value: String) extends ExternalDef with Comment
 
 case class EmptyExternalDef() extends ExternalDef
 

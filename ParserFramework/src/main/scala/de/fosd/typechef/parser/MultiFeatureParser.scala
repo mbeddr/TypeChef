@@ -1,11 +1,12 @@
 package de.fosd.typechef.parser
 
-import scala.math._
-import annotation.tailrec
 import de.fosd.typechef.conditional._
-import de.fosd.typechef.featureexpr.{FeatureExprFactory, FeatureModel, FeatureExpr}
-import FeatureExprFactory.True
 import de.fosd.typechef.error.WithPosition
+import de.fosd.typechef.featureexpr.FeatureExprFactory.True
+import de.fosd.typechef.featureexpr.{FeatureExpr, FeatureExprFactory, FeatureModel}
+
+import scala.annotation.tailrec
+import scala.math._
 
 /**
  * adopted parser combinator framework with support for multi-feature parsing
@@ -70,8 +71,13 @@ abstract class MultiFeatureParser(val featureModel: FeatureModel = null, debugOu
             val result = thisParser(in, feature).map(f)
             result.mapfr(FeatureExprFactory.True, (f, r) => r match {
                 case Success(t, restIn) =>
-                    if (t.isInstanceOf[WithPosition])
+                    if (t.isInstanceOf[WithComment]) {
+                        val comments = in.skipHidden(f, featureSolverCache).comments
+                        t.asInstanceOf[WithComment].setComment(comments)
+                    }
+                    if (t.isInstanceOf[WithPosition]) {
                         t.asInstanceOf[WithPosition].setPositionRange(in.skipHidden(f, featureSolverCache).pos, restIn.pos)
+                    }
                     null
                 case _ => null
             })
@@ -436,7 +442,7 @@ abstract class MultiFeatureParser(val featureModel: FeatureModel = null, debugOu
                 val res0 = res;
                 res = res.seqAllSuccessful(ctx,
                     (ctx, lastSuccess) =>
-                    //only extend the firstmost unsealed result
+                        //only extend the firstmost unsealed result
                         if (lastSuccess.result.isSealed || lastSuccess.next.offset != nextTokenOffset)
                             lastSuccess
                         else {
@@ -674,7 +680,7 @@ abstract class MultiFeatureParser(val featureModel: FeatureModel = null, debugOu
                 //try to parse separator first
                 res = res.seqAllSuccessful(ctx,
                     (fs, x) =>
-                    //only extend the firstmost unsealed result
+                        //only extend the firstmost unsealed result
                         if (x.result.isSealed || x.next.offset != nextTokenOffset)
                             x
                         else {
@@ -701,7 +707,7 @@ abstract class MultiFeatureParser(val featureModel: FeatureModel = null, debugOu
 
                 res = res.seqAllSuccessful(ctx,
                     (fs, x) =>
-                    //only extend the firstmost unsealed result
+                        //only extend the firstmost unsealed result
                         if (x.result.isSealed || x.next.offset != nextTokenOffset)
                             x
                         else {

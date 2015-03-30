@@ -3,7 +3,7 @@ package de.fosd.typechef.parser.java15
 import de.fosd.typechef.parser.java15.lexer.Token
 
 import de.fosd.typechef.featureexpr.FeatureExpr
-import de.fosd.typechef.parser.{AbstractToken, ProfilingToken}
+import de.fosd.typechef.parser.{Attachable, AbstractToken, ProfilingToken}
 import de.fosd.typechef.error.Position
 
 object TokenWrapper {
@@ -30,7 +30,7 @@ class TokenWrapper(
 
     def getPosition(): Position = position
 
-    override def getComments: List[String] = List()
+    override def getAttachedTokens: List[Attachable] = List()
 
     override def toString = "\"" + image + "\"" + (if (!getFeature.isTautology()) getFeature else "")
 

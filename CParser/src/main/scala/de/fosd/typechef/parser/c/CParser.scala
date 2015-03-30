@@ -637,7 +637,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
             | stringConst
             | (LPAREN ~> ((compoundStatement ^^ {
             CompoundStatementExpr(_)
-        }) | expr) <~ RPAREN)
+        }) | (expr ^^ {ParensExpr(_)})) <~ RPAREN)
             | fail("primary expression expected"))
 
     def typeName: MultiParser[TypeName] =

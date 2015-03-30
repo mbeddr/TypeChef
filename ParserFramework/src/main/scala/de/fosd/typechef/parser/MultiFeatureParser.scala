@@ -71,9 +71,9 @@ abstract class MultiFeatureParser(val featureModel: FeatureModel = null, debugOu
             val result = thisParser(in, feature).map(f)
             result.mapfr(FeatureExprFactory.True, (f, r) => r match {
                 case Success(t, restIn) =>
-                    if (t.isInstanceOf[WithComment]) {
-                        val comments = in.skipHidden(f, featureSolverCache).comments
-                        t.asInstanceOf[WithComment].setComment(comments)
+                    if (t.isInstanceOf[WithAttachables]) {
+                        val tokens = in.skipHidden(f, featureSolverCache).attachedTokens
+                        t.asInstanceOf[WithAttachables].attach(tokens)
                     }
                     if (t.isInstanceOf[WithPosition]) {
                         t.asInstanceOf[WithPosition].setPositionRange(in.skipHidden(f, featureSolverCache).pos, restIn.pos)

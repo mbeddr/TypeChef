@@ -14,7 +14,7 @@ public class DefaultTokenSelector implements TokenSelector {
     public boolean isAttachableToken(LexerToken token) {
         if (token instanceof Token) {
             int type = ((Token) token).getType();
-            return type == Token.CCOMMENT || type == Token.CPPCOMMENT;
+            return type == Token.CCOMMENT || type == Token.CPPCOMMENT || type == Token.NL;
         } else {
             return false;
         }

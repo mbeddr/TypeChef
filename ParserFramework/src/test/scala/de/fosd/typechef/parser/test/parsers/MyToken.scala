@@ -19,7 +19,7 @@ class MyToken(val text: String, val feature: FeatureExpr) extends ProfilingToken
         def getColumn = 1
     }
 
-    override def getComments: List[String] = List()
+    override def getAttachedTokens: List[Attachable] = List()
 
     override def toString = "\"" + text + "\"" + (if (!feature.isTautology()) feature else "")
 

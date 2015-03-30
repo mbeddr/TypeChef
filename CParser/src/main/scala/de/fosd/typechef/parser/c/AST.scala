@@ -2,7 +2,7 @@ package de.fosd.typechef.parser.c
 
 import de.fosd.typechef.conditional._
 import de.fosd.typechef.error.{Position, WithPosition}
-import de.fosd.typechef.parser.WithComment
+import de.fosd.typechef.parser.{WithAttachables}
 
 /**
  * AST for C
@@ -58,7 +58,7 @@ LocalLabelDeclaration -- label names
   */
 
 //Expressions
-trait AST extends Product with Serializable with Cloneable with WithPosition with WithComment {
+trait AST extends Product with Serializable with Cloneable with WithPosition with WithAttachables {
     override def clone(): AST.this.type = super.clone().asInstanceOf[AST.this.type]
 }
 
@@ -123,6 +123,8 @@ case class NArySubExpr(op: String, e: Expr) extends AST
 case class ConditionalExpr(condition: Expr, thenExpr: Option[Expr], elseExpr: Expr) extends Expr
 
 case class AssignExpr(target: Expr, operation: String, source: Expr) extends Expr
+
+case class ParensExpr(inner : Expr) extends Expr
 
 case class ExprList(exprs: List[Opt[Expr]]) extends Expr
 

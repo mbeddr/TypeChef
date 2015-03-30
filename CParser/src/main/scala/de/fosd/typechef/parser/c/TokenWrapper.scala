@@ -49,8 +49,19 @@ class CToken(val token: LexerToken, val number: Int) extends ProfilingToken with
         pos
     }
 
-    def getComments : List[String] = {
-        token.getAttachedTokens.map(_.getText).toList
+    def getAttachedTokens : List[Attachable] = {
+        (for {
+            t <- token.getAttachedTokens
+            if (t.isInstanceOf[Token])
+            tokenType = t.asInstanceOf[Token].getType
+            if (tokenType == Token.NL || tokenType == Token.CCOMMENT || tokenType == Token.CPPCOMMENT)
+        } yield {
+            if (tokenType == Token.NL) {
+                NewLine
+            } else {
+                Comment(t.getText)
+            }
+        }).toList;
     }
 }
 

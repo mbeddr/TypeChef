@@ -78,6 +78,9 @@ abstract class MultiFeatureParser(val featureModel: FeatureModel = null, debugOu
                     if (t.isInstanceOf[WithPosition]) {
                         t.asInstanceOf[WithPosition].setPositionRange(in.skipHidden(f, featureSolverCache).pos, restIn.pos)
                     }
+                    if (t.isInstanceOf[WithBlockId]) {
+                        t.asInstanceOf[WithBlockId].setBlockId(in.skipHidden(f, featureSolverCache).blockId)
+                    }
                     null
                 case _ => null
             })

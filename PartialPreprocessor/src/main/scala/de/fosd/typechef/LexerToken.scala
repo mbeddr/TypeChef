@@ -33,6 +33,10 @@ trait LexerToken {
     def setSourceName(src: String)
     def getSource : Source
 
+    // @mbeddr this is used to identify the ifdef block where the token is originated from
+    def getBlockId : String
+    def setBlockId(id : String)
+    
     /**
      * properties of tokens used by other clients like the C parser
      *

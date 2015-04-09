@@ -310,6 +310,16 @@ public class XtcPreprocessor implements VALexer {
         }
 
         @Override
+        public void setBlockId(String id) {
+
+        }
+
+        @Override
+        public String getBlockId() {
+            return null;
+        }
+
+        @Override
         public int getLine() {
             if (localLine != Integer.MIN_VALUE)
                 return localLine;

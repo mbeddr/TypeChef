@@ -25,7 +25,7 @@ class RepOptTest extends TestCase with TestHelper {
   }
 
   def parseExtList(code: String): (List[Opt[ExternalDef]], TokenReader[AbstractToken, CTypeContext]) = {
-    val actual = p.parseAny(lex(code.stripMargin), p.externalList)
+    val actual = p.parseAny(lex(code.stripMargin), p.unitContents)
     (actual: @unchecked) match {
       case p.Success(ast, unparsed) => {
         (ast.asInstanceOf[List[Opt[ExternalDef]]], unparsed);

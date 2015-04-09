@@ -135,8 +135,9 @@ public class TokenSequenceToken extends Token {
 
     @Override
     public void setFeature(FeatureExpr expr) {
-        for (Token t : internalTokens)
+        for (Token t : internalTokens) {
             t.setFeature(expr);
+        }
     }
 
 }

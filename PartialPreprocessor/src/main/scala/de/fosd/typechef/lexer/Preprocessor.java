@@ -1445,8 +1445,12 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
 
         String value = m.getText();
         List<Token> tokens = new ArrayList<Token>();
-        tokens.add(new SimpleToken(Token.DEFINE_KEY, key.toString(), currentSource));
-        tokens.add(new SimpleToken(Token.DEFINE_VALUE, value, currentSource));
+        SimpleToken keyToken = new SimpleToken(Token.DEFINE_KEY, key.toString(), currentSource);
+        keyToken.setFeature(tok.getFeature());
+        tokens.add(keyToken);
+        SimpleToken valueToken = new SimpleToken(Token.DEFINE_VALUE, value, currentSource);
+        valueToken.setFeature(tok.getFeature());
+        tokens.add(valueToken);
 
         if (!(codeChecker != null && codeChecker.canParseExpression(m.getText()))) {
             logger.info("#define " + name + " " + m);
@@ -1474,6 +1478,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                     break EXPANSION;
                 case NL:
                     break EXPANSION;
+                // @mbeddr
                 case P_LINE:
                     break EXPANSION;
 
@@ -1573,7 +1578,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         if (getFeature(Feature.DEBUG_VERBOSE))
             System.err.println("pp: including " + file);
 
-        // only include the header file for the given c file, nothing else
+        // @mbeddr only include the header file for the given c file, nothing else
         if (this.identifier.sameUnit(new SourceIdentifier(file.getPath()))) {
             sourceManager.push_source(file.getSource(), true);
         }
@@ -1732,7 +1737,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
             include(sourceManager.getSource().getPath(), tok.getLine(), name,
                     quoted, next);
 
-            // if the current source's parent is null, then this is the source used for the
+            // @mbeddr if the current source's parent is null, then this is the source used for the
             // original file input, otherwise this is transitively reached from other included headers
             if (currentSource.getParent() == null) {
                 return new SimpleToken(Token.INCLUDE, 1, 0, name, currentSource);
@@ -1870,10 +1875,13 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
             }
             tok = retrieveTokenFromSource();
         }
-        if (is_error)
-            error(pptok, buf.toString());
-        else
+        if (is_error) {
+            // @mbeddr turn off #error error handling
+            // error(pptok, buf.toString());
+        }
+        else {
             warning(pptok, buf.toString());
+        }
 
         return new SimpleToken(P_LINE, pptok.getLine(), pptok.getColumn(), buf
                 .toString(), null);
@@ -2541,19 +2549,14 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
 
                 case HASH:
                     tok = source_token_nonwhite();
-                    // (new Exception("here")).printStackTrace();
                     switch (tok.getType()) {
                         case NL:
                             break LEX; /* Some code has #\n */
                         case IDENTIFIER:
                             break;
                         default:
-                            //no warning, interpreted as comment
-//                            warning(tok, "Preprocessor directive not a word "
-//                                    + tok.getText() + ", skipping line");
                             return source_skipline(false);
                     }
-                    // System.out.println(previousToken);
                     Integer _ppcmd = ppcmds.get(tok.getText());
                     if (_ppcmd == null) {
                         warning(tok, "Unknown preprocessor directive "
@@ -2672,7 +2675,6 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                         case PP_IFDEF:
                             push_state();
                             tok = source_token_nonwhite();
-                            // System.out.println("ifdef " + tok);
                             if (tok.getType() != IDENTIFIER) {
                                 error(tok, "Expected identifier, not " + tok.getText());
                                 return source_skipline(false);
@@ -2682,7 +2684,6 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                                 state.putLocalFeature(
                                         isParentActive() ? localFeatureExpr2
                                                 : FeatureExprLib.False(), macros);
-                                // return
 
                                 if (tok.getType() != NL)
                                     source_skipline(isParentActive());
@@ -2777,7 +2778,9 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         try {
             Token tok = parse_main();
             tok = tok.clone();
-            tok.setFeature(state.getFullPresenceCondition());
+            FeatureExpr featureExpression = state.getFullPresenceCondition();
+            tok.setBlockId(state.getId());
+            tok.setFeature(featureExpression);
             if (getFeature(Feature.DEBUG_VERBOSE))
                 System.err.println("pp: Returning " + tok);
             return tok;

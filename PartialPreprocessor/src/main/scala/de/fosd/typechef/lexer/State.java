@@ -8,9 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 class State {
+    private static int stateCounter = 1;
     List<FeatureExpr> localFeatures = new ArrayList<FeatureExpr>();
     final State parent;
-
+    private String id;
     boolean sawElse;
 
     /* pp */State() {
@@ -20,6 +21,7 @@ class State {
     /* pp */State(State parent) {
         this.parent = parent;
         this.sawElse = false;
+        this.id = ((parent == null) ? "" : parent.getId() + "_") + stateCounter++;
     }
 
     /* pp */void setSawElse() {
@@ -31,6 +33,10 @@ class State {
 
     /* pp */boolean sawElse() {
         return sawElse;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String toString() {

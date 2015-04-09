@@ -2,7 +2,7 @@ package de.fosd.typechef.parser.c
 
 import de.fosd.typechef.conditional._
 import de.fosd.typechef.error.{Position, WithPosition}
-import de.fosd.typechef.parser.{WithAttachables}
+import de.fosd.typechef.parser.{WithBlockId, WithAttachables}
 
 /**
  * AST for C
@@ -58,7 +58,7 @@ LocalLabelDeclaration -- label names
   */
 
 //Expressions
-trait AST extends Product with Serializable with Cloneable with WithPosition with WithAttachables {
+trait AST extends Product with Serializable with Cloneable with WithPosition with WithAttachables with WithBlockId {
     override def clone(): AST.this.type = super.clone().asInstanceOf[AST.this.type]
 }
 

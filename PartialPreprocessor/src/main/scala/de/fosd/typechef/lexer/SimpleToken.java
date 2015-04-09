@@ -147,6 +147,7 @@ public class SimpleToken extends Token {
     /**
      * Returns a description of this token, for debugging purposes.
      */
+    @Override
     public String toString() {
         StringBuilder buf = new StringBuilder();
 
@@ -165,7 +166,7 @@ public class SimpleToken extends Token {
             buf.append('<').append(type).append('>');
         if (value != null)
             buf.append('=').append(value);
-        buf.append('@').append(presenceCondition);
+        buf.append('@').append(presenceCondition).append(" - ");
         return buf.toString();
     }
 

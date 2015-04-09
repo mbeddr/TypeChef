@@ -21,6 +21,8 @@ class MyToken(val text: String, val feature: FeatureExpr) extends ProfilingToken
 
     override def getAttachedTokens: List[Attachable] = List()
 
+    override def getBlockId : String = null
+
     override def toString = "\"" + text + "\"" + (if (!feature.isTautology()) feature else "")
 
     def isInteger: Boolean = false

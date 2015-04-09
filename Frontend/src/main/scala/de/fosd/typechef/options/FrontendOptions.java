@@ -1,6 +1,5 @@
 package de.fosd.typechef.options;
 
-import de.fosd.typechef.VALexer;
 import de.fosd.typechef.error.Position;
 import de.fosd.typechef.featureexpr.FeatureExpr;
 import de.fosd.typechef.featureexpr.FeatureExprFactory$;
@@ -11,9 +10,7 @@ import gnu.getopt.LongOpt;
 import scala.Function3;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
-
 
 public class FrontendOptions extends CAnalysisOptions implements ParserOptions {
     public boolean parse = true,
@@ -105,7 +102,7 @@ public class FrontendOptions extends CAnalysisOptions implements ParserOptions {
                 new Option("parserstatistics", LongOpt.NO_ARGUMENT, F_PARSERSTATS, null,
                         "Print parser statistics."),
                 new Option("simplifyPresenceConditions", LongOpt.NO_ARGUMENT, F_SIMPLIFYPRESENCECONDITIONS, null,
-                "Simplify presence conditions after parsing.")
+                        "Simplify presence conditions after parsing.")
         ));
         r.add(new OptionGroup("Misc", 1000,
                 new Option("printIncludes", LongOpt.NO_ARGUMENT, TY_DEBUG_INCLUDES, null,
@@ -285,20 +282,22 @@ public class FrontendOptions extends CAnalysisOptions implements ParserOptions {
         return printVersion;
     }
 
-    public boolean isPrintIncludes() { return printInclude; }
+    public boolean isPrintIncludes() {
+        return printInclude;
+    }
 
     public void printInclude() {
         System.out.println("Included headers:");
-        for (String header: this.getIncludedHeaders()) {
-            System.out.println("  "+header);
+        for (String header : this.getIncludedHeaders()) {
+            System.out.println("  " + header);
         }
         System.out.println("System Include Paths:");
-        for (String dir: this.getIncludePaths()) {
-            System.out.println("  "+dir);
+        for (String dir : this.getIncludePaths()) {
+            System.out.println("  " + dir);
         }
         System.out.println("Quote Include Paths:");
-        for (String dir: this.getQuoteIncludePath()) {
-            System.out.println("  "+dir);
+        for (String dir : this.getQuoteIncludePath()) {
+            System.out.println("  " + dir);
         }
     }
 

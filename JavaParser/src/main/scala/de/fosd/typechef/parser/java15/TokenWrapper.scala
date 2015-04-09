@@ -32,6 +32,8 @@ class TokenWrapper(
 
     override def getAttachedTokens: List[Attachable] = List()
 
+    override def getBlockId : String = null
+
     override def toString = "\"" + image + "\"" + (if (!getFeature.isTautology()) getFeature else "")
 
     def isInteger: Boolean = false

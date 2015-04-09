@@ -25,6 +25,11 @@ class TokenReader[+T <: AbstractToken, U](val tokens: List[T], val offst: Int, v
 
     def attachedTokens : List[Attachable] = first.getAttachedTokens
 
+    def blockId : String = {
+        val deepest = tokens.maxBy(e => if (e.getBlockId == null) 0 else e.getBlockId.length)
+        deepest.getBlockId
+    }
+
     /** true iff there are no more elements in this reader
       */
     def atEnd: Boolean = tokens.isEmpty

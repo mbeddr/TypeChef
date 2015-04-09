@@ -13,7 +13,11 @@ trait AbstractToken {
     // used to propagate position information to AST elements
     def getPosition: Position
 
+    // @mbeddr used for comments and new line
     def getAttachedTokens: List[Attachable]
+
+    // @mbeddr used for block id tracking
+    def getBlockId : String
 
     // profiling
     def countSuccess(context: FeatureExpr) = {}

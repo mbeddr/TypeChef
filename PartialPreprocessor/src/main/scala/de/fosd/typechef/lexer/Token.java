@@ -40,6 +40,7 @@ import scala.collection.*;
 public abstract class Token implements LexerToken {
 
     protected String label;
+    protected String blockId;
     protected List<LexerToken> attachedTokens;
 
     protected Token() {
@@ -54,6 +55,16 @@ public abstract class Token implements LexerToken {
     @Override
     public scala.collection.Iterable<LexerToken> getAttachedTokens() {
         return JavaConversions.collectionAsScalaIterable(attachedTokens);
+    }
+
+    @Override
+    public void setBlockId(String blockId) {
+        this.blockId = blockId;
+    }
+
+    @Override
+    public String getBlockId() {
+        return blockId;
     }
 
     public String getLabel() {

@@ -82,12 +82,19 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         "sizeof", "_Pragma", "__expectType", "__expectNotType", "__thread")
     val predefinedTypedefs = Set("__builtin_va_list", "__builtin_type")
 
-    def translationUnit = externalList ^^ {
-        TranslationUnit(_)
-    }
+    def translationUnit = unitContents ^^ {TranslationUnit(_)}
 
-    def externalList: MultiParser[List[Opt[ExternalDef]]] =
-        repOpt(externalDef, "externalDef") ^^ ConditionalLib.flatten
+    def unitContents: MultiParser[List[Opt[ExternalDef]]] =
+        ((textToken("extern") ~! stringConst ~ textToken("{") ~ repOpt(externalDef, "externalDef") ~ textToken("}")) ^^ {
+            case _ ~ _ ~ _ ~ t ~ _ => {
+                ConditionalLib.flatten(t)
+            }
+        }) |
+        (repOpt(externalDef, "externalDef") ^^ {
+            case t => {
+                ConditionalLib.flatten(t)
+            }
+        })
 
     def externalDef: MultiParser[Conditional[ExternalDef]] =
     // first part (with lookahead) only for error reporting, i.e.don 't try to parse anything else after a typedef
@@ -612,7 +619,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     //  ...
     //  ( type-name ) { initializer-list }
     //  ( type-name ) { initializer-list , }
-    private def castAndInitializer = (LPAREN ~> typeName <~ RPAREN) ~ lcurlyInitializer ^^ { case tn ~ init => CastExpr(tn, init)}
+    private def castAndInitializer = (LPAREN ~> typeName <~ RPAREN) ~ lcurlyInitializer ^^ { case tn ~ init => CastExpr(tn, init) }
 
     //
     def functionCall: MultiParser[FunctionCall] =

@@ -49,7 +49,7 @@ class CToken(val token: LexerToken, val number: Int) extends ProfilingToken with
         pos
     }
 
-    def getAttachedTokens : List[Attachable] = {
+    override def getAttachedTokens : List[Attachable] = {
         (for {
             t <- token.getAttachedTokens
             if (t.isInstanceOf[Token])
@@ -62,6 +62,10 @@ class CToken(val token: LexerToken, val number: Int) extends ProfilingToken with
                 Comment(t.getText)
             }
         }).toList;
+    }
+
+    override def getBlockId : String = {
+        this.token.getBlockId
     }
 }
 

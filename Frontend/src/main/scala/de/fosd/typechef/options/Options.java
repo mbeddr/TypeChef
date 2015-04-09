@@ -120,7 +120,7 @@ public abstract class Options {
     int dfltIndent = 35;
 
     @SuppressWarnings("unchecked")
-    void printUsage() {
+    public void printUsage() {
         StringBuilder text = new StringBuilder("Parameters: \n");
         List<OptionGroup> og = getOptionGroups();
         Collections.sort(og);

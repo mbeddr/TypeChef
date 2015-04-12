@@ -71,6 +71,7 @@ abstract class MultiFeatureParser(val featureModel: FeatureModel = null, debugOu
             val result = thisParser(in, feature).map(f)
             result.mapfr(FeatureExprFactory.True, (f, r) => r match {
                 case Success(t, restIn) =>
+                    // TODO do not compute the skipHidden multiple times
                     if (t.isInstanceOf[WithAttachables]) {
                         val tokens = in.skipHidden(f, featureSolverCache).attachedTokens
                         t.asInstanceOf[WithAttachables].attach(tokens)
@@ -79,7 +80,10 @@ abstract class MultiFeatureParser(val featureModel: FeatureModel = null, debugOu
                         t.asInstanceOf[WithPosition].setPositionRange(in.skipHidden(f, featureSolverCache).pos, restIn.pos)
                     }
                     if (t.isInstanceOf[WithBlockId]) {
-                        t.asInstanceOf[WithBlockId].setBlockId(in.skipHidden(f, featureSolverCache).blockId)
+                        val tokenReader = in.skipHidden(f, featureSolverCache)
+                        val range = if (restIn.tokens.isEmpty) Int.MaxValue else restIn.tokens.head.getTokenId
+                        val blockId = tokenReader.blockId(range, f, featureSolverCache)
+                        t.asInstanceOf[WithBlockId].setBlockId(blockId)
                     }
                     null
                 case _ => null

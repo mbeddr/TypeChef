@@ -77,6 +77,14 @@ public class TokenSequenceToken extends Token {
     }
 
     @Override
+    public void setBlockId(String blockId) {
+        this.blockId = blockId;
+        for (Token t : internalTokens) {
+            t.setBlockId(blockId);
+        }
+    }
+
+    @Override
     public String getText() {
         StringWriter strWriter = new StringWriter();
         PrintWriter writer = new PrintWriter(strWriter);

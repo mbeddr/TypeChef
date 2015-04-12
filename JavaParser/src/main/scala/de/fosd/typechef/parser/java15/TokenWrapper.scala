@@ -1,10 +1,9 @@
 package de.fosd.typechef.parser.java15
 
-import de.fosd.typechef.parser.java15.lexer.Token
-
-import de.fosd.typechef.featureexpr.FeatureExpr
-import de.fosd.typechef.parser.{Attachable, AbstractToken, ProfilingToken}
 import de.fosd.typechef.error.Position
+import de.fosd.typechef.featureexpr.FeatureExpr
+import de.fosd.typechef.parser.java15.lexer.Token
+import de.fosd.typechef.parser.{AbstractToken, Attachable, ProfilingToken}
 
 object TokenWrapper {
     def create(javaToken: Token, afeatureExpr: FeatureExpr, file: String) = {
@@ -30,9 +29,11 @@ class TokenWrapper(
 
     def getPosition(): Position = position
 
+    override def getTokenId: Int = -1
+
     override def getAttachedTokens: List[Attachable] = List()
 
-    override def getBlockId : String = null
+    override def getBlockId: String = null
 
     override def toString = "\"" + image + "\"" + (if (!getFeature.isTautology()) getFeature else "")
 

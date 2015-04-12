@@ -1,7 +1,7 @@
 package de.fosd.typechef.parser
 
-import de.fosd.typechef.featureexpr.FeatureExpr
 import de.fosd.typechef.error.Position
+import de.fosd.typechef.featureexpr.FeatureExpr
 
 trait AbstractToken {
     // used to determine splitting and joining
@@ -13,11 +13,13 @@ trait AbstractToken {
     // used to propagate position information to AST elements
     def getPosition: Position
 
+    def getTokenId: Int
+
     // @mbeddr used for comments and new line
     def getAttachedTokens: List[Attachable]
 
     // @mbeddr used for block id tracking
-    def getBlockId : String
+    def getBlockId: String
 
     // profiling
     def countSuccess(context: FeatureExpr) = {}
@@ -40,6 +42,8 @@ trait ProfilingToken extends AbstractToken {
     var profile_consumedContexts: Set[FeatureExpr] = Set()
 
     def profile_consumed_replicated(): Int = if (profile_consumed > 0) profile_consumed - profile_consumed_backtracking - 1 else 0
+
+    override def getTokenId: Int = -1
 
     override def countSuccess(context: FeatureExpr) = {
         super.countSuccess(context)

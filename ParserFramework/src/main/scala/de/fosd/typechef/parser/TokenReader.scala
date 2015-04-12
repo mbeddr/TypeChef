@@ -1,8 +1,9 @@
 package de.fosd.typechef.parser
 
-import scala.math.min
-import de.fosd.typechef.featureexpr.{FeatureExprFactory, FeatureExpr}
 import de.fosd.typechef.error.Position
+import de.fosd.typechef.featureexpr.{FeatureExpr, FeatureExprFactory}
+
+import scala.math.min
 
 /**
  * reader of elements that each have a feature expression (that can be accessed with the getFeature function)
@@ -23,11 +24,21 @@ class TokenReader[+T <: AbstractToken, U](val tokens: List[T], val offst: Int, v
       */
     def pos: Position = first.getPosition
 
-    def attachedTokens : List[Attachable] = first.getAttachedTokens
+    def attachedTokens: List[Attachable] = first.getAttachedTokens
 
-    def blockId : String = {
-        val deepest = tokens.maxBy(e => if (e.getBlockId == null) 0 else e.getBlockId.length)
-        deepest.getBlockId
+    def blockId(rightMost: Int, context: FeatureExpr, featureSolverCache: FeatureSolverCache): String = {
+        val inRange = for {
+            t <- tokens
+            if t.getTokenId >= offset && t.getTokenId < rightMost
+            if !featureSolverCache.mutuallyExclusive(context, t.getFeature)
+        } yield t
+
+        if (inRange.isEmpty) {
+            return null
+        } else {
+            val shortest = inRange.minBy(e => e.getBlockId.length)
+            shortest.getBlockId
+        }
     }
 
     /** true iff there are no more elements in this reader

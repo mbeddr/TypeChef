@@ -8,11 +8,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 class State {
-    private static int stateCounter = 1;
+    // @mbeddr
+    private static int stateCounter = 0;
+
     List<FeatureExpr> localFeatures = new ArrayList<FeatureExpr>();
     final State parent;
-    private String id;
+
     boolean sawElse;
+
+    // @mbeddr
+    private int stateCount;
+
+    // @mbeddr
+    private String stateBranch;
 
     /* pp */State() {
         this(null);
@@ -21,7 +29,8 @@ class State {
     /* pp */State(State parent) {
         this.parent = parent;
         this.sawElse = false;
-        this.id = ((parent == null) ? "" : parent.getId() + "_") + stateCounter++;
+        this.stateBranch = "if";
+        this.stateCount = stateCounter++;
     }
 
     /* pp */void setSawElse() {
@@ -29,6 +38,8 @@ class State {
         assert !localFeatures.isEmpty() : "else before #if?";
         sawElse = true;
         processElIf();
+        // set it at the very end, because the processElIf also changes the branch
+        this.stateBranch = "else";
     }
 
     /* pp */boolean sawElse() {
@@ -36,7 +47,23 @@ class State {
     }
 
     public String getId() {
-        return id;
+        State current = this;
+        StringBuffer buffer = new StringBuffer();
+
+        while (current.parent != null) {
+            buffer.insert(0, "." + current.stateCount + "_" + current.stateBranch);
+            current = current.parent;
+        }
+
+        if (this.parent != null) {
+            return buffer.substring(1);
+        } else {
+            return "";
+        }
+    }
+
+    public boolean isRoot() {
+        return this.parent == null;
     }
 
     public String toString() {
@@ -151,6 +178,7 @@ class State {
     }
 
     public void processElIf() {
+        this.stateBranch = "elseif";
         assert !localFeatures.isEmpty();
         localFeatures.set(localFeatures.size() - 1, localFeatures.get(
                 localFeatures.size() - 1).not());

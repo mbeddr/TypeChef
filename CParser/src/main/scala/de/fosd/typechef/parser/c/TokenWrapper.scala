@@ -30,9 +30,9 @@ class CToken(val token: LexerToken, val number: Int) extends ProfilingToken with
 
     def isInclude: Boolean = token.isInclude
 
-    def isDefine : Boolean = token.isDefine
+    def isDefine: Boolean = token.isDefine
 
-    def isHeaderElement : Boolean = {
+    def isHeaderElement: Boolean = {
         token.getSource != null && token.getSource.isInstanceOf[LexerSource] && token.getSource.asInstanceOf[LexerSource].getIdentifier.isHeaderFileSource
     }
 
@@ -49,22 +49,24 @@ class CToken(val token: LexerToken, val number: Int) extends ProfilingToken with
         pos
     }
 
-    override def getAttachedTokens : List[Attachable] = {
+    override def getTokenId: Int = number
+
+    override def getAttachedTokens: List[Attachable] = {
         (for {
             t <- token.getAttachedTokens
             if (t.isInstanceOf[Token])
             tokenType = t.asInstanceOf[Token].getType
             if (tokenType == Token.NL || tokenType == Token.CCOMMENT || tokenType == Token.CPPCOMMENT)
         } yield {
-            if (tokenType == Token.NL) {
-                NewLine
-            } else {
-                Comment(t.getText)
-            }
-        }).toList;
+                if (tokenType == Token.NL) {
+                    NewLine
+                } else {
+                    Comment(t.getText)
+                }
+            }).toList;
     }
 
-    override def getBlockId : String = {
+    override def getBlockId: String = {
         this.token.getBlockId
     }
 }

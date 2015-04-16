@@ -85,16 +85,9 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     def translationUnit = unitContents ^^ {TranslationUnit(_)}
 
     def unitContents: MultiParser[List[Opt[ExternalDef]]] =
-        ((textToken("extern") ~! stringConst ~ textToken("{") ~ repOpt(externalDef, "externalDef") ~ textToken("}")) ^^ {
-            case _ ~ _ ~ _ ~ t ~ _ => {
-                ConditionalLib.flatten(t)
-            }
-        }) |
-        (repOpt(externalDef, "externalDef") ^^ {
-            case t => {
-                ConditionalLib.flatten(t)
-            }
-        })
+        repOpt(externalDef, "externalDef") ^^ {
+            t => ConditionalLib.flatten(t)
+        }
 
     def externalDef: MultiParser[Conditional[ExternalDef]] =
     // first part (with lookahead) only for error reporting, i.e.don 't try to parse anything else after a typedef
@@ -132,7 +125,6 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
                 if (result.declSpecs.exists(o => o.entry == TypedefSpecifier()))
                     for (decl: Opt[InitDeclarator] <- result.init) {
                         c = c.addType(decl.entry.declarator.getName, featureCtx)
-                        //                            println("add type " + decl.declarator.getName)//DEBUG only
                     }
                 c
             }
@@ -370,7 +362,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     //    private def compoundStatementCond: MultiParser[Conditional[CompoundStatement]] = compoundStatement ^^ {One(_)}
 
     def statementList: MultiParser[List[Opt[Statement]]] =
-        repOpt(compoundDeclaration | statement, "statement") ^^ ConditionalLib.flatten
+        repOpt(compoundDeclaration |  statement, "statement") ^^ ConditionalLib.flatten
 
     def statement: MultiParser[Conditional[Statement]] = (SEMI ^^ {
         _ => EmptyStatement()
@@ -379,9 +371,6 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         //// Iteration statements:
         | (textToken("while") ~! LPAREN ~ expr ~ RPAREN ~ statement ^^ {
         case _ ~ _ ~ e ~ _ ~ s => WhileStatement(e, s)
-    })
-        | (declaration ^^ {
-        DeclarationStatement(_)
     })
         | (textToken("do") ~! statement ~ textToken("while") ~ LPAREN ~ expr ~ RPAREN ~ SEMI ^^ {
         case _ ~ s ~ _ ~ _ ~ e ~ _ ~ _ => DoStatement(e, s)
@@ -429,6 +418,8 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     })
         | (expr <~ SEMI ^^ {
         ExprStatement(_)
+    }) | (declaration ^^ {
+        DeclarationStatement(_)
     })
         // Expressions
         | fail("statement expected")) !
@@ -641,7 +632,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         })
             | ID
             | numConst
-            | stringConst
+            | concatenatedStringLit
             | (LPAREN ~> ((compoundStatement ^^ {
             CompoundStatementExpr(_)
         }) | (expr ^^ {ParensExpr(_)})) <~ RPAREN)
@@ -665,6 +656,12 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
             ^^ {
             (list: List[Opt[AbstractToken]]) => StringLit(list.map(o => Opt(o.condition, o.entry.getText)))
         })
+
+    def concatenatedStringLit : MultiParser[ConcatenatedStringLit] = {
+        rep1(token("element", t => t.isString || isIdentifier(t))) ^^ {
+            (list: List[Opt[AbstractToken]]) => ConcatenatedStringLit(list.map(o => Opt(o.condition, o.entry.getText)))
+        }
+    }
 
     def include: MultiParser[Include] =
         token("include", _.isInclude) ^^ {

@@ -78,6 +78,8 @@ case class Constant(value: String) extends PrimaryExpr
 
 case class StringLit(name: List[Opt[String]]) extends PrimaryExpr
 
+case class ConcatenatedStringLit(elements : List[Opt[String]]) extends PrimaryExpr
+
 sealed abstract class PostfixSuffix extends AST
 
 case class SimplePostfixSuffix(t: String) extends PostfixSuffix

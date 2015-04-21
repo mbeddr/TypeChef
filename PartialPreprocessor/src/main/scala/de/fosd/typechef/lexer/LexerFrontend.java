@@ -20,7 +20,6 @@ import de.fosd.typechef.featureexpr.FeatureModel;
 import de.fosd.typechef.lexer.macrotable.MacroFilter;
 import de.fosd.typechef.lexer.options.ILexerOptions;
 import de.fosd.typechef.lexer.options.PartialConfiguration;
-import de.fosd.typechef.xtclexer.XtcPreprocessor;
 
 import java.io.*;
 import java.util.*;
@@ -129,8 +128,6 @@ public class LexerFrontend {
         return run(new VALexer.LexerFactory() {
             @Override
             public VALexer create(FeatureModel featureModel) {
-                if (options.useXtcLexer())
-                    return new XtcPreprocessor(options.getMacroFilter(), featureModel);
                 return new Preprocessor(options.getMacroFilter(), featureModel, codeChecker, identifier);
             }
         }, options, returnTokenList);

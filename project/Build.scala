@@ -179,8 +179,15 @@ object TypeChef extends Build {
         ctypechecker,
         javaparser,
         crewrite,
-        frontend
+        frontend,
+        partialCodeChecker
         )
+
+    lazy val partialCodeChecker = Project(
+        "PartialCodeChecker",
+        file("PartialCodeChecker"),
+        settings = buildSettings
+    )
 
     lazy val featureexpr = Project(
         "FeatureExprLib",
@@ -210,7 +217,7 @@ object TypeChef extends Build {
         "PartialPreprocessor",
         file("PartialPreprocessor"),
         settings = buildSettings
-    ) dependsOn(featureexpr, conditionallib, errorlib)
+    ) dependsOn(featureexpr, conditionallib, errorlib, partialCodeChecker)
 
     lazy val cparser = Project(
         "CParser",
@@ -218,7 +225,7 @@ object TypeChef extends Build {
         settings = buildSettings ++
             Seq(parallelExecution in Test := false,
                 libraryDependencies <+= scalaVersion(kiamaDependency(_)))
-    ) dependsOn(featureexpr, jcpp, parserexp, conditionallib, errorlib)
+    ) dependsOn(featureexpr, jcpp, parserexp, conditionallib, errorlib, partialCodeChecker)
 
 
     lazy val frontend = Project(

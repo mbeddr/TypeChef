@@ -170,6 +170,7 @@ object TypeChef extends Build {
         file("."),
         settings = buildSettings
     ) aggregate(
+        partialCodeChecker,
         featureexpr,
         conditionallib,
         parserexp,
@@ -179,8 +180,7 @@ object TypeChef extends Build {
         ctypechecker,
         javaparser,
         crewrite,
-        frontend,
-        partialCodeChecker
+        frontend
         )
 
     lazy val partialCodeChecker = Project(

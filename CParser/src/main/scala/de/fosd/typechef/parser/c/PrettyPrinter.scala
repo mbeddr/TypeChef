@@ -479,7 +479,7 @@ object PrettyPrinter {
             case BuiltinVaArgs(expr: Expr, typeName: TypeName) => "__builtin_va_arg(" ~ expr ~ "," ~~ typeName ~ ")"
             case CompoundStatementExpr(compoundStatement: CompoundStatement) => "(" ~ compoundStatement ~ ")"
             case Pragma(command: StringLit) => "_Pragma(" ~ command ~ ")"
-
+            case ParensExpr(inner:Expr) => "("~inner~")"
             case e => assert(assertion = false, message = "match not exhaustive: " + e); ""
         }
     }

@@ -44,16 +44,22 @@ import static de.fosd.typechef.lexer.Token.*;
 
 /**
  * modified C preprocessor with the following changes
- *
+ * <p/>
  * * ifdef never hides code (except for include guards
- *   which are recognized with some mechanism)
- *
+ * which are recognized with some mechanism)
+ * <p/>
  * * a history of all defines is remembered and associated
- *   with features. multiple defines for the same macro
- *   are possible.
- *
+ * with features. multiple defines for the same macro
+ * are possible.
+ * <p/>
  * * when applying a macro all alternative expansions are considered
- *
+ * <p/>
+ * <p/>
+ * when to expand macros:
+ * *	always expand macros in pure text, do not reexpand expanded tokens
+ * * 	expand macros after #include
+ * * 	expand macros in expression of #if and #elif, but not in defined(X)
+ * * 	no expansion in other # directives, never expand the identifier after #
  */
 
 /**
@@ -1432,7 +1438,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         if (isFunction) {
             boolean first = true;
             key.append("(");
-            for (String arg: args) {
+            for (String arg : args) {
                 if (first) {
                     first = false;
                 } else {
@@ -1737,9 +1743,17 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
             include(sourceManager.getSource().getPath(), tok.getLine(), name,
                     quoted, next);
 
-            // @mbeddr if the current source's parent is null, then this is the source used for the
-            // original file input, otherwise this is transitively reached from other included headers
-            if (currentSource.getParent() == null) {
+            // @mbeddr
+            // add an include token iff
+            // (1) the currentSource's parent is null, because this means we have arrived here by parsing the original file
+            // (2) we have transitively reached the header file from the soure file in the same translation unit
+            Source parentSource = currentSource.getParent();
+
+            boolean c1 = parentSource == null;
+            boolean c2 = (currentSource instanceof LexerSource) && (parentSource != null && parentSource instanceof LexerSource) &&
+                    ((LexerSource) parentSource).getIdentifier().sameUnit(currentSource.getIdentifier());
+
+            if (c1 || c2) {
                 return new SimpleToken(Token.INCLUDE, 1, 0, name, currentSource);
             } else {
                 /*
@@ -1878,8 +1892,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         if (is_error) {
             // @mbeddr turn off #error error handling
             // error(pptok, buf.toString());
-        }
-        else {
+        } else {
             warning(pptok, buf.toString());
         }
 

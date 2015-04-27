@@ -295,9 +295,11 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
             case iel ~ expr => Initializer(iel, expr)
         }
 
-    def declarator: MultiParser[Declarator] =
+    def declarator : MultiParser[Declarator] = declarator(false)
+
+    def declarator(parameter : Boolean): MultiParser[Declarator] =
     //XXX: why opt(attributeDecl) rather than rep?
-        (pointerGroup0 ~~ (ID | (LPAREN ~~> repOpt(attributeDecl) ~~ declarator <~ RPAREN)) ~
+        (pointerGroup0 ~~ (ID | ((if (parameter) NOMATCH else LPAREN) ~~> repOpt(attributeDecl) ~~ declarator(parameter) <~ RPAREN)) ~
             repOpt(
                 (LPAREN ~~> ((parameterDeclList ^^ {
                     DeclParameterDeclList(_)
@@ -312,24 +314,22 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
                     | (LBRACKET ~~> ((opt(staticSpecifier) ~ repOpt(typeQualifier) ~ opt(staticSpecifier)) ~> opt(constExpr)) <~ RBRACKET ^^ {
                     DeclArrayAccess(_)
                 }))) ^^ {
-            case pointers ~ (id: Id) ~ ext => AtomicNamedDeclarator(pointers, id, ext);
-            case pointers ~ (attr ~ (decl: Declarator)) ~ ext =>
+            case pointers ~ (id: Id) ~ ext => {
+                AtomicNamedDeclarator(pointers, id, ext)
+            }
+            case pointers ~ (attr ~ (decl: Declarator)) ~ ext => {
                 NestedNamedDeclarator(pointers, decl, ext, attr.asInstanceOf[List[Opt[AttributeSpecifier]]])
+            }
         }
-
+//a(b(c...
     def parameterDeclList: MultiParser[List[Opt[ParameterDeclaration]]] =
         rep1Sep(parameterDeclaration, COMMA | SEMI) ~ opt((COMMA | SEMI) ~> VARARGS ^^^ VarArgs()) ^^ {
             case l ~ Some(v) => l ++ List(o(v));
             case l ~ None => l
         }
-    //    def parameterTypeList: MultiParser[List[Opt[ParameterDeclaration]]] =
-    //        repSepOptIntern(false, parameterDeclaration, COMMA | SEMI).sep_~(opt(VARARGS)) ^^ {
-    //            case l ~ Some(v) => l ++ List(o(VarArgs())); case l ~ None => l
-    //        }
-    //    //consumes trailing separators
 
     def parameterDeclaration: MultiParser[ParameterDeclaration] =
-        declSpecifiers ~ opt(declarator | nonemptyAbstractDeclarator) ~ repOpt(attributeDecl) ^^ {
+        declSpecifiers ~ opt(declarator(true) | nonemptyAbstractDeclarator) ~ repOpt(attributeDecl) ^^ {
             case s ~ Some(d: Declarator) ~ attr => ParameterDeclarationD(s, d, attr)
             case s ~ Some(d: AbstractDeclarator) ~ attr => ParameterDeclarationAD(s, d, attr)
             case s ~ None ~ attr => PlainParameterDeclaration(s, attr)
@@ -362,7 +362,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     //    private def compoundStatementCond: MultiParser[Conditional[CompoundStatement]] = compoundStatement ^^ {One(_)}
 
     def statementList: MultiParser[List[Opt[Statement]]] =
-        repOpt(compoundDeclaration |  statement, "statement") ^^ ConditionalLib.flatten
+        repOpt(compoundDeclaration | statement, "statement") ^^ ConditionalLib.flatten
 
     def statement: MultiParser[Conditional[Statement]] = (SEMI ^^ {
         _ => EmptyStatement()
@@ -727,6 +727,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     def VARARGS = textToken("...")
     def DOT = textToken(".")
     def LPAREN = textToken('(')
+    def NOMATCH = textToken("0123456789")
     def RPAREN = textToken(')')
     def LBRACKET = textToken('[')
     def RBRACKET = textToken(']')

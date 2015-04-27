@@ -6,7 +6,7 @@ package de.fosd.typechef.parser.c;
  */
 public class PrettyPrinterAccess {
 
-    public static String printAst(AST node) {
+    public static String print(AST node) {
         return PrettyPrinter.print(node);
     }
 }

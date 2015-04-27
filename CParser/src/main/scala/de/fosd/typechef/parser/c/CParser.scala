@@ -295,11 +295,9 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
             case iel ~ expr => Initializer(iel, expr)
         }
 
-    def declarator : MultiParser[Declarator] = declarator(false)
-
-    def declarator(parameter : Boolean): MultiParser[Declarator] =
+    def declarator: MultiParser[Declarator] =
     //XXX: why opt(attributeDecl) rather than rep?
-        (pointerGroup0 ~~ (ID | ((if (parameter) NOMATCH else LPAREN) ~~> repOpt(attributeDecl) ~~ declarator(parameter) <~ RPAREN)) ~
+        (pointerGroup0 ~~ (ID | (LPAREN ~~> repOpt(attributeDecl) ~~ declarator <~ RPAREN)) ~
             repOpt(
                 (LPAREN ~~> ((parameterDeclList ^^ {
                     DeclParameterDeclList(_)
@@ -329,7 +327,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         }
 
     def parameterDeclaration: MultiParser[ParameterDeclaration] =
-        declSpecifiers ~ opt(declarator(true) | nonemptyAbstractDeclarator) ~ repOpt(attributeDecl) ^^ {
+        declSpecifiers ~ opt(declarator | nonemptyAbstractDeclarator) ~ repOpt(attributeDecl) ^^ {
             case s ~ Some(d: Declarator) ~ attr => ParameterDeclarationD(s, d, attr)
             case s ~ Some(d: AbstractDeclarator) ~ attr => ParameterDeclarationAD(s, d, attr)
             case s ~ None ~ attr => PlainParameterDeclaration(s, attr)
@@ -727,7 +725,6 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     def VARARGS = textToken("...")
     def DOT = textToken(".")
     def LPAREN = textToken('(')
-    def NOMATCH = textToken("0123456789")
     def RPAREN = textToken(')')
     def LBRACKET = textToken('[')
     def RBRACKET = textToken(']')

@@ -653,7 +653,7 @@ trait CTypeSystem extends CTypes with CEnv with CDeclTyping with CTypeEnv with C
                 if ((expr andNot declExpr).isSatisfiable())
                     reportTypeError(expr andNot declExpr, "Type " + name.name + " not defined. (defined only in context " + declExpr + ")", specifier, Severity.TypeLookupError)
 
-            case EnumSpecifier(Some(id), None) =>
+            case EnumSpecifier(Some(id), None, _) =>
                 addEnumUse(id, env, expr) //CDeclUse: Add enum usage to usages.
             // Not checking enums anymore, since they are only enforced by compilers in few cases (those cases are hard to distinguish, gcc is not very close to the standard here)
             //                val declExpr = env.enumEnv.getOrElse(id.name, FeatureExprFactory.False)

@@ -418,8 +418,8 @@ object PrettyPrinter {
             case ParameterDeclarationD(specifiers, decl, attr) => spaceSep(specifiers) ~~ decl ~~ sep(attr, _ ~~ _)
             case ParameterDeclarationAD(specifiers, decl, attr) => spaceSep(specifiers) ~~ decl ~~ sep(attr, _ ~~ _)
             case VarArgs() => "..."
-            case EnumSpecifier(id, Some(enums)) => "enum" ~~ opt(id) ~~ block(sepVaware(enums, ",", prettyOpt, line))
-            case EnumSpecifier(Some(id), None) => "enum" ~~ id
+            case EnumSpecifier(id, Some(enums), _) => "enum" ~~ opt(id) ~~ block(sepVaware(enums, ",", prettyOpt, line))
+            case EnumSpecifier(Some(id), None, _) => "enum" ~~ id
             case Enumerator(id, Some(init)) => id ~~ "=" ~~ init
             case Enumerator(id, None) => id
             case StructOrUnionSpecifier(isUnion, id, enumerators, attr1, attr2) =>

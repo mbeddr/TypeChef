@@ -72,7 +72,7 @@ sealed abstract class Expr extends AST with CFGStmt
 
 sealed abstract class PrimaryExpr extends Expr
 
-case class Id(name: String, token : CToken = null) extends PrimaryExpr
+case class Id(name: String, fromHeader : Boolean = false) extends PrimaryExpr
 
 case class Constant(value: String) extends PrimaryExpr
 
@@ -334,7 +334,7 @@ trait OldParameterDeclaration extends AST
 
 case class VarArgs() extends ParameterDeclaration(List()) with OldParameterDeclaration
 
-case class EnumSpecifier(id: Option[Id], enumerators: Option[List[Opt[Enumerator]]]) extends TypeSpecifier
+case class EnumSpecifier(id: Option[Id], enumerators: Option[List[Opt[Enumerator]]], fromHeader : Boolean) extends TypeSpecifier
 
 case class Enumerator(id: Id, assignment: Option[Expr]) extends AST
 

@@ -178,7 +178,7 @@ trait CTypeEnv extends CTypes with CTypeSystemInterface with CEnv with CDeclTypi
                 val specFeature = opt.condition
                 val typeSpec = opt.entry
                 typeSpec match {
-                    case EnumSpecifier(Some(i@Id(name, _)), l) if (isHeadless || !l.isEmpty) =>
+                    case EnumSpecifier(Some(i@Id(name, _)), l, _) if (isHeadless || !l.isEmpty) =>
                         addDefinition(i, env, specFeature and featureExpr)
                         var ft = FeatureExprFactory.False
                         b.getOrElse(name, FeatureExprFactory.False) match {

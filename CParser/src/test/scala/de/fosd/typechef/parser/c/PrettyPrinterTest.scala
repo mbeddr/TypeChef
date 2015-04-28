@@ -19,7 +19,7 @@ class PrettyPrinterTest extends TestHelper {
         //
         //        println(PrettyPrinter.print(sp,ast))
         val f = FeatureExprFactory.True
-        val doc = prettyPrint(EnumSpecifier(Some(Id("e")), Some(List(Opt(f, Enumerator(Id("test"), None)), Opt(f, Enumerator(Id("test2"), None))))))
+        val doc = prettyPrint(EnumSpecifier(Some(Id("e")), Some(List(Opt(f, Enumerator(Id("test"), None)), Opt(f, Enumerator(Id("test2"), None)))), false))
 
         println(layout(doc))
     }

@@ -187,14 +187,14 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         tokenWithContext("type",
             (token, featureContext, typeContext) =>
                 isIdentifier(token) /*&& (predefinedTypedefs.contains(token.getText) || typeContext.knowsType(token.getText, featureContext, featureModel))*/) ^^ {
-            t => Id(t.getText, t)
+            t => Id(t.getText, t.isHeaderElement)
         } ^^ {
             TypeDefTypeSpecifier(_)
         }
     def notypedefName =
         tokenWithContext("notype",
             (token, featureContext, typeContext) => isIdentifier(token) && !predefinedTypedefs.contains(token.getText) && !typeContext.knowsType(token.getText, featureContext, featureModel)) ^^ {
-            t => Id(t.getText)
+            t => Id(t.getText, t.isHeaderElement)
         }
 
     def structOrUnionSpecifier: MultiParser[StructOrUnionSpecifier] =
@@ -243,13 +243,13 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     def enumSpecifier: MultiParser[EnumSpecifier] =
         textToken("enum") ~>
             ((ID ~~ LCURLY ~! (enumList ~ RCURLY) ^^ {
-                case id ~ _ ~ (l ~ _) => EnumSpecifier(Some(id), Some(l))
+                case id ~ lc ~ (l ~ _) => EnumSpecifier(Some(id), Some(l), lc.isHeaderElement)
             })
                 | (LCURLY ~ enumList ~ RCURLY ^^ {
-                case _ ~ l ~ _ => EnumSpecifier(None, Some(l))
+                case lc ~ l ~ _ => EnumSpecifier(None, Some(l), lc.isHeaderElement)
             })
                 | (ID ^^ {
-                case i => EnumSpecifier(Some(i), None)
+                case i => EnumSpecifier(Some(i), None, false)
             }))
 
     def enumList: MultiParser[List[Opt[Enumerator]]] =
@@ -628,9 +628,10 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
             | (textToken("__builtin_va_arg") ~ LPAREN ~ assignExpr ~ COMMA ~ typeName ~ RPAREN ^^ {
             case _ ~ _ ~ tn ~ _ ~ tn2 ~ _ => BuiltinVaArgs(tn, tn2)
         })
+            | concat_id
             | ID
             | numConst
-            | concatenatedStringLit
+            | concat_notid
             | (LPAREN ~> ((compoundStatement ^^ {
             CompoundStatementExpr(_)
         }) | (expr ^^ {ParensExpr(_)})) <~ RPAREN)
@@ -643,7 +644,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
 
     def ID: MultiParser[Id] = token("id", isIdentifier(_)) ^^ {
         t => {
-            Id(t.getText, t)
+            Id(t.getText, t.isHeaderElement)
         }
     }
 
@@ -655,7 +656,15 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
             (list: List[Opt[AbstractToken]]) => StringLit(list.map(o => Opt(o.condition, o.entry.getText)))
         })
 
-    def concatenatedStringLit : MultiParser[ConcatenatedStringLit] = {
+    def concat_id : MultiParser[ConcatenatedStringLit] = {
+        token("element", t => isIdentifier(t)) ~~ rep1(token("element", t => t.isString || isIdentifier(t))) ^^ {
+            case head ~ tail => {
+                ConcatenatedStringLit(Opt(FeatureExprFactory.True, head.getText)::tail.map(o => Opt(o.condition, o.entry.getText)))
+            }
+        }
+    }
+
+    def concat_notid : MultiParser[ConcatenatedStringLit] = {
         rep1(token("element", t => t.isString || isIdentifier(t))) ^^ {
             (list: List[Opt[AbstractToken]]) => ConcatenatedStringLit(list.map(o => Opt(o.condition, o.entry.getText)))
         }

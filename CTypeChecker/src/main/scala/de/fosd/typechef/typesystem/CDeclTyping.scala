@@ -122,7 +122,7 @@ trait CDeclTyping extends CTypes with CEnv with CTypeSystemInterface with CDeclU
                         One(reportTypeError(f, "type " + typedefname + " not defined (shadowed by variable with type " + t + ")", e).toCType)
                 })
             }
-            case EnumSpecifier(_, _) =>
+            case EnumSpecifier(_, _, _) =>
                 //according to tests with GCC, this should be unsigned int (see test "enum type is unsigned int" in TypeSystemTest)
                 types = types :+ One(CUnsigned(CInt()).toCType) //TODO check that enum name is actually defined (not urgent, there is not much checking possible for enums anyway)
             case TypeOfSpecifierT(typename) => types = types :+ getTypenameType(typename, featureExpr, env)
@@ -300,7 +300,7 @@ trait CDeclTyping extends CTypes with CEnv with CTypeSystemInterface with CDeclU
         var localEnv = env
         var result = List[(String, FeatureExpr, AST, Conditional[CType], DeclarationKind, Conditional[Linkage])]()
         for (Opt(f, spec) <- specs) spec match {
-            case EnumSpecifier(optId, Some(enums)) =>
+            case EnumSpecifier(optId, Some(enums), _) =>
                 for (Opt(f2, enum) <- enums) {
                     enum.assignment.map(checkEnumInitializer(_, f and f2 and featureExpr, localEnv))
                     addDefinition(enum.id, env, f and f2 and featureExpr) // CDeclUse: Add enum member Ids to Declarations
@@ -308,7 +308,7 @@ trait CDeclTyping extends CTypes with CEnv with CTypeSystemInterface with CDeclU
                     result = (enum.id.name, featureExpr and f and f2, enum, One(CSigned(CInt()).toCType), KEnumVar, One(NoLinkage)) :: result
                 }
             //recurse into structs
-            case EnumSpecifier(Some(i: Id), None) =>
+            case EnumSpecifier(Some(i: Id), None, _) =>
                 addEnumUse(i, env, featureExpr) // CDeclUse: Add enum usage to usages
             case StructOrUnionSpecifier(_, _, fields, _, _) =>
                 for (Opt(f2, structDeclaration) <- fields.getOrElse(Nil))

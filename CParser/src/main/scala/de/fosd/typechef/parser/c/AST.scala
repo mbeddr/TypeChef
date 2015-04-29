@@ -177,28 +177,28 @@ sealed abstract class Specifier() extends AST
 
 sealed abstract class TypeSpecifier() extends Specifier()
 
-sealed abstract class PrimitiveTypeSpecifier() extends TypeSpecifier()
+sealed abstract class PrimitiveTypeSpecifier(fromHeader : Boolean = false) extends TypeSpecifier()
 
 sealed abstract class OtherSpecifier() extends Specifier()
 
 
 case class OtherPrimitiveTypeSpecifier(typeName: String) extends TypeSpecifier()
 
-case class VoidSpecifier() extends PrimitiveTypeSpecifier()
+case class VoidSpecifier(fromHeader : Boolean = false) extends PrimitiveTypeSpecifier(fromHeader)
 
-case class ShortSpecifier() extends PrimitiveTypeSpecifier()
+case class ShortSpecifier(fromHeader : Boolean = false) extends PrimitiveTypeSpecifier(fromHeader)
 
-case class IntSpecifier() extends PrimitiveTypeSpecifier()
+case class IntSpecifier(fromHeader : Boolean = false) extends PrimitiveTypeSpecifier(fromHeader)
 
-case class FloatSpecifier() extends PrimitiveTypeSpecifier()
+case class FloatSpecifier(fromHeader : Boolean = false) extends PrimitiveTypeSpecifier(fromHeader)
 
-case class DoubleSpecifier() extends PrimitiveTypeSpecifier()
+case class DoubleSpecifier(fromHeader : Boolean = false) extends PrimitiveTypeSpecifier(fromHeader)
 
-case class LongSpecifier() extends PrimitiveTypeSpecifier()
+case class LongSpecifier(fromHeader : Boolean = false) extends PrimitiveTypeSpecifier(fromHeader)
 
-case class Int128Specifier() extends PrimitiveTypeSpecifier()
+case class Int128Specifier(fromHeader : Boolean = false) extends PrimitiveTypeSpecifier(fromHeader)
 
-case class CharSpecifier() extends PrimitiveTypeSpecifier()
+case class CharSpecifier(fromHeader : Boolean = false) extends PrimitiveTypeSpecifier(fromHeader)
 
 case class TypedefSpecifier() extends Specifier()
 

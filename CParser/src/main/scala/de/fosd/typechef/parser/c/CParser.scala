@@ -156,14 +156,14 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
 
     def specifier(name: String) = textToken(name)
 
-    def typeSpecifier: MultiParser[TypeSpecifier] = ((textToken("void") ^^^ VoidSpecifier())
-        | (textToken("char") ^^^ CharSpecifier())
-        | (textToken("short") ^^^ ShortSpecifier())
-        | (textToken("int") ^^^ IntSpecifier())
-        | (textToken("long") ^^^ LongSpecifier())
-        | (textToken("__int128") ^^^ Int128Specifier())
-        | (textToken("float") ^^^ FloatSpecifier())
-        | (textToken("double") ^^^ DoubleSpecifier())
+    def typeSpecifier: MultiParser[TypeSpecifier] = ((textToken("void") ^^ {t => VoidSpecifier(t.isHeaderElement)})
+        | (textToken("char") ^^ {t =>  CharSpecifier(t.isHeaderElement)})
+        | (textToken("short") ^^ {t =>  ShortSpecifier(t.isHeaderElement)})
+        | (textToken("int") ^^ {t =>  IntSpecifier(t.isHeaderElement)})
+        | (textToken("long") ^^ {t =>  LongSpecifier(t.isHeaderElement)})
+        | (textToken("__int128") ^^ {t =>  Int128Specifier(t.isHeaderElement)})
+        | (textToken("float") ^^ {t =>  FloatSpecifier(t.isHeaderElement)})
+        | (textToken("double") ^^ {t =>  DoubleSpecifier(t.isHeaderElement)})
         | signed
         | (textToken("unsigned") ^^^ UnsignedSpecifier())
         | (textToken("_Bool")

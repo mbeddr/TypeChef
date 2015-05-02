@@ -191,6 +191,7 @@ public class LexerFrontend {
         LexerError crash = null;
         List<LexerToken> resultTokenList = new ArrayList<LexerToken>();
         List<LexerToken> attachableTokens = new ArrayList<LexerToken>();
+        LexerToken lastLanguageToken = null;
 
         int outputLine = 1;
         try {
@@ -203,11 +204,17 @@ public class LexerFrontend {
                     break;
 
                 if (returnTokenList && (!options.isReturnLanguageTokensOnly() || (tokenSelector != null && tokenSelector.isLanguageToken(tok)))) {
+                    lastLanguageToken = tok;
                     for (LexerToken token : attachableTokens) tok.attachToken(token);
                     attachableTokens.clear();
                     resultTokenList.add(tok);
                 } else if (tokenSelector != null && tokenSelector.isAttachableToken(tok)) {
-                    attachableTokens.add(tok);
+                    if (lastLanguageToken != null && lastLanguageToken.getLine() == tok.getLine()) {
+                        assert attachableTokens.isEmpty();
+                        lastLanguageToken.attachToken(tok);
+                    } else {
+                        attachableTokens.add(tok);
+                    }
                 }
 
                 if (output != null) {

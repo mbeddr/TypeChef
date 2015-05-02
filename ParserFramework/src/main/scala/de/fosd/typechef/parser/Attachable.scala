@@ -1,9 +1,9 @@
 package de.fosd.typechef.parser
 
 trait WithAttachables {
-    var tokens : List[Attachable] = null
+    var tokens : Iterable[Attachable] = null
 
-    def attach(tokens : List[Attachable]): Unit = {
+    def attach(tokens : Iterable[Attachable]): Unit = {
         this.tokens = tokens
     }
 }

@@ -3,6 +3,7 @@ package de.fosd.typechef.parser
 import de.fosd.typechef.error.Position
 import de.fosd.typechef.featureexpr.{FeatureExpr, FeatureExprFactory}
 
+import scala.collection.mutable
 import scala.math.min
 
 /**
@@ -24,14 +25,31 @@ class TokenReader[+T <: AbstractToken, U](val tokens: List[T], val offst: Int, v
       */
     def pos: Position = first.getPosition
 
-    def attachedTokens: List[Attachable] = first.getAttachedTokens
+    def attachedTokens(rightMost: Int, context: FeatureExpr, featureSolverCache: FeatureSolverCache): Iterable[Attachable] = {
+        val inRange = range(rightMost, context, featureSolverCache)
 
-    def blockId(rightMost: Int, context: FeatureExpr, featureSolverCache: FeatureSolverCache): String = {
-        val inRange = for {
+        if (inRange.isEmpty) {
+            List()
+        } else if (inRange.size == 1) {
+            inRange.head.getAttachedTokens
+        } else {
+            val result = mutable.ListBuffer[Attachable]()
+            result ++= inRange.head.getAttachedTokens
+            result ++= inRange.last.getAttachedTokens
+            result
+        }
+    }
+
+    def range(rightMost : Int, context: FeatureExpr, featureSolverCache: FeatureSolverCache) : List[T] = {
+        for {
             t <- tokens
             if t.getTokenId >= offset && t.getTokenId < rightMost
             if !featureSolverCache.mutuallyExclusive(context, t.getFeature)
         } yield t
+    }
+
+    def blockId(rightMost: Int, context: FeatureExpr, featureSolverCache: FeatureSolverCache): String = {
+        val inRange = range(rightMost, context, featureSolverCache)
 
         if (inRange.isEmpty) {
             return null

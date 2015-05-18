@@ -4,10 +4,13 @@ package de.fosd.typechef.parser.c
 import com.mbeddr.core.importer.PartialCodeChecker
 import de.fosd.typechef.VALexer.{FileSource, LexerInput, TextSource}
 import de.fosd.typechef.conditional.{Opt, _}
+import de.fosd.typechef.error.WithPosition
 import de.fosd.typechef.featureexpr.FeatureExprFactory.True
+import de.fosd.typechef.featureexpr.sat.False
 import de.fosd.typechef.featureexpr.{FeatureExpr, FeatureExprFactory, FeatureModel}
 import de.fosd.typechef.lexer.{LexerFrontend, SourceIdentifier, TokenSequenceToken}
 import de.fosd.typechef.parser.{~, _}
+import org.kiama.rewriting.Rewriter._
 
 import scala.collection.JavaConversions._
 
@@ -51,6 +54,72 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
             case _ => {
                 false
             }
+        }
+    }
+
+    def simplifyPresenceConditions[X <: AST](ast: X): X = {
+        simplifyPresenceConditions(ast, FeatureExprFactory.True)
+    }
+
+    def simplifyPresenceConditions[X <: AST](ast: X, ctx: FeatureExpr): X = {
+        val environment = de.fosd.typechef.parser.c.CASTEnv.createASTEnv(ast)
+
+        def traverseASTrecursive[Y <: Product](t: Y, currentContext: FeatureExpr): Y = {
+            val func = alltd(rule[Any] {
+                case l: List[_] =>
+                    l.flatMap(x => x match {
+                        case o@Opt(ft: FeatureExpr, entry) =>
+                            if (!ft.and(currentContext).isSatisfiable()) {
+                                // current context makes feature impossible
+                                // @mbeddr - still keep the node because the copyAdditionalInformation method won't work otherwise
+                                List(traverseASTrecursive(Opt(False, entry), False))
+                            } else {
+                                List(traverseASTrecursive(Opt(ft.simplify(currentContext), entry), ft.and(currentContext)))
+                            }
+                    })
+                case c@Choice(ft, thenBranch, elseBranch) =>
+                    val ctx = environment.featureExpr(c)
+                    val newChoiceFeature = ft.simplify(ctx)
+                    val result = Choice(newChoiceFeature,
+                        traverseASTrecursive(thenBranch, ctx.and(newChoiceFeature)),
+                        traverseASTrecursive(elseBranch, ctx.and(newChoiceFeature.not)))
+                    result
+            })
+
+            val result = func(t) match {
+                case None =>
+                    t
+                case Some(value) =>
+                    value.asInstanceOf[Y]
+            }
+
+            result
+        }
+
+        val result = traverseASTrecursive(ast, ctx)
+        copyAdditionalInformation(ast, result)
+        result
+    }
+
+    def copyAdditionalInformation(source: Product, target: Product) {
+        assert(source.getClass == target.getClass, "cloned tree should match exactly the original, typewise")
+        if (source.isInstanceOf[WithPosition]) {
+            target.asInstanceOf[WithPosition].range = source.asInstanceOf[WithPosition].range
+        }
+        if (source.isInstanceOf[WithBlockId]) {
+            target.asInstanceOf[WithBlockId].blockId = source.asInstanceOf[WithBlockId].blockId
+        }
+        if (source.isInstanceOf[WithAttachables]) {
+            target.asInstanceOf[WithAttachables].tokens = source.asInstanceOf[WithAttachables].tokens
+        }
+
+        assert(source.productArity == target.productArity, "cloned tree should match exactly the original")
+        for ((c1, c2) <- source.productIterator.zip(target.productIterator)) {
+            val cond1 = c1.getClass == c2.getClass
+            val cond2 = c1 == False || c2 == False
+            assert(cond1 || cond2, "cloned tree should match exactly the original, typewise")
+            if (c1.isInstanceOf[Product] && c2.isInstanceOf[Product])
+                copyAdditionalInformation(c1.asInstanceOf[Product], c2.asInstanceOf[Product])
         }
     }
 

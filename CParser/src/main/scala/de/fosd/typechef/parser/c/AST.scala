@@ -59,7 +59,10 @@ LocalLabelDeclaration -- label names
 
 //Expressions
 trait AST extends Product with Serializable with Cloneable with WithPosition with WithAttachables with WithBlockId {
-    override def clone(): AST.this.type = super.clone().asInstanceOf[AST.this.type]
+    override def clone(): AST.this.type = {
+        val result = super.clone().asInstanceOf[AST.this.type]
+        result
+    }
 }
 
 trait CFGStmt extends AST

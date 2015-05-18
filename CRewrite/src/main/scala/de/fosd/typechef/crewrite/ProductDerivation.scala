@@ -26,7 +26,7 @@ object ProductDerivation extends EnforceTreeHelper {
             case a: AST => a.clone()
         })
         val cast = prod(ast).get.asInstanceOf[T]
-        copyPositions(ast, cast)
+        copyAdditionalInformation(ast, cast)
         cast
     }
 }

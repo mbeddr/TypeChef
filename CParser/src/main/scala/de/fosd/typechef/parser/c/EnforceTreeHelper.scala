@@ -2,6 +2,7 @@ package de.fosd.typechef.parser.c
 
 import de.fosd.typechef.conditional.{One, Opt}
 import de.fosd.typechef.error.WithPosition
+import de.fosd.typechef.parser.{WithAttachables, WithBlockId}
 import org.kiama.rewriting.Rewriter._
 
 
@@ -17,16 +18,23 @@ trait EnforceTreeHelper {
     /**
      * unfortunately cloning loses position information, so we have to reassign it
      */
-    def copyPositions(source: Product, target: Product) {
+    def copyAdditionalInformation(source: Product, target: Product) {
         assert(source.getClass == target.getClass, "cloned tree should match exactly the original, typewise")
-        if (source.isInstanceOf[WithPosition])
+        if (source.isInstanceOf[WithPosition]) {
             target.asInstanceOf[WithPosition].range = source.asInstanceOf[WithPosition].range
+        }
+        if (source.isInstanceOf[WithBlockId]) {
+            target.asInstanceOf[WithBlockId].blockId = source.asInstanceOf[WithBlockId].blockId
+        }
+        if (source.isInstanceOf[WithAttachables]) {
+            target.asInstanceOf[WithAttachables].tokens = source.asInstanceOf[WithAttachables].tokens
+        }
 
         assert(source.productArity == target.productArity, "cloned tree should match exactly the original")
         for ((c1, c2) <- source.productIterator.zip(target.productIterator)) {
             assert(c1.getClass == c2.getClass, "cloned tree should match exactly the original, typewise")
             if (c1.isInstanceOf[Product] && c2.isInstanceOf[Product])
-                copyPositions(c1.asInstanceOf[Product], c2.asInstanceOf[Product])
+                copyAdditionalInformation(c1.asInstanceOf[Product], c2.asInstanceOf[Product])
         }
     }
 
@@ -48,7 +56,7 @@ trait EnforceTreeHelper {
             case n: AST => n.clone()
         })
         val cast = clone(ast).get.asInstanceOf[T]
-        copyPositions(ast, cast)
+        copyAdditionalInformation(ast, cast)
         cast
     }
 
@@ -66,7 +74,7 @@ trait EnforceTreeHelper {
         })
 
         val cast = removedead(ast).get.asInstanceOf[T]
-        copyPositions(ast, cast)
+        copyAdditionalInformation(ast, cast)
         cast
     }
 
@@ -85,7 +93,7 @@ trait EnforceTreeHelper {
         })
 
         val cast = rewrite(ast).get.asInstanceOf[T]
-        copyPositions(ast, cast)
+        copyAdditionalInformation(ast, cast)
         cast
     }
 

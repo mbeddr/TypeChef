@@ -69,7 +69,7 @@ abstract class MultiFeatureParser(val featureModel: FeatureModel = null, debugOu
 
         def apply(in: Input, feature: FeatureExpr): MultiParseResult[U] = {
             val result = thisParser(in, feature).map(f)
-            result.mapfr(FeatureExprFactory.True, (f, r) => r match {
+            result.mapfr(feature, (f, r) => r match {
                 case Success(t, restIn) =>
                     val containedTokens: TokenReader[Elem, TypeContext] = in.skipHidden(f, featureSolverCache)
                     val range = if (restIn.tokens.isEmpty) Int.MaxValue else restIn.tokens.head.getTokenId
@@ -84,6 +84,7 @@ abstract class MultiFeatureParser(val featureModel: FeatureModel = null, debugOu
                     if (t.isInstanceOf[WithBlockId]) {
                         val blockId = containedTokens.blockId(range, f, featureSolverCache)
                         t.asInstanceOf[WithBlockId].setBlockId(blockId)
+                        val copy = containedTokens.blockId(range, f, featureSolverCache)
                     }
                     null
                 case _ => null

@@ -76,6 +76,37 @@ sealed abstract class SATFeatureExpr extends FeatureExpr {
     def and(that: FeatureExpr): FeatureExpr = FExprBuilder.and(this, asSATFeatureExpr(that))
     def notS(): SATFeatureExpr = FExprBuilder.not(this)
     def not(): SATFeatureExpr = notS()
+    def common(that : SATFeatureExpr) : SATFeatureExpr = {
+        val thisCNF = this.toCNF()
+        val thatCNF = that.toCNF()
+
+        if (thisCNF == False || thatCNF == False) {
+            False
+        } else if (thisCNF == True || thatCNF == True) {
+            True
+        } else {
+            val thisClauses = thisCNF match {
+                case and : And => and.clauses
+                case _ => Set(thisCNF)
+            }
+            val thatClauses = thatCNF match {
+                case and : And => and.clauses
+                case _ => Set(thatCNF)
+            }
+
+            val commonClauses =
+                for {
+                    c <- thisClauses
+                    if thatClauses.contains(c)
+                } yield c
+
+            if (commonClauses.isEmpty) {
+                True
+            } else {
+                new And(commonClauses)
+            }
+        }
+    }
 
     // we dont have a good implementation in SAT, and a satisfies the contract
     def simplify(b:FeatureExpr): SATFeatureExpr = this

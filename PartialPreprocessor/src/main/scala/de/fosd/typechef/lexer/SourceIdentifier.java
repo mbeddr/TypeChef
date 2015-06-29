@@ -28,14 +28,56 @@ public class SourceIdentifier {
         return file;
     }
 
+    public String getPath() {
+        if (this.file == null) {
+            return null;
+        } else {
+            return this.file.getPath();
+        }
+    }
+
     public String getFileExtension() {
         return fileExtension;
+    }
+
+    public SourceIdentifier resolve(String path) {
+        if (path.startsWith(File.separator)) {
+            return new SourceIdentifier(path);
+        } else {
+            String[] tokens = path.split(File.separator);
+
+            // when resolving a path start from the parent
+            SourceIdentifier result = this.getParent();
+
+            for (String token : tokens) {
+                if (token.equals("..")) {
+                    result = result.getParent();
+                } else if (token.equals(".")) {
+                    // do nothing
+                } else {
+                    result = result.getChild(token);
+                }
+            }
+
+            return result;
+        }
+    }
+
+    public boolean contains(SourceIdentifier that) {
+        SourceIdentifier current = that;
+        while (current != BASE_SOURCE) {
+            if (this.equals(current)) {
+                return true;
+            }
+            current = current.getParent();
+        }
+        return false;
     }
 
     public SourceIdentifier getChild(String name) {
         if (this.file != null && this.file.isDirectory()) {
             for (File file : this.file.listFiles()) {
-                if (file.isFile() && file.getName().equals(name)) {
+                if (file.getName().equals(name)) {
                     return new SourceIdentifier(file);
                 }
             }

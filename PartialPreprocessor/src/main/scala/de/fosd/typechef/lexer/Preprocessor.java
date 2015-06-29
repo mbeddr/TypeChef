@@ -60,6 +60,12 @@ import static de.fosd.typechef.lexer.Token.*;
  * * 	expand macros after #include
  * * 	expand macros in expression of #if and #elif, but not in defined(X)
  * * 	no expansion in other # directives, never expand the identifier after #
+ * <p/>
+ * when to expand macros:
+ * *	always expand macros in pure text, do not reexpand expanded tokens
+ * * 	expand macros after #include
+ * * 	expand macros in expression of #if and #elif, but not in defined(X)
+ * * 	no expansion in other # directives, never expand the identifier after #
  */
 
 /**
@@ -916,6 +922,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                         macro_expandAlternativesInline(macroName, macroExpansions,
                                 args, origInvokeTok, origArgTokens, commonCondition);
                     else
+                        // @mbeddr
                         macro_expandAlternatives(macroName, macroExpansions, args,
                                 origInvokeTok, origArgTokens, commonCondition);
                 }
@@ -1614,28 +1621,27 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         // The parent path can be null when using --include. Should then use the
         // current directory. XXX: but later we take the parent of this! Why
         // doesn't it break???
-        if (parent == null)
+        if (parent == null) {
             parent = ".";
-        VirtualFile pfile = filesystem.getFile(parent);
-        VirtualFile pdir = pfile.getParentFile();
-        String parentDir = pdir.getPath();
+        }
 
         if (quoted && !next) {
-            VirtualFile ifile = pdir.getChildFile(name);
-            if (include(ifile))
-                return;
-            if (include(quoteincludepath, name))
-                return;
+            SourceIdentifier id = new SourceIdentifier(parent).resolve(name);
+            for (String path : getQuoteIncludePath()) {
+                if (new SourceIdentifier(path).contains(id)) {
+                    include(filesystem.getFile(id.getPath()));
+                }
+            }
         }
 
-        List<String> path = getSystemIncludePath();
-        if (next) {
-            int idx = path.indexOf(parentDir);
-            if (idx != -1)
-                path = path.subList(idx + 1, path.size());
-        }
-        if (include(path, name))
-            return;
+//        paths = getSystemIncludePath();
+//        if (next) {
+//            int idx = paths.indexOf(parentDir);
+//            if (idx != -1)
+//                paths = paths.subList(idx + 1, paths.size());
+//        }
+//        if (include(paths, name))
+//            return;
 
         // Error reporting is turned off, because the mbeddr importer does not
         // need the additional headers to be included

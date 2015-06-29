@@ -429,24 +429,32 @@ public class LexerFrontend {
             this.featureModel = featureModel;
         }
 
+        private Map<String, String> definedMacros = new HashMap<String, String>();
+
         @Override
         public Map<String, String> getDefinedMacros() {
-            return Collections.emptyMap();
+            return definedMacros;
         }
+
+        private Set<String> undefMacros = new HashSet<String>();
 
         @Override
         public Set<String> getUndefMacros() {
-            return Collections.emptySet();
+            return undefMacros;
         }
+
+        private List<String> includePaths = new ArrayList<String>();
 
         @Override
         public List<String> getIncludePaths() {
-            return Collections.emptyList();
+            return includePaths;
         }
+
+        private List<String> quoteIncludePaths = new ArrayList<String>();
 
         @Override
         public List<String> getQuoteIncludePath() {
-            return Collections.emptyList();
+            return quoteIncludePaths;
         }
 
         @Override

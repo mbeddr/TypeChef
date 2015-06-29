@@ -178,7 +178,7 @@ class State {
     }
 
     public void processElIf() {
-        this.stateBranch = "elseif";
+        this.stateBranch = "elif";
         assert !localFeatures.isEmpty();
         localFeatures.set(localFeatures.size() - 1, localFeatures.get(
                 localFeatures.size() - 1).not());

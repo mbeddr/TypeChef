@@ -1463,8 +1463,17 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         tokens.add(keyToken);
         SimpleToken valueToken = new SimpleToken(Token.DEFINE_VALUE, value, currentSource);
         valueToken.setFeature(tok.getFeature());
+
+        // attach comment tokens, if any
+        for (Token token : m.getTokens()) {
+            if (token.getType() == Token.CCOMMENT || token.getType() == Token.CPPCOMMENT) {
+                valueToken.attachToken(token);
+            }
+        }
+
         tokens.add(valueToken);
 
+        // @mbeddr
         if (!(codeChecker != null && codeChecker.canParseExpression(m.getText()))) {
             logger.info("#define " + name + " " + m);
             addMacro(name, state.getFullPresenceCondition(), m);
@@ -1496,7 +1505,15 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                     break EXPANSION;
 
                 case CCOMMENT:
+                    m.addToken(new SimpleToken(CCOMMENT, tok.getLine(), tok
+                            .getColumn(), tok.getText(), null,
+                            null, label));
+                    break;
                 case CPPCOMMENT:
+                    m.addToken(new SimpleToken(CCOMMENT, tok.getLine(), tok
+                            .getColumn(), tok.getText(), null,
+                            null, label));
+                    break;
                     /* XXX This is where we implement GNU's cpp -CC. */
                     // break;
                 case WHITESPACE:
@@ -2802,6 +2819,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
             tok.setFeature(featureExpression);
             if (getFeature(Feature.DEBUG_VERBOSE))
                 System.err.println("pp: Returning " + tok);
+            System.out.println(tok);
             return tok;
         } catch (de.fosd.typechef.featureexpr.FeatureException e) {
 //            error(0,0,e.getMessage(),lastPC);

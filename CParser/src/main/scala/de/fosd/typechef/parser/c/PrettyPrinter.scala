@@ -350,14 +350,14 @@ object PrettyPrinter {
                 (if (isAuto) "auto" ~~ Empty else Empty) ~ sep(specifiers, _ ~~ _) ~~ declarator ~~ sep(parameters, _ ~~ _) ~~ stmt
             case LocalLabelDeclaration(ids) => "__label__" ~~ sep(ids, _ ~ "," ~~ _) ~ ";"
             case OtherPrimitiveTypeSpecifier(typeName: String) => typeName
-            case VoidSpecifier() => "void"
-            case ShortSpecifier() => "short"
-            case IntSpecifier() => "int"
-            case FloatSpecifier() => "float"
-            case LongSpecifier() => "long"
-            case Int128Specifier() => "__int128"
-            case CharSpecifier() => "char"
-            case DoubleSpecifier() => "double"
+            case VoidSpecifier(_) => "void"
+            case ShortSpecifier(_) => "short"
+            case IntSpecifier(_) => "int"
+            case FloatSpecifier(_) => "float"
+            case LongSpecifier(_) => "long"
+            case Int128Specifier(_) => "__int128"
+            case CharSpecifier(_) => "char"
+            case DoubleSpecifier(_) => "double"
 
             case TypedefSpecifier() => "typedef"
             case TypeDefTypeSpecifier(name: Id) => name

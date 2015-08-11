@@ -1,6 +1,9 @@
 package de.fosd.typechef.lexer;
 
+import de.fosd.typechef.LexerToken;
 import de.fosd.typechef.featureexpr.FeatureExpr;
+import scala.collection.*;
+import scala.collection.mutable.ListBuffer;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -36,6 +39,17 @@ public class TokenSequenceToken extends Token {
         this.source = source;
         this.internalTokens = tokenList;
         this.sourceName = (source == null ? null : source.getName());
+    }
+
+    @Override
+    public scala.collection.Iterable<LexerToken> getAttachedTokens() {
+        ListBuffer<LexerToken> tokens = new ListBuffer<LexerToken>();
+        for (Token token : internalTokens) {
+            tokens.$plus$plus$eq(token.getAttachedTokens());
+        }
+        // do not call getAttachedTokens here, because it will cause a stack overflow
+        tokens.$plus$plus$eq(scala.collection.JavaConversions.collectionAsScalaIterable(this.attachedTokens));
+        return tokens;
     }
 
     public List<Token> getTokens() {

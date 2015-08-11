@@ -236,7 +236,9 @@ public abstract class Source implements Iterable<Token>, Closeable {
                     /* This may contain one or more newlines. */
                     return tok;
                 case CCOMMENT:
+                    return tok;
                 case CPPCOMMENT:
+                    return tok;
                 case WHITESPACE:
                     break;
                 default:

@@ -140,22 +140,27 @@ public class MacroData {
       * is sufficient.
       */
     public String getText() {
+       return getText(true);
+    }
+
+    public String getText(boolean skipComment) {
         StringBuilder buf = new StringBuilder();
         boolean paste = false;
         for (int i = 0; i < tokens.size(); i++) {
             Token tok = tokens.get(i);
-            if (tok.getType() == Token.M_PASTE) {
-                assert paste == false : "Two sequential pastes.";
-                paste = true;
-                continue;
-            } else {
-                buf.append(tok.getText());
+            if (!(skipComment && (tok.getType() == Token.CCOMMENT || tok.getType() == Token.CPPCOMMENT))) {
+                if (tok.getType() == Token.M_PASTE) {
+                    assert paste == false : "Two sequential pastes.";
+                    paste = true;
+                    continue;
+                } else {
+                    buf.append(tok.getText());
+                }
+                if (paste) {
+                    buf.append(" #" + "# ");
+                    paste = false;
+                }
             }
-            if (paste) {
-                buf.append(" #" + "# ");
-                paste = false;
-            }
-            // buf.append(tokens.get(i));
         }
         return buf.toString();
     }

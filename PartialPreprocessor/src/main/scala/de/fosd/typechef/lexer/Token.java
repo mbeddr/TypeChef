@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import scala.collection.*;
+import scala.collection.Iterable;
 
 /**
  * A Preprocessor token.
@@ -45,6 +46,13 @@ public abstract class Token implements LexerToken {
 
     protected Token() {
         this.attachedTokens = new ArrayList<LexerToken>();
+    }
+
+    @Override
+    public void attachTokens(scala.collection.Iterable<LexerToken> tokens) {
+        for (LexerToken token : scala.collection.JavaConversions.asJavaIterable(tokens)) {
+            this.attachToken(token);
+        }
     }
 
     @Override

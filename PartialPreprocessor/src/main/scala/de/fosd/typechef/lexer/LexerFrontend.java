@@ -33,11 +33,17 @@ public class LexerFrontend {
     private PartialCodeChecker codeChecker;
     private SourceIdentifier identifier;
     private TokenSelector tokenSelector;
+    private LexerFrontendOptions lexerFrontendOptions;
 
     public LexerFrontend(PartialCodeChecker codeChecker, SourceIdentifier identifier, TokenSelector tokenSelector) {
+        this(codeChecker, identifier, tokenSelector, null);
+    }
+
+    public LexerFrontend(PartialCodeChecker codeChecker, SourceIdentifier identifier, TokenSelector tokenSelector, LexerFrontendOptions options) {
         this.codeChecker = codeChecker;
         this.identifier = identifier;
         this.tokenSelector = tokenSelector;
+        this.lexerFrontendOptions = options;
     }
 
     public LexerFrontend(PartialCodeChecker codeChecker, SourceIdentifier identifier) {
@@ -209,10 +215,15 @@ public class LexerFrontend {
                     attachableTokens.clear();
                     resultTokenList.add(tok);
                 } else if (tokenSelector != null && tokenSelector.isAttachableToken(tok)) {
-                    if (lastLanguageToken != null && lastLanguageToken.getLine() == tok.getLine()) {
+
+                    boolean c1 = lastLanguageToken != null;
+                    boolean c2 = c1 && lastLanguageToken.getLine() == tok.getLine();
+                    boolean c3 = c1 && lastLanguageToken.getSource() == tok.getSource();
+
+                    if (c1 && c2 && c3) {
                         assert attachableTokens.isEmpty();
                         lastLanguageToken.attachToken(tok);
-                    } else {
+                    } else if (lexerFrontendOptions != null && lexerFrontendOptions.includeComments()) {
                         attachableTokens.add(tok);
                     }
                 }
@@ -242,6 +253,10 @@ public class LexerFrontend {
             }
             crash = new LexerError(e.toString(), "", -1, -1);
         } finally {
+            if (lastLanguageToken != null) {
+                for (LexerToken token : attachableTokens) lastLanguageToken.attachToken(token);
+            }
+
             pp.debugPreprocessorDone();
             if (output != null)
                 output.flush();

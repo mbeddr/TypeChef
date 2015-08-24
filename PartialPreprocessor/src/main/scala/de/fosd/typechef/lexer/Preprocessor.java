@@ -1763,7 +1763,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
             name = buf.toString();
             processing_include = false;
             /* Do the inclusion. */
-            include(sourceManager.getSource().getPath(), tok.getLine(), name,
+            include(currentSource.getPath(), tok.getLine(), name,
                     quoted, next);
 
             // @mbeddr
@@ -2819,7 +2819,6 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
             tok.setFeature(featureExpression);
             if (getFeature(Feature.DEBUG_VERBOSE))
                 System.err.println("pp: Returning " + tok);
-            System.out.println(tok);
             return tok;
         } catch (de.fosd.typechef.featureexpr.FeatureException e) {
 //            error(0,0,e.getMessage(),lastPC);

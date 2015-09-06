@@ -152,8 +152,18 @@ public abstract class Token implements LexerToken {
     }
 
     @Override
+    public boolean isIdentifier() {
+        return getType() == Token.IDENTIFIER;
+    }
+
+    @Override
     public boolean isDefine() {
         return getType() == Token.DEFINE;
+    }
+
+    @Override
+    public boolean isPragma() {
+        return getType() == Token.PRAGMA;
     }
 
     /**
@@ -412,6 +422,10 @@ public abstract class Token implements LexerToken {
     public static final int DEFINE_KEY = 307;
 
     public static final int DEFINE_VALUE = 308;
+
+    public static final int PRAGMA = 309;
+
+    public static final int PRAGMA_CONTENT = 310;
 
     /**
      * The position-less space token.

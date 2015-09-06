@@ -148,7 +148,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         "const", "volatile", "restrict", "char", "short", "int", "long", "__int128", "float", "double",
         "signed", "unsigned", "_Bool", "struct", "union", "enum", "if", "while", "do",
         "for", "goto", "continue", "break", "return", "case", "default", "else", "switch",
-        "sizeof", "_Pragma", "__expectType", "__expectNotType", "__thread")
+        "sizeof", "_Pragma", "__expectType", "__expectNotType", "__thread", "void")
     val predefinedTypedefs = Set("__builtin_va_list", "__builtin_type")
 
     def translationUnit = unitContents ^^ {TranslationUnit(_)}
@@ -166,11 +166,11 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
             })
                 |
                 define |
+                pragma |
                 asm_expr |
                 declaration |
                 functionDef |
                 typelessDeclaration |
-                pragma |
                 expectType |
                 expectNotType |
                 include |
@@ -225,14 +225,14 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
 
     def specifier(name: String) = textToken(name)
 
-    def typeSpecifier: MultiParser[TypeSpecifier] = ((textToken("void") ^^ {t => VoidSpecifier(t.isHeaderElement)})
-        | (textToken("char") ^^ {t =>  CharSpecifier(t.isHeaderElement)})
-        | (textToken("short") ^^ {t =>  ShortSpecifier(t.isHeaderElement)})
-        | (textToken("int") ^^ {t =>  IntSpecifier(t.isHeaderElement)})
-        | (textToken("long") ^^ {t =>  LongSpecifier(t.isHeaderElement)})
-        | (textToken("__int128") ^^ {t =>  Int128Specifier(t.isHeaderElement)})
-        | (textToken("float") ^^ {t =>  FloatSpecifier(t.isHeaderElement)})
-        | (textToken("double") ^^ {t =>  DoubleSpecifier(t.isHeaderElement)})
+    def typeSpecifier: MultiParser[TypeSpecifier] = ((textToken("void") ^^ { t => VoidSpecifier(t.isHeaderElement) })
+        | (textToken("char") ^^ { t => CharSpecifier(t.isHeaderElement) })
+        | (textToken("short") ^^ { t => ShortSpecifier(t.isHeaderElement) })
+        | (textToken("int") ^^ { t => IntSpecifier(t.isHeaderElement) })
+        | (textToken("long") ^^ { t => LongSpecifier(t.isHeaderElement) })
+        | (textToken("__int128") ^^ { t => Int128Specifier(t.isHeaderElement) })
+        | (textToken("float") ^^ { t => FloatSpecifier(t.isHeaderElement) })
+        | (textToken("double") ^^ { t => DoubleSpecifier(t.isHeaderElement) })
         | signed
         | (textToken("unsigned") ^^^ UnsignedSpecifier())
         | (textToken("_Bool")
@@ -388,7 +388,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
                 NestedNamedDeclarator(pointers, decl, ext, attr.asInstanceOf[List[Opt[AttributeSpecifier]]])
             }
         }
-//a(b(c...
+    //a(b(c...
     def parameterDeclList: MultiParser[List[Opt[ParameterDeclaration]]] =
         rep1Sep(parameterDeclaration, COMMA | SEMI) ~ opt((COMMA | SEMI) ~> VARARGS ^^^ VarArgs()) ^^ {
             case l ~ Some(v) => l ++ List(o(v));
@@ -403,12 +403,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         }
 
     def functionDef: MultiParser[FunctionDef] =
-        optList(functionDeclSpecifiers) ~~
-            declarator ~~
-            repOpt(declaration) ~~ opt2List(VARARGS ^^ {
-            x => VarArgs()
-        }) ~~ repOpt(SEMI) ~~
-            lookahead(LCURLY) ~! //prevents backtracking inside function bodies
+        optList(functionDeclSpecifiers) ~~ declarator ~~ repOpt(declaration) ~~ opt2List(VARARGS ^^ { x => VarArgs() }) ~~ repOpt(SEMI) ~~ lookahead(LCURLY) ~! //prevents backtracking inside function bodies
             compoundStatement ^^ {
             case sp ~ declarator ~ param ~ vparam ~ _ ~ _ ~ stmt => FunctionDef(sp, declarator, param ++ vparam.map(o(_)), stmt)
         }
@@ -725,15 +720,15 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
             (list: List[Opt[AbstractToken]]) => StringLit(list.map(o => Opt(o.condition, o.entry.getText)))
         })
 
-    def concat_id : MultiParser[ConcatenatedStringLit] = {
+    def concat_id: MultiParser[ConcatenatedStringLit] = {
         token("element", t => isIdentifier(t)) ~~ rep1(token("element", t => t.isString || isIdentifier(t))) ^^ {
             case head ~ tail => {
-                ConcatenatedStringLit(Opt(FeatureExprFactory.True, head.getText)::tail.map(o => Opt(o.condition, o.entry.getText)))
+                ConcatenatedStringLit(Opt(FeatureExprFactory.True, head.getText) :: tail.map(o => Opt(o.condition, o.entry.getText)))
             }
         }
     }
 
-    def concat_notid : MultiParser[ConcatenatedStringLit] = {
+    def concat_notid: MultiParser[ConcatenatedStringLit] = {
         rep1(token("element", t => t.isString || isIdentifier(t))) ^^ {
             (list: List[Opt[AbstractToken]]) => ConcatenatedStringLit(list.map(o => Opt(o.condition, o.entry.getText)))
         }
@@ -757,6 +752,16 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
                 }
             }
         }
+
+    def pragma: MultiParser[Pragma] =
+        token("define", _.isPragma) ^^ {
+            t => {
+                assert(t.token.isInstanceOf[TokenSequenceToken])
+                val seq = t.token.asInstanceOf[TokenSequenceToken]
+                Pragma(seq.getText, t.isHeaderElement)
+            }
+        }
+
 
     def comment[T <: Comment](fun: (Elem => T)): MultiParser[T] = {
         token("comment", _.isComment) ^^ {
@@ -845,19 +850,26 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     def BXOR = textToken('^')
     def BXOR_ASSIGN = textToken("^=")
 
-    def pragma = textToken("_Pragma") ~! LPAREN ~> stringConst <~ RPAREN ^^ {
-        Pragma(_)
-    }
+//    def pragma = textToken("_Pragma") ~! LPAREN ~> stringConst <~ RPAREN ^^ {
+//        Pragma(_)
+//    }
 
     //***  gnuc extensions ****************************************************
 
     def attributeDecl: MultiParser[AttributeSpecifier] =
-        (((attributeKw ~ LPAREN ~ LPAREN ~ attributeList ~ RPAREN ~ RPAREN ^^ {
-            case _ ~ _ ~ _ ~ al ~ _ ~ _ => GnuAttributeSpecifier(al)
-        })
+        (
+            (attributeKw ~ LPAREN ~ LPAREN ~ attributeList ~ RPAREN ~ RPAREN ^^ {
+                case _ ~ _ ~ _ ~ al ~ _ ~ _ => GnuAttributeSpecifier(al)
+            })
             | (asm ~ LPAREN ~> stringConst <~ RPAREN ^^ {
-            AsmAttributeSpecifier(_)
-        })))
+                AsmAttributeSpecifier(_)
+            })
+            /*| (token("string literal", e => !keywords.contains(e.getText) && e.isIdentifier) ^^ {
+                 e => {
+                     LazyAttributeSpecifier(e.getText)
+                 }
+            })*/
+        )
 
     def attributeList: MultiParser[List[Opt[AttributeSequence]]] =
         attribute ~ repOpt(COMMA ~> attribute) ~ opt(COMMA) ^^ {

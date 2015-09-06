@@ -367,6 +367,8 @@ case class Include(path: String, fromHeader : Boolean) extends ExternalDef
 
 case class Define(key: String, value: String, fromHeader : Boolean) extends ExternalDef
 
+case class Pragma(value : String, fromHeader : Boolean) extends ExternalDef
+
 case class EmptyExternalDef() extends ExternalDef
 
 case class TypelessDeclaration(declList: List[Opt[InitDeclarator]]) extends ExternalDef
@@ -381,6 +383,8 @@ sealed abstract class AttributeSpecifier() extends Specifier()
 case class GnuAttributeSpecifier(attributeList: List[Opt[AttributeSequence]]) extends AttributeSpecifier
 
 case class AsmAttributeSpecifier(stringConst: StringLit) extends AttributeSpecifier
+
+case class LazyAttributeSpecifier(stringConst : String) extends AttributeSpecifier
 
 case class LcurlyInitializer(inits: List[Opt[Initializer]]) extends Expr
 
@@ -422,5 +426,3 @@ case class BuiltinTypesCompatible(typeName1: TypeName, typeName2: TypeName) exte
 case class BuiltinVaArgs(expr: Expr, typeName: TypeName) extends PrimaryExpr
 
 case class CompoundStatementExpr(compoundStatement: CompoundStatement) extends PrimaryExpr
-
-case class Pragma(command: StringLit) extends ExternalDef

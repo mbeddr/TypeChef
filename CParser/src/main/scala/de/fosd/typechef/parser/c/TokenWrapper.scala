@@ -26,11 +26,18 @@ class CToken(val token: LexerToken, val number: Int) extends ProfilingToken with
 
     def isCharacter: Boolean = token.isCharacterLiteral
 
+    def isIdentifier: Boolean = {
+        val value: Boolean = token.isIdentifier
+        value
+    }
+
     def isComment: Boolean = token.isComment
 
     def isInclude: Boolean = token.isInclude
 
     def isDefine: Boolean = token.isDefine
+
+    def isPragma: Boolean = token.isPragma
 
     def isHeaderElement: Boolean = {
         token.getSource != null && token.getSource.isInstanceOf[LexerSource] && token.getSource.asInstanceOf[LexerSource].getIdentifier.isHeaderFileSource

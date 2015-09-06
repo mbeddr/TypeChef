@@ -1,8 +1,9 @@
 package de.fosd.typechef
 
-import de.fosd.typechef.lexer.Source
-import featureexpr.FeatureExpr
 import java.io.PrintWriter
+
+import de.fosd.typechef.featureexpr.FeatureExpr
+import de.fosd.typechef.lexer.Source
 
 /**
  * abstract representation of tokens in the lexers
@@ -16,9 +17,9 @@ import java.io.PrintWriter
  */
 trait LexerToken {
     // used to determine splitting and joining
-    def getAttachedTokens : Iterable[LexerToken]
+    def getAttachedTokens: Iterable[LexerToken]
     def attachToken(token: LexerToken)
-    def attachTokens(tokens : Iterable[LexerToken])
+    def attachTokens(tokens: Iterable[LexerToken])
 
     def getFeature: FeatureExpr
     def setFeature(fexpr: FeatureExpr)
@@ -32,12 +33,12 @@ trait LexerToken {
     def getColumn: Int
     def getSourceName: String
     def setSourceName(src: String)
-    def getSource : Source
+    def getSource: Source
 
     // @mbeddr this is used to identify the ifdef block where the token is originated from
-    def getBlockId : String
-    def setBlockId(id : String)
-    
+    def getBlockId: String
+    def setBlockId(id: String)
+
     /**
      * properties of tokens used by other clients like the C parser
      *
@@ -45,9 +46,10 @@ trait LexerToken {
      */
     def isLanguageToken: Boolean
     def isEOF: Boolean
-    def isComment : Boolean
-    def isInclude : Boolean
-    def isDefine : Boolean
+    def isComment: Boolean
+    def isInclude: Boolean
+    def isDefine: Boolean
+    def isPragma: Boolean
 
     /**
      * is a language identifier (or type in C)
@@ -59,6 +61,7 @@ trait LexerToken {
     def isNumberLiteral: Boolean
     def isStringLiteral: Boolean
     def isCharacterLiteral: Boolean
+    def isIdentifier: Boolean
 
     /**
      * "Lazily print" this token, i.e. print it without constructing a full in-memory representation. This is just a

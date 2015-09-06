@@ -1474,6 +1474,8 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         tokens.add(valueToken);
 
         // @mbeddr
+        // this ensures that the macro expansion will not be found for identifieres which refer to
+        // proper expressions, so that those wont be inlined
         if (!(codeChecker != null && codeChecker.canParseExpression(m.getText()))) {
             logger.info("#define " + name + " " + m);
             addMacro(name, state.getFullPresenceCondition(), m);
@@ -1803,6 +1805,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
     }
 
     private Token parse_pragma() throws IOException, LexerException {
+        Source currentSource = getSource();
         Token name;
 
         NAME:
@@ -1864,7 +1867,12 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
 
         pragma(name, value);
 
-        return tok; /* The NL. */
+        List<Token> tokens = new ArrayList<Token>();
+        tokens.add(name);
+        tokens.addAll(value);
+        Token ret_tok = new TokenSequenceToken(Token.PRAGMA, 0, 0, tokens, currentSource);
+
+        return ret_tok; /* The NL. */
     }
 
     // /* For #error and #warning. */

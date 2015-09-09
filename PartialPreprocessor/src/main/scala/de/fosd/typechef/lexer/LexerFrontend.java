@@ -129,7 +129,6 @@ public class LexerFrontend {
         }
     }
 
-
     public Conditional<LexerResult> run(final ILexerOptions options, boolean returnTokenList) throws LexerException, IOException {
         return run(new VALexer.LexerFactory() {
             @Override

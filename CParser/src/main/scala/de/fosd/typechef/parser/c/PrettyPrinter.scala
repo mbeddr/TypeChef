@@ -308,6 +308,7 @@ object PrettyPrinter {
             case SimplePostfixSuffix(t) => t
             case PointerPostfixSuffix(kind, id) => kind ~ id
             case FunctionCall(params) => "(" ~ params ~ ")"
+            case ConcatenatedStringLit(elements) => sepVaware(elements, " ", prettyOptStr)
             case ArrayAccess(e) => "[" ~ e ~ "]"
             case PostfixExpr(p, s) => p ~ s
             case UnaryExpr(p, s) => p ~ s

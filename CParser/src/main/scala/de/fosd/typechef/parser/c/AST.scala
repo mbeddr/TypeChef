@@ -77,6 +77,8 @@ sealed abstract class PrimaryExpr extends Expr
 
 case class Id(name: String, fromHeader : Boolean = false) extends PrimaryExpr
 
+case class Type(p : ParameterDeclaration) extends Expr
+
 case class Constant(value: String) extends PrimaryExpr
 
 case class StringLit(name: List[Opt[String]]) extends PrimaryExpr

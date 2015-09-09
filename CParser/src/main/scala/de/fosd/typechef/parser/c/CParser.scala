@@ -8,7 +8,8 @@ import de.fosd.typechef.error.WithPosition
 import de.fosd.typechef.featureexpr.FeatureExprFactory.True
 import de.fosd.typechef.featureexpr.sat.False
 import de.fosd.typechef.featureexpr.{FeatureExpr, FeatureExprFactory, FeatureModel}
-import de.fosd.typechef.lexer.{LexerFrontend, SourceIdentifier, TokenSequenceToken}
+import de.fosd.typechef.lexer.LexerFrontend.LexerSuccess
+import de.fosd.typechef.lexer._
 import de.fosd.typechef.parser.{~, _}
 import org.kiama.rewriting.Rewriter._
 
@@ -123,12 +124,30 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         }
     }
 
-    protected def lex(text: String, includes: List[String], featureModel: FeatureModel = FeatureExprFactory.empty, identifier: SourceIdentifier) = {
-        val lexer = new LexerFrontend(this, identifier)
+    protected def lex(text: String, includes: List[String], featureModel: FeatureModel = FeatureExprFactory.empty, identifier: SourceIdentifier) : TokenReader[CToken, CTypeContext] = {
+        val frontendOptions: LexerFrontendOptions = new LexerFrontendOptions {
+            override def includeComments(): Boolean = true
+        }
+
+        val lexerFrontend: LexerFrontend = new LexerFrontend(this, identifier, DefaultTokenSelector.INSTANCE, frontendOptions)
         val lexerSource = (if (identifier.getFile != null) new FileSource(identifier.getFile) else new TextSource(text)).asInstanceOf[LexerInput]
-        val tokens = lexer.parse(lexerSource, includes, featureModel)
-        val tokenReader = CLexerAdapter.prepareTokens(tokens)
-        tokenReader
+
+        val options: LexerFrontend.DefaultLexerOptions = new LexerFrontend.DefaultLexerOptions(lexerSource, false, featureModel)
+
+        if (identifier.getFile != null && includes != null) {
+            options.getIncludePaths.addAll(includes)
+            options.getQuoteIncludePath.addAll(includes)
+        }
+
+        val lexerResult: Conditional[LexerFrontend.LexerResult] = lexerFrontend.run(options, true)
+
+        for (opt <- lexerResult.toOptList) {
+            if (opt.entry.isInstanceOf[LexerSuccess]) {
+                return CLexerAdapter.prepareTokens(opt.entry.asInstanceOf[LexerSuccess].getTokens)
+            }
+        }
+
+        return null
     }
 
     def parse[T](tokenStream: TokenReader[AbstractToken, CTypeContext], mainProduction: MultiParser[T]): MultiParseResult[T] =
@@ -674,12 +693,12 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     //  ( type-name ) { initializer-list , }
     private def castAndInitializer = (LPAREN ~> typeName <~ RPAREN) ~ lcurlyInitializer ^^ { case tn ~ init => CastExpr(tn, init) }
 
-    //
     def functionCall: MultiParser[FunctionCall] =
-        LPAREN ~> opt(argExprList) <~ RPAREN ^^ {
+        LPAREN ~> opt(argExprList_functionCall) <~ RPAREN ^^ {
             case Some(l) => FunctionCall(l);
             case None => FunctionCall(ExprList(List()))
         }
+
     //XXX allows trailing comma after argument list
 
     def primaryExpr: MultiParser[Expr] = castAndInitializer |
@@ -781,6 +800,20 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         rep1SepOpt(assignExpr, COMMA, "argExprList") ^^ {
             ExprList(_)
         }
+
+    // @mbeddr
+    // specialized with va support
+    def argExprList_functionCall: MultiParser[ExprList] =
+        rep1SepOpt(assignExpr | va_type_name , COMMA, "argExprList") ^^ {
+            ExprList(_)
+        }
+
+    def va_type_name : MultiParser[Expr] = {
+        parameterDeclaration ^^ {
+            p => Type(p)
+        }
+    }
+
     //consumes trailing commas
 
     def offsetofMemberDesignator: MultiParser[List[Opt[OffsetofMemberDesignator]]] =
@@ -864,11 +897,6 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
             | (asm ~ LPAREN ~> stringConst <~ RPAREN ^^ {
                 AsmAttributeSpecifier(_)
             })
-            /*| (token("string literal", e => !keywords.contains(e.getText) && e.isIdentifier) ^^ {
-                 e => {
-                     LazyAttributeSpecifier(e.getText)
-                 }
-            })*/
         )
 
     def attributeList: MultiParser[List[Opt[AttributeSequence]]] =

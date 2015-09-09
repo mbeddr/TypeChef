@@ -234,7 +234,7 @@ class CParserWrapper extends CParser {
                         "}"
                 }
                 case WhileStatement(expr: Expr, s: Conditional[Statement]) => {
-                    "while (" + visitExpression(expr) + "( {" +
+                    "while (" + visitExpression(expr) + ") {" +
                         collectTrueOptions(s.toOptList, visitStatement, "\n") +
                         "}"
                 }
@@ -402,6 +402,9 @@ class CParserWrapper extends CParser {
             }
             case StringLit(name: List[Opt[String]]) => {
                 collectTrueOptions(name, (e: String) => e)
+            }
+            case Type(p : ParameterDeclaration) => {
+                visitParameterDeclaration(p)
             }
             case _ => {
                 "Unknown Expression " + expression.getClass.getName

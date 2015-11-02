@@ -41,10 +41,12 @@ public class SourceIdentifier {
     }
 
     public SourceIdentifier resolve(String path) {
-        if (path.startsWith(File.separator)) {
+        File file = new File(path);
+        if (file.isAbsolute()) {
             return new SourceIdentifier(path);
         } else {
-            String[] tokens = path.split(File.separator);
+            String separator = File.separator.replace("\\", "\\\\");
+            String[] tokens = path.split(separator);
 
             // when resolving a path start from the parent
             SourceIdentifier result = this.getParent();

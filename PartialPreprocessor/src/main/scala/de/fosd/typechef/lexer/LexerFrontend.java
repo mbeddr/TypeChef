@@ -163,8 +163,17 @@ public class LexerFrontend {
             for (String undef : options.getLexerPartialConfiguration().getUndefinedFeatures())
                 pp.removeMacro(undef, FeatureExprLib.True());
         }
-        for (Map.Entry<String, String> macro : options.getDefinedMacros().entrySet())
-            pp.addMacro(macro.getKey(), FeatureExprLib.True(), macro.getValue());
+
+        // @mbeddr
+        // collect all predefined macros and add them as a separate input
+        StringBuffer buffer = new StringBuffer();
+        for (Map.Entry<String, String> macro : options.getDefinedMacros().entrySet()) {
+            buffer.append(macro.getKey() + " " + macro.getValue() + System.getProperty("line.separator"));
+        }
+        if (buffer.length() != 0) {
+            pp.addInput(new VALexer.TextSource(buffer.toString(), true));
+        }
+
         for (String undef : options.getUndefMacros())
             pp.removeMacro(undef, FeatureExprLib.True());
 

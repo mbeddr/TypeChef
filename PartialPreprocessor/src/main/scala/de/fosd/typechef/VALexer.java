@@ -28,14 +28,25 @@ public interface VALexer {
     }
 
     public static interface LexerInput {
+        public boolean forceMacroExpansion();
     }
 
     public static class TextSource implements LexerInput {
         public final String code;
+        private boolean forceMacroExpansion;
 
         public TextSource(String code) {
-            this.code = code;
+            this(code, false);
+        }
 
+        public TextSource(String code, boolean forceMacroExpansion) {
+            this.code = code;
+            this.forceMacroExpansion = forceMacroExpansion;
+        }
+
+        @Override
+        public boolean forceMacroExpansion() {
+            return forceMacroExpansion;
         }
     }
 
@@ -45,6 +56,11 @@ public interface VALexer {
 
         public FileSource(File file) {
             this.file = file;
+        }
+
+        @Override
+        public boolean forceMacroExpansion() {
+            return false;
         }
     }
 
@@ -59,6 +75,11 @@ public interface VALexer {
         public StreamSource(InputStream inputStream, String fileName) {
             this.filename = fileName;
             this.inputStream = inputStream;
+        }
+
+        @Override
+        public boolean forceMacroExpansion() {
+            return false;
         }
     }
 

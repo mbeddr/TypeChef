@@ -86,6 +86,10 @@ public abstract class Source implements Iterable<Token>, Closeable {
         this.sibling = sibling;
     }
 
+    boolean forceMacroExpansion() {
+        return false;
+    }
+
     /**
      * Returns the parent source of this source.
      * <p/>

@@ -66,6 +66,12 @@ import static de.fosd.typechef.lexer.Token.*;
  * * 	expand macros after #include
  * * 	expand macros in expression of #if and #elif, but not in defined(X)
  * * 	no expansion in other # directives, never expand the identifier after #
+ * <p/>
+ * when to expand macros:
+ * *	always expand macros in pure text, do not reexpand expanded tokens
+ * * 	expand macros after #include
+ * * 	expand macros in expression of #if and #elif, but not in defined(X)
+ * * 	no expansion in other # directives, never expand the identifier after #
  */
 
 /**
@@ -169,7 +175,8 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
     private PartialCodeChecker codeChecker;
     private SourceIdentifier identifier;
 
-    private List<MacroConstraint> macroConstraints = new ArrayList<MacroConstraint>();
+    private List<MacroConstraint> macroConstraints;
+    private Map<VirtualFile, FeatureExpr> includedFileMap;
 
     public Preprocessor(MacroFilter macroFilter, FeatureModel fm, PartialCodeChecker codeChecker, SourceIdentifier identifier) {
         this.featureModel = fm;
@@ -193,6 +200,8 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         this.listener = null;
         this.codeChecker = codeChecker;
         this.identifier = identifier;
+        this.includedFileMap = new HashMap<VirtualFile, FeatureExpr>();
+        this.macroConstraints = new ArrayList<MacroConstraint>();
     }
 
     public Preprocessor(MacroFilter macroFilter, FeatureModel fm) {
@@ -1438,7 +1447,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
             source_untoken(tok);
         }
 
-        parse_macroBody(name, m, args);
+        Token macroBodyToken = parse_macroBody(name, m, args);
         StringBuilder key = new StringBuilder();
         key.append(name);
 
@@ -1476,13 +1485,16 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         // @mbeddr
         // this ensures that the macro expansion will not be found for identifieres which refer to
         // proper expressions, so that those wont be inlined
-        if (!(codeChecker != null && codeChecker.canParseExpression(m.getText()))) {
+        if (currentSource.forceMacroExpansion() || !(codeChecker != null && codeChecker.canParseExpression(m.getText()))) {
             logger.info("#define " + name + " " + m);
             addMacro(name, state.getFullPresenceCondition(), m);
         }
 
-        Token ret_tok = new TokenSequenceToken(Token.DEFINE, 0, 0, tokens, currentSource);
-        return ret_tok;
+        if (currentSource.forceMacroExpansion()) {
+            return macroBodyToken;
+        } else {
+            return new TokenSequenceToken(Token.DEFINE, 0, 0, tokens, currentSource);
+        }
     }
 
     private Token parse_macroBody(String label, MacroData m, List<String> args)
@@ -1517,7 +1529,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                             null, label));
                     break;
                     /* XXX This is where we implement GNU's cpp -CC. */
-                    // break;
+                // break;
                 case WHITESPACE:
                     if (!paste)
                         space = true;
@@ -1611,8 +1623,19 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
             System.err.println("pp: including " + file);
 
         // @mbeddr only include the header file for the given c file, nothing else
-        if (this.identifier.sameUnit(new SourceIdentifier(file.getPath()))) {
-            sourceManager.push_source(file.getSource(), true);
+        boolean sameUnit = this.identifier.sameUnit(new SourceIdentifier(file.getPath()));
+
+        if (sameUnit) {
+            FeatureExpr currentCondition = state.getFullPresenceCondition();
+            FeatureExpr condition = this.includedFileMap.get(file);
+
+            if (condition == null) {
+                sourceManager.push_source(file.getSource(), true);
+                this.includedFileMap.put(file, currentCondition);
+            } else if (currentCondition.andNot(condition).isSatisfiable()) {
+                sourceManager.push_source(file.getSource(), true);
+                this.includedFileMap.put(file, currentCondition.or(condition));
+            }
         }
         return true;
     }
@@ -1800,8 +1823,9 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
     protected void pragma(Token nameTok, List<Token> value) throws IOException,
             LexerException {
         String pragmaName = nameTok.getText();
-        if (!"pack".equals(pragmaName))
+        if (!"pack".equals(pragmaName)) {
             warning(nameTok, "Unknown #" + "pragma: " + pragmaName);
+        }
     }
 
     private Token parse_pragma() throws IOException, LexerException {
@@ -2960,14 +2984,20 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
     @Override
     public void addInput(LexerInput source) throws IOException {
         //ugly but will do for now
-        if (source instanceof FileSource)
-            addInput(new FileLexerSource(((FileSource) source).file));
-        else if (source instanceof StreamSource)
-            addInput(new FileLexerSource(((StreamSource) source).inputStream, ((StreamSource) source).filename));
-        else if (source instanceof TextSource)
-            addInput(new StringLexerSource(((TextSource) source).code, true));
-        else
+        LexerSource lexerSource = null;
+
+        if (source instanceof FileSource) {
+            lexerSource = new FileLexerSource(((FileSource) source).file);
+        } else if (source instanceof StreamSource) {
+            lexerSource = new FileLexerSource(((StreamSource) source).inputStream, ((StreamSource) source).filename);
+        } else if (source instanceof TextSource) {
+            lexerSource = new StringLexerSource(((TextSource) source).code, true);
+        } else {
             throw new RuntimeException("unexpected input");
+        }
+
+        lexerSource.forceMacroExpansion(source.forceMacroExpansion());
+        addInput(lexerSource);
     }
 
     @Override

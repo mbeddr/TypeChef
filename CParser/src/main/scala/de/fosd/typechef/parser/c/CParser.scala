@@ -1024,6 +1024,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     def alignof = textToken("__alignof__") | textToken("__alignof")
 
     def ignoreAttributes(s: Specifier): Boolean = s match {
+
         case x: AttributeSpecifier => false
         case _ => true
     }

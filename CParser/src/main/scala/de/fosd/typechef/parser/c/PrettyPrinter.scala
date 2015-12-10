@@ -1,8 +1,9 @@
 package de.fosd.typechef.parser.c
 
+import java.io.{StringWriter, Writer}
+
 import de.fosd.typechef.conditional._
-import de.fosd.typechef.featureexpr.{FeatureExprFactory, FeatureExpr}
-import java.io.{FileWriter, StringWriter, Writer}
+import de.fosd.typechef.featureexpr.{FeatureExpr, FeatureExprFactory}
 
 object PrettyPrinter {
 
@@ -30,14 +31,14 @@ object PrettyPrinter {
     implicit def string(s: String): Doc = Text(s)
 
     /**
-      * Determines whether doc has some content other than spaces.
-      */
+     * Determines whether doc has some content other than spaces.
+     */
     def hasContent(doc: Doc): Boolean = {
         doc match {
-            case Empty           => false
+            case Empty => false
             case Text(s: String) => !s.forall(_.isWhitespace)
-            case Cons(a, b)      => hasContent(a) || hasContent(b)
-            case _               => true
+            case Cons(a, b) => hasContent(a) || hasContent(b)
+            case _ => true
         }
     }
 
@@ -157,6 +158,12 @@ object PrettyPrinter {
                 "#endif"
         }
 
+    }
+
+    case class DeclarationWrapper(declaration: Declaration) extends AST
+
+    def printSpecialDeclaration(declaration: Declaration): String = {
+        layout(prettyPrint(DeclarationWrapper(declaration)))
     }
 
     def prettyPrint(ast: AST, list_feature_expr: List[FeatureExpr] = List(FeatureExprFactory.True)): Doc = {
@@ -290,12 +297,12 @@ object PrettyPrinter {
             value match {
                 case None => Empty
                 case Some(_lst) =>
-                    val lst=_lst.asInstanceOf[List[Opt[AST]]]
+                    val lst = _lst.asInstanceOf[List[Opt[AST]]]
                     (lst.drop(1).
                         foldLeft[Doc]
                         (prettyOpt(lst.head.asInstanceOf[Opt[AST]]))
                         (addOptionalIdOrStringToDoc)
-                    )
+                        )
                 case _ => sys.error("did not find a match for optional expression in GnuAsmExpr")
             }
         }
@@ -377,7 +384,23 @@ object PrettyPrinter {
             case AtomicAttribute(n: String) => n
             case AttributeSequence(attributes) => sep(attributes, _ ~~ _)
             case CompoundAttribute(inner) => "(" ~ sep(inner, _ ~ "," ~~ _) ~ ")"
+            case DeclarationWrapper(declaration) => {
+                if (declaration.init.size != 1) {
+                    throw new RuntimeException("Special declaration pretty printing error!")
+                }
+                val initDeclarator: InitDeclarator = declaration.init.head.entry
 
+                val initDeclaratorDoc : Doc = initDeclarator match {
+                    case InitDeclaratorI(declarator, _, _) => {
+                        declarator
+                    }
+                    case InitDeclaratorE(declarator, _, _) => {
+                        declarator
+                    }
+                }
+
+                sep(declaration.declSpecs, _ ~~ _) ~ initDeclaratorDoc
+            }
             case Declaration(declSpecs, init) =>
                 sep(declSpecs, _ ~~ _) ~~ sepVaware(init, ",", prettyOpt) ~ ";"
 
@@ -480,7 +503,7 @@ object PrettyPrinter {
             case BuiltinVaArgs(expr: Expr, typeName: TypeName) => "__builtin_va_arg(" ~ expr ~ "," ~~ typeName ~ ")"
             case CompoundStatementExpr(compoundStatement: CompoundStatement) => "(" ~ compoundStatement ~ ")"
             case Pragma(command: String, _) => "_Pragma(" ~ command ~ ")"
-            case ParensExpr(inner:Expr) => "("~inner~")"
+            case ParensExpr(inner: Expr) => "(" ~ inner ~ ")"
             case e => assert(assertion = false, message = "match not exhaustive: " + e); ""
         }
     }

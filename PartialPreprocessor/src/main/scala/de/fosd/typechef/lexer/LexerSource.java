@@ -54,15 +54,13 @@ public class LexerSource extends Source {
     private int column;
     private int lastcolumn;
     private boolean cr;
+    private boolean forceMacroExpansion;
 
     public LexerSource(Reader reader, boolean ppvalid) {
         this(reader, ppvalid, SourceIdentifier.BASE_SOURCE);
     }
 
-    /*
-      * ppvalid is: false in StringLexerSource, true in FileLexerSource
-      */
-    public LexerSource(Reader reader, boolean ppvalid, SourceIdentifier identifier) {
+    public LexerSource(Reader reader, boolean ppvalid, SourceIdentifier identifier, boolean forceMacroExpansion) {
         this.reader = new JoinReader(reader);
         this.ppvalid = ppvalid;
         this.bol = true;
@@ -74,10 +72,27 @@ public class LexerSource extends Source {
         this.column = 0;
         this.lastcolumn = -1;
         this.cr = false;
+        this.forceMacroExpansion = forceMacroExpansion;
+    }
+
+    /*
+      * ppvalid is: false in StringLexerSource, true in FileLexerSource
+      */
+    public LexerSource(Reader reader, boolean ppvalid, SourceIdentifier identifier) {
+       this(reader, ppvalid, identifier, false);
     }
 
     public SourceIdentifier getIdentifier() {
         return identifier;
+    }
+
+    @Override
+    public boolean forceMacroExpansion() {
+        return forceMacroExpansion;
+    }
+
+    public void forceMacroExpansion(boolean value) {
+        this.forceMacroExpansion = value;
     }
 
     @Override

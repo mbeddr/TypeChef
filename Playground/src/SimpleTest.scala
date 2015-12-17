@@ -9,7 +9,7 @@ object SimpleTest {
         val code =
             """
             """
-        val file = new File("/Users/szabta/git/mbeddr.importer/code/testcode/VMS-CDT-reduced/failed/vmsksnc.h")
+        val file = new File("/Users/szabta/git/mbeddr.importer/code/testcode/include/self.c")
         val includes = List[String]()
 
         val result = importer.parseCode(file, includes)

@@ -35,6 +35,10 @@ class TokenReader[+T <: AbstractToken, U](val tokens: List[T], val offst: Int, v
         } else {
             val result = mutable.ListBuffer[Attachable]()
             result ++= inRange.head.getAttachedTokens
+            val partial = inRange.drop(1).dropRight(1)
+            for (t <- partial) {
+                result ++= t.getAttachedTokens.filter(_.isInstanceOf[Comment])
+            }
             result ++= inRange.last.getAttachedTokens
             result
         }

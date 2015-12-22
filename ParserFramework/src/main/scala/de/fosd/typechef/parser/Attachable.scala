@@ -1,5 +1,7 @@
 package de.fosd.typechef.parser
 
+import java.util.concurrent.atomic.AtomicLong
+
 trait WithAttachables {
     var tokens : Iterable[Attachable] = null
 
@@ -8,9 +10,9 @@ trait WithAttachables {
     }
 }
 
-abstract class Attachable
-case object NewLine extends Attachable
-case class Comment(val text : String) extends Attachable
+abstract class Attachable(val id : Long)
+case class NewLine(_id : Long) extends Attachable(_id)
+case class Comment(val text : String, _id : Long) extends Attachable(_id)
 
 trait WithBlockId {
     var blockId : String = null

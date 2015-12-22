@@ -180,7 +180,7 @@ class CParserWrapper extends CParser {
     }
 
     private def visitStatement(statement: Statement): String = {
-        //visitAttachables(statement) + (
+        visitAttachables(statement) + (
             statement match {
                 case IfStatement(condition: Conditional[Expr], thenBranch: Conditional[Statement], elifs: List[Opt[ElifStatement]], elseBranch: Option[Conditional[Statement]]) => {
                     "if (" + collectTrueOptions(condition.toOptList, visitExpression) + ") {" +
@@ -254,11 +254,11 @@ class CParserWrapper extends CParser {
                     "Unknown Statement " + statement.getClass.getName
                 }
             }
-     //       )
+            )
     }
 
     private def visitSpecifier(specifier: Specifier): String = {
-       // "(" + visitAttachables(specifier) + (
+        //"(" + visitAttachables(specifier) + (
         specifier match {
             case VoidSpecifier(_) => {
                 "void"
@@ -339,12 +339,13 @@ class CParserWrapper extends CParser {
     }
 
     private def visitAttachables(node: AST): String = {
+        val tokens = node.tokens
         val a1 = (for {
-            t <- node.tokens
+            t <- tokens
         } yield
             t match {
-                case NewLine => "\n"
-                case Comment(text: String) => "//" + text //+ "\n"
+                case NewLine(_) => "(" + t.id + ")\n"
+                case Comment(text: String, _) => "(" + t.id + ") //" + text + "\n"
             }).mkString
 
         val a2 = node.blockId

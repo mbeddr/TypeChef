@@ -29,6 +29,7 @@ import de.fosd.typechef.featureexpr.FeatureExpr;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import scala.collection.*;
 import scala.collection.Iterable;
@@ -43,9 +44,17 @@ public abstract class Token implements LexerToken {
     protected String label;
     protected String blockId;
     protected List<LexerToken> attachedTokens;
+    private static final AtomicLong counter = new AtomicLong(0);
+    private long id;
 
     protected Token() {
         this.attachedTokens = new ArrayList<LexerToken>();
+        this.id = counter.incrementAndGet();
+    }
+
+    @Override
+    public long getId() {
+        return this.id;
     }
 
     @Override

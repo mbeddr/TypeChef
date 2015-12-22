@@ -59,18 +59,19 @@ class CToken(val token: LexerToken, val number: Int) extends ProfilingToken with
     override def getTokenId: Int = number
 
     override def getAttachedTokens: List[Attachable] = {
-        (for {
+        val result = (for {
             t <- token.getAttachedTokens
             if (t.isInstanceOf[Token])
             tokenType = t.asInstanceOf[Token].getType
             if (tokenType == Token.NL || tokenType == Token.CCOMMENT || tokenType == Token.CPPCOMMENT)
         } yield {
                 if (tokenType == Token.NL) {
-                    NewLine
+                    NewLine(t.getId())
                 } else {
-                    Comment(t.getText)
+                    Comment(t.getText, t.getId())
                 }
             }).toList;
+        result
     }
 
     override def getBlockId: String = {

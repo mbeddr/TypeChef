@@ -217,9 +217,20 @@ public class LexerFrontend {
                 if (tok.isEOF())
                     break;
 
+                if (!tok.getAttachedTokens().isEmpty()) {
+                    // ensure that any attached token is cleared and later re-added to preserve the order
+                    scala.collection.Iterator<LexerToken> iterator = tok.getAttachedTokens().iterator();
+                    while (iterator.hasNext()) {
+                        attachableTokens.add(iterator.next());
+                    }
+                    tok.clearAttachedTokens();
+                }
+
                 if (returnTokenList && (!options.isReturnLanguageTokensOnly() || (tokenSelector != null && tokenSelector.isLanguageToken(tok)))) {
                     lastLanguageToken = tok;
-                    for (LexerToken token : attachableTokens) tok.attachToken(token);
+                    for (LexerToken token : attachableTokens) {
+                        tok.attachToken(token);
+                    }
                     attachableTokens.clear();
                     resultTokenList.add(tok);
                 } else if (tokenSelector != null && tokenSelector.isAttachableToken(tok)) {
@@ -262,7 +273,9 @@ public class LexerFrontend {
             crash = new LexerError(e.toString(), "", -1, -1);
         } finally {
             if (lastLanguageToken != null) {
-                for (LexerToken token : attachableTokens) lastLanguageToken.attachToken(token);
+                for (LexerToken token : attachableTokens) {
+                    lastLanguageToken.attachToken(token);
+                }
             }
 
             pp.debugPreprocessorDone();

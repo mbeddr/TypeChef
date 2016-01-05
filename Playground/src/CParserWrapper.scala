@@ -258,7 +258,7 @@ class CParserWrapper extends CParser {
     }
 
     private def visitSpecifier(specifier: Specifier): String = {
-        //"(" + visitAttachables(specifier) + (
+        "(" + visitAttachables(specifier) + (
         specifier match {
             case VoidSpecifier(_) => {
                 "void"
@@ -335,7 +335,7 @@ class CParserWrapper extends CParser {
                 "Unknown Specifier " + specifier.getClass.getName
             }
         }
-        //) + ")"
+        ) + ")"
     }
 
     private def visitAttachables(node: AST): String = {
@@ -355,7 +355,9 @@ class CParserWrapper extends CParser {
     }
 
     private def visitStructDeclaration(declaration: StructDeclaration): String = {
+        "(" + visitAttachables(declaration) + (
         declaration.declaratorList + " " + declaration.qualifierList
+        ) + ")"
     }
 
     private def visitEnumerator(enumerator: Enumerator): String = {
@@ -363,7 +365,7 @@ class CParserWrapper extends CParser {
     }
 
     private def visitExpression(expression: Expr): String = {
-        //"(" + visitAttachables(expression) + (
+        "(" + visitAttachables(expression) + (
         expression match {
             case Constant(value: String) => {
                 value
@@ -411,7 +413,7 @@ class CParserWrapper extends CParser {
                 "Unknown Expression " + expression.getClass.getName
             }
         }
-        //) + ")"
+        ) + ")"
     }
 
     private def visitNArySubExpr(expr: NArySubExpr): String = {

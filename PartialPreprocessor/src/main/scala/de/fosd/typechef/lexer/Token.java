@@ -71,7 +71,12 @@ public abstract class Token implements LexerToken {
 
     @Override
     public scala.collection.Iterable<LexerToken> getAttachedTokens() {
-        return JavaConversions.collectionAsScalaIterable(attachedTokens);
+        return JavaConversions.collectionAsScalaIterable(this.attachedTokens);
+    }
+
+    @Override
+    public void clearAttachedTokens() {
+        this.attachedTokens.clear();
     }
 
     @Override

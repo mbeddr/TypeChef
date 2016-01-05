@@ -52,6 +52,14 @@ public class TokenSequenceToken extends Token {
         return tokens;
     }
 
+    @Override
+    public void clearAttachedTokens() {
+        this.attachedTokens.clear();
+        for (Token token : internalTokens) {
+            token.clearAttachedTokens();
+        }
+    }
+
     public List<Token> getTokens() {
         return Collections.unmodifiableList(internalTokens);
     }

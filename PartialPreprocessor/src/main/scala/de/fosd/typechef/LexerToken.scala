@@ -20,6 +20,7 @@ trait LexerToken {
     def getAttachedTokens: Iterable[LexerToken]
     def attachToken(token: LexerToken)
     def attachTokens(tokens: Iterable[LexerToken])
+    def clearAttachedTokens
 
     def getFeature: FeatureExpr
     def setFeature(fexpr: FeatureExpr)

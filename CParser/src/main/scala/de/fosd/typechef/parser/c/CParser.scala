@@ -660,7 +660,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         | fail("expected unaryExpr"))
 
     def unaryOperator = (PLUS | MINUS | BNOT | LNOT
-        | LAND //for label dereference (&&label)
+        // | LAND //for label dereference (&&label) @mbeddr disabled
         | textToken("__real__")
         | textToken("__imag__"))
 

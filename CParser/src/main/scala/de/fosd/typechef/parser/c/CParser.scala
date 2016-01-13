@@ -125,11 +125,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     }
 
     protected def lex(text: String, includes: List[String], featureModel: FeatureModel = FeatureExprFactory.empty, identifier: SourceIdentifier) : TokenReader[CToken, CTypeContext] = {
-        val frontendOptions: LexerFrontendOptions = new LexerFrontendOptions {
-            override def includeComments(): Boolean = true
-        }
-
-        val lexerFrontend: LexerFrontend = new LexerFrontend(this, identifier, DefaultTokenSelector.INSTANCE, frontendOptions)
+        val lexerFrontend: LexerFrontend = new LexerFrontend(this, identifier, DefaultTokenSelector.INSTANCE)
         val lexerSource = (if (identifier.getFile != null) new FileSource(identifier.getFile) else new TextSource(text)).asInstanceOf[LexerInput]
 
         val options: LexerFrontend.DefaultLexerOptions = new LexerFrontend.DefaultLexerOptions(lexerSource, false, featureModel)

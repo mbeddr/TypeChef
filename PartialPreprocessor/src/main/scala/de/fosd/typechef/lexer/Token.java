@@ -66,7 +66,14 @@ public abstract class Token implements LexerToken {
 
     @Override
     public void attachToken(LexerToken token) {
-        this.attachedTokens.add(token);
+        int type = ((Token) token).getType();
+        if (type == Token.NL) {
+            for ( int i = 0;i<token.getText().length();i++) {
+                this.attachedTokens.add(token);
+            }
+        } else {
+            this.attachedTokens.add(token);
+        }
     }
 
     @Override

@@ -199,7 +199,7 @@ class CParserWrapper extends CParser {
                         "} "
                 }
                 case CompoundStatement(statements: List[Opt[Statement]]) => {
-                    collectTrueOptions(statements, visitStatement, "\n")
+                    "{" + collectTrueOptions(statements, visitStatement, "\n") + "}"
                 }
                 case ReturnStatement(expr: Option[Expr]) => {
                     "return " + (if (expr.isDefined) visitExpression(expr.get) else "") + ";"
@@ -344,7 +344,7 @@ class CParserWrapper extends CParser {
             t <- tokens
         } yield
             t match {
-                case NewLine(_) => "(" + t.id + ")\n"
+                case NewLine(_) => "(" + t.id + ") nl \n"
                 case Comment(text: String, _) => "(" + t.id + ") //" + text + "\n"
             }).mkString
 

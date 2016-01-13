@@ -33,17 +33,11 @@ public class LexerFrontend {
     private PartialCodeChecker codeChecker;
     private SourceIdentifier identifier;
     private TokenSelector tokenSelector;
-    private LexerFrontendOptions lexerFrontendOptions;
 
     public LexerFrontend(PartialCodeChecker codeChecker, SourceIdentifier identifier, TokenSelector tokenSelector) {
-        this(codeChecker, identifier, tokenSelector, null);
-    }
-
-    public LexerFrontend(PartialCodeChecker codeChecker, SourceIdentifier identifier, TokenSelector tokenSelector, LexerFrontendOptions options) {
         this.codeChecker = codeChecker;
         this.identifier = identifier;
         this.tokenSelector = tokenSelector;
-        this.lexerFrontendOptions = options;
     }
 
     public LexerFrontend(PartialCodeChecker codeChecker, SourceIdentifier identifier) {
@@ -242,7 +236,7 @@ public class LexerFrontend {
                     if (c1 && c2 && c3) {
                         assert attachableTokens.isEmpty();
                         lastLanguageToken.attachToken(tok);
-                    } else if (lexerFrontendOptions != null && lexerFrontendOptions.includeComments()) {
+                    } else {
                         attachableTokens.add(tok);
                     }
                 }

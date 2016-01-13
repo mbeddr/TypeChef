@@ -657,17 +657,19 @@ public class LexerSource extends Source {
                     if (include) {
                         tok = new SimpleToken(NL, _l, _c, "\n", this);
                     } else {
-                        int nls = 0;
+                        /*int nls = 0;
                         do {
                             nls++;
                             d = read();
                         } while (d == '\n');
                         unread(d);
                         char[] text = new char[nls];
-                        for (int i = 0; i < text.length; i++)
+                        for (int i = 0; i < text.length; i++) {
                             text[i] = '\n';
+                        }
                         // Skip the bol = false below.
-                        tok = new SimpleToken(NL, _l, _c, new String(text), this);
+                        tok = new SimpleToken(NL, _l, _c, new String(text), this);*/
+                        tok = new SimpleToken(NL, _l, _c, "\n", this);
                     }
                     if (DEBUG)
                         System.out.println("lx: Returning NL: " + tok);

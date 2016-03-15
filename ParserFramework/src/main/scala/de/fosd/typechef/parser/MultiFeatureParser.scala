@@ -84,7 +84,6 @@ abstract class MultiFeatureParser(val featureModel: FeatureModel = null, debugOu
                     if (t.isInstanceOf[WithBlockId]) {
                         val blockId = containedTokens.blockId(range, f, featureSolverCache)
                         t.asInstanceOf[WithBlockId].setBlockId(blockId)
-                        val copy = containedTokens.blockId(range, f, featureSolverCache)
                     }
                     null
                 case _ => null

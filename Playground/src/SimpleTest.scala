@@ -9,7 +9,7 @@ object SimpleTest {
         val code =
             """
             """
-        val file = new File("/Users/szabta/git/mbeddr.importer/code/testcode/localVarRef/localVarRef.c")
+        val file = new File("/Users/szabta/git/mbeddr.internal/code/testcode/standalone_test_headers/against_articulated_least.h")
         val includes = List[String]()
 
         val result = importer.parseCode(file, includes)

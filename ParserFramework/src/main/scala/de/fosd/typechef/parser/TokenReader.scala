@@ -13,7 +13,6 @@ import scala.math.min
  *
  */
 class TokenReader[+T <: AbstractToken, U](val tokens: List[T], val offst: Int, val context: U = null, eofToken: T) {
-
     def offset: Int = offst
 
     def first: T = if (!tokens.isEmpty) tokens.head else eofToken
@@ -44,12 +43,63 @@ class TokenReader[+T <: AbstractToken, U](val tokens: List[T], val offst: Int, v
         }
     }
 
-    def range(rightMost : Int, context: FeatureExpr, featureSolverCache: FeatureSolverCache) : List[T] = {
+    def firstBiggerOrEqual(arr: Array[AbstractToken], target: Int): Int = {
+        if (arr(arr.length - 1).getTokenId < target) {
+            -1
+        } else {
+            var l = 0
+            var r = arr.length - 1
+            var res = -1
+
+            while (l <= r) {
+                val m = l + ((r - l) >> 1)
+                if (arr(m).getTokenId >= target) {
+                    res = m
+                    r = m - 1
+                } else {
+                    l = m + 1
+                }
+            }
+            res
+        }
+    }
+
+    def lastSmaller(arr: Array[AbstractToken], target: Int): Int = {
+        if (arr(0).getTokenId >= target) {
+            -1
+        } else {
+            var l = 0
+            var r = arr.length - 1
+            var res = -1
+
+            while (l <= r) {
+                val m = l + ((r - l) >> 1)
+                if (arr(m).getTokenId >= target) {
+                    r = m - 1
+                } else {
+                    l = m + 1
+                    res = m
+                }
+            }
+            res
+        }
+    }
+
+    def range(rightMost: Int, context: FeatureExpr, featureSolverCache: FeatureSolverCache): IndexedSeq[AbstractToken] = {
+        val arr = tokens.toArray[AbstractToken]
+        val start = firstBiggerOrEqual(arr, offset)
+        if (start == -1) {
+            return mutable.IndexedSeq.empty
+        }
+        val end = lastSmaller(arr, rightMost)
+        if (end == -1) {
+            return mutable.IndexedSeq.empty
+        }
+
         for {
-            t <- tokens
-            if t.getTokenId >= offset && t.getTokenId < rightMost
-            if !featureSolverCache.mutuallyExclusive(context, t.getFeature)
-        } yield t
+            i <- start to end
+            if !featureSolverCache.mutuallyExclusive(context, arr(i).getFeature)
+        } yield arr(i)
     }
 
     def blockId(rightMost: Int, context: FeatureExpr, featureSolverCache: FeatureSolverCache): String = {

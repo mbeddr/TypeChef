@@ -25,12 +25,22 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     type AbstractToken = CToken
     type TypeContext = CTypeContext
 
+    private var _processAttachables : Boolean = false
+
     override def canParseExpression(code: String): Boolean = {
         canParse(code, this.expr)
     }
 
     override def canParseStatement(code: String): Boolean = {
         canParse(code, this.statement)
+    }
+
+    override def processAttachables : Boolean = {
+        _processAttachables
+    }
+
+    def setProcessAttachables(value : Boolean) = {
+        _processAttachables = value
     }
 
     protected def canParse[T](code: String, production: MultiParser[T]): Boolean = {

@@ -21,6 +21,10 @@ abstract class MultiFeatureParser(val featureModel: FeatureModel = null, debugOu
 
     val featureSolverCache = new FeatureSolverCache(featureModel)
 
+    def processAttachables : Boolean = {
+        false
+    }
+
     class SeqParser[T, U](thisParser: => MultiParser[T], thatParser: => MultiParser[U]) extends MultiParser[~[T, U]] {
         name = "~"
 
@@ -72,18 +76,22 @@ abstract class MultiFeatureParser(val featureModel: FeatureModel = null, debugOu
             result.mapfr(feature, (f, r) => r match {
                 case Success(t, restIn) =>
                     val containedTokens: TokenReader[Elem, TypeContext] = in.skipHidden(f, featureSolverCache)
-                    val range = if (restIn.tokens.isEmpty) Int.MaxValue else restIn.tokens.head.getTokenId
 
-                    if (t.isInstanceOf[WithAttachables]) {
-                        val tokens = containedTokens.attachedTokens(range, f, featureSolverCache)
-                        t.asInstanceOf[WithAttachables].attach(tokens)
-                    }
                     if (t.isInstanceOf[WithPosition]) {
                         t.asInstanceOf[WithPosition].setPositionRange(containedTokens.pos, restIn.pos)
                     }
-                    if (t.isInstanceOf[WithBlockId]) {
-                        val blockId = containedTokens.blockId(range, f, featureSolverCache)
-                        t.asInstanceOf[WithBlockId].setBlockId(blockId)
+
+                    if (processAttachables) {
+                        val range = if (restIn.tokens.isEmpty) Int.MaxValue else restIn.tokens.head.getTokenId
+
+                        if (t.isInstanceOf[WithAttachables]) {
+                            val tokens = containedTokens.attachedTokens(range, f, featureSolverCache)
+                            t.asInstanceOf[WithAttachables].attach(tokens)
+                        }
+                        if (t.isInstanceOf[WithBlockId]) {
+                            val blockId = containedTokens.blockId(range, f, featureSolverCache)
+                            t.asInstanceOf[WithBlockId].setBlockId(blockId)
+                        }
                     }
                     null
                 case _ => null

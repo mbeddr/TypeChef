@@ -12,6 +12,10 @@ import java.util.Set;
 
 public interface ILexerOptions {
 
+    String getEncoding();
+
+    void setEncoding(String value);
+
     Map<String, String> getDefinedMacros();
 
     Set<String> getUndefMacros();

@@ -27,6 +27,13 @@ class TestFeatureExpr extends TestCase {
     def BaseFeature() = True
     def DeadFeature() = False
 
+    def testTautology(): Unit = {
+        val fac = FeatureExprFactory.default
+        val A = fac.createDefinedExternal("A")
+        val B = fac.createDefinedExternal("B")
+        val F = A.not().and(B.not()).or(A.or(B))
+        assertTrue(F.isTautology())
+    }
 
     def testSimplifyIf() {
         assertSimplify(FeatureExprFactory.default.createLessThanEquals(

@@ -40,25 +40,21 @@ public class FileLexerSource extends LexerSource {
         super(new BufferedReader(reader), true, new SourceIdentifier(new File(path)));
         this.path = path;
     }
-    /**
-     * Creates a new Source for lexing the given File
-     * <p/>
-     * Preprocessor directives are honoured within the file.
-     *
-     * @param file the file object
-     * @param the  path to use in error messages - it might be different when loading files from a ChRoot.
-     */
+
     public FileLexerSource(File file, String path) throws IOException {
-        this(new FileReader(file), path);
+        this(new FileInputStream(file), path);
     }
 
-    /**
-     * Creates a new Source for lexing the given File.
-     * <p/>
-     * Preprocessor directives are honoured within the file.
-     */
+    public FileLexerSource(File file, String path, String encoding) throws IOException {
+        this(new FileInputStream(file), path, encoding);
+    }
+
     public FileLexerSource(InputStream stream, String path) throws IOException {
         this(new InputStreamReader(stream), path);
+    }
+
+    public FileLexerSource(InputStream stream, String path, String encoding) throws IOException {
+        this(new InputStreamReader(stream, encoding), path);
     }
 
     public FileLexerSource(File file) throws IOException {

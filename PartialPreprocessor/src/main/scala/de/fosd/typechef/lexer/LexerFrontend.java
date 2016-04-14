@@ -22,6 +22,7 @@ import de.fosd.typechef.lexer.options.ILexerOptions;
 import de.fosd.typechef.lexer.options.PartialConfiguration;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.*;
 
 /**
@@ -33,6 +34,13 @@ public class LexerFrontend {
     private PartialCodeChecker codeChecker;
     private SourceIdentifier identifier;
     private TokenSelector tokenSelector;
+    private String encoding;
+
+    public LexerFrontend(PartialCodeChecker codeChecker, SourceIdentifier identifier, TokenSelector tokenSelector, String encoding) {
+        this.codeChecker = codeChecker;
+        this.identifier = identifier;
+        this.tokenSelector = tokenSelector;
+    }
 
     public LexerFrontend(PartialCodeChecker codeChecker, SourceIdentifier identifier, TokenSelector tokenSelector) {
         this.codeChecker = codeChecker;
@@ -178,11 +186,11 @@ public class LexerFrontend {
 
 
         for (String include : options.getIncludedHeaders())
-            pp.addInput(new VALexer.FileSource(new File(include)));
+            pp.addInput(new VALexer.FileSource(new File(include)), options.getEncoding());
 
 
         for (VALexer.LexerInput input : options.getInput())
-            pp.addInput(input);
+            pp.addInput(input, options.getEncoding());
         if (options.getInput().isEmpty())
             pp.addInput(new VALexer.StreamSource(System.in, "<console>"));
 
@@ -450,13 +458,36 @@ public class LexerFrontend {
         final VALexer.LexerInput input;
         final boolean printToStdOutput;
         final FeatureModel featureModel;
+        private String encoding;
+
+        public DefaultLexerOptions(final VALexer.LexerInput input,
+                                   final boolean printToStdOutput,
+                                   final FeatureModel featureModel,
+                                   final String encoding) {
+            this.input = input;
+            this.printToStdOutput = printToStdOutput;
+            this.featureModel = featureModel;
+            this.encoding = encoding;
+        }
 
         public DefaultLexerOptions(final VALexer.LexerInput input,
                                    final boolean printToStdOutput,
                                    final FeatureModel featureModel) {
-            this.input = input;
-            this.printToStdOutput = printToStdOutput;
-            this.featureModel = featureModel;
+            this(input, printToStdOutput, featureModel, null);
+        }
+
+        @Override
+        public String getEncoding() {
+            if (this.encoding == null) {
+                return Charset.defaultCharset().name();
+            } else {
+                return this.encoding;
+            }
+        }
+
+        @Override
+        public void setEncoding(String value) {
+            this.encoding = value;
         }
 
         private Map<String, String> definedMacros = new HashMap<String, String>();
@@ -586,6 +617,16 @@ public class LexerFrontend {
             features.add(Feature.TRIGRAPHS);
             features.add(Feature.LINEMARKERS);
             features.add(Feature.GNUCEXTENSIONS);
+
+        }
+
+        @Override
+        public String getEncoding() {
+            return Charset.defaultCharset().name();
+        }
+
+        @Override
+        public void setEncoding(String value) {
 
         }
 

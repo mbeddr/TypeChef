@@ -21,7 +21,7 @@ import java.util.List;
 public interface VALexer {
 
     void addInput(LexerInput source) throws IOException;
-
+    void addInput(LexerInput source, String encoding) throws IOException;
 
     public static interface LexerFactory {
         public VALexer create(FeatureModel featureModel);

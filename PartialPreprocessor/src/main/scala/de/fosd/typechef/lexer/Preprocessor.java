@@ -37,6 +37,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.Charset;
 import java.util.*;
 
 import static de.fosd.typechef.lexer.Token.*;
@@ -2983,13 +2984,19 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
      */
     @Override
     public void addInput(LexerInput source) throws IOException {
+        addInput(source, Charset.defaultCharset().name());
+    }
+
+    @Override
+    public void addInput(LexerInput source, String encoding) throws IOException {
         //ugly but will do for now
         LexerSource lexerSource = null;
 
         if (source instanceof FileSource) {
-            lexerSource = new FileLexerSource(((FileSource) source).file);
+            File file = ((FileSource) source).file;
+            lexerSource = new FileLexerSource(file, file.getPath(), encoding);
         } else if (source instanceof StreamSource) {
-            lexerSource = new FileLexerSource(((StreamSource) source).inputStream, ((StreamSource) source).filename);
+            lexerSource = new FileLexerSource(((StreamSource) source).inputStream, ((StreamSource) source).filename, encoding);
         } else if (source instanceof TextSource) {
             lexerSource = new StringLexerSource(((TextSource) source).code, true);
         } else {

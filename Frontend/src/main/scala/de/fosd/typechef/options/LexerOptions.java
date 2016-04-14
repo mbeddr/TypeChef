@@ -10,6 +10,7 @@ import gnu.getopt.LongOpt;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.*;
 
 /**
@@ -31,6 +32,16 @@ public abstract class LexerOptions extends Options implements ILexerOptions {
     private static final char PP_NOSTDOUT = genOptionId();
     private final static char PP_XTC = genOptionId();
     private final static char PP_ADJUSTLINES = genOptionId();
+
+    @Override
+    public String getEncoding() {
+        return Charset.defaultCharset().name();
+    }
+
+    @Override
+    public void setEncoding(String value) {
+
+    }
 
     @Override
     protected List<Options.OptionGroup> getOptionGroups() {

@@ -44,7 +44,7 @@ class TokenReader[+T <: AbstractToken, U](val tokens: List[T], val offst: Int, v
     }
 
     def firstBiggerOrEqual(arr: Array[AbstractToken], target: Int): Int = {
-        if (arr(arr.length - 1).getTokenId < target) {
+        if (arr.length == 0 || arr(arr.length - 1).getTokenId < target) {
             -1
         } else {
             var l = 0
@@ -65,7 +65,7 @@ class TokenReader[+T <: AbstractToken, U](val tokens: List[T], val offst: Int, v
     }
 
     def lastSmaller(arr: Array[AbstractToken], target: Int): Int = {
-        if (arr(0).getTokenId >= target) {
+        if (arr.length == 0 || arr(0).getTokenId >= target) {
             -1
         } else {
             var l = 0

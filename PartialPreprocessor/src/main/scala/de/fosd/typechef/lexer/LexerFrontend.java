@@ -79,31 +79,35 @@ public class LexerFrontend {
     }
 
     public static class LexerSuccess extends LexerResult {
-        private final List<LexerToken> tokens;
+        private List<LexerToken> tokens;
+        private List<Pair<FeatureExpr, LexerWarning>> warnings;
 
-        public LexerSuccess(List<LexerToken> tokens) {
+        public LexerSuccess(List<LexerToken> tokens, List<Pair<FeatureExpr, LexerWarning>> warnings) {
             this.tokens = tokens;
+            this.warnings = warnings;
         }
 
         public List<LexerToken> getTokens() {
             return tokens;
         }
+
+        public List<Pair<FeatureExpr, LexerWarning>> getWarnings() {
+            return warnings;
+        }
     }
 
-    public static class LexerError extends LexerResult {
+    public static abstract class LexerIssue extends LexerResult {
+        protected int col;
+        protected String msg;
+        protected String file;
+        protected int line;
 
-        private final int col;
-        private final String msg;
-        private final String file;
-        private final int line;
-
-        public LexerError(String msg, String file, int line, int col) {
+        public LexerIssue(String msg, String file, int line, int col) {
             this.msg = msg;
             this.file = file;
             this.line = line;
             this.col = col;
         }
-
 
         public int getColumn() {
             return col;
@@ -124,10 +128,29 @@ public class LexerFrontend {
         public String getPositionStr() {
             return getFile() + ":" + getLine() + ":" + getColumn();
         }
+    }
+
+    public static class LexerError extends LexerIssue {
+
+        public LexerError(String msg, String file, int line, int col) {
+            super(msg, file, line, col);
+        }
 
         @Override
         public String toString() {
             return "Lexer Error: " + getMessage();
+        }
+    }
+
+    public static class LexerWarning extends LexerIssue {
+
+        public LexerWarning(String msg, String file, int line, int col) {
+            super(msg, file, line, col);
+        }
+
+        @Override
+        public String toString() {
+            return "Lexer Warning: " + getMessage();
         }
     }
 
@@ -288,7 +311,7 @@ public class LexerFrontend {
         }
 
         // creating conditional result by nesting the result with all the errors received so far
-        Conditional<LexerResult> result = createResult(listener.getLexerErrorList(), resultTokenList, options.getFullFeatureModel());
+        Conditional<LexerResult> result = createResult(listener.getLexerErrorList(), listener.getLexerWarningList(), resultTokenList, options.getFullFeatureModel());
         if (crash != null)
             result = new One<LexerResult>(crash);
 
@@ -298,12 +321,13 @@ public class LexerFrontend {
         return result;
     }
 
-    private Conditional<LexerResult> createResult(List<PreprocessorListener.Pair<FeatureExpr, LexerError>> lexerErrorList, List<LexerToken> resultTokenList, FeatureModel fm) {
-        Conditional<LexerResult> result = new One<LexerResult>(new LexerSuccess(resultTokenList));
+    private Conditional<LexerResult> createResult(List<Pair<FeatureExpr, LexerError>> lexerErrorList, List<Pair<FeatureExpr, LexerWarning>> lexerWarningList, List<LexerToken> resultTokenList, FeatureModel fm) {
+        LexerSuccess success = new LexerSuccess(resultTokenList, lexerWarningList);
+        Conditional<LexerResult> result = new One<LexerResult>(success);
 
-        List<PreprocessorListener.Pair<FeatureExpr, LexerError>> errorList = new ArrayList<PreprocessorListener.Pair<FeatureExpr, LexerError>>(lexerErrorList);
+        List<Pair<FeatureExpr, LexerError>> errorList = new ArrayList<Pair<FeatureExpr, LexerError>>(lexerErrorList);
         Collections.reverse(errorList);
-        for (PreprocessorListener.Pair<FeatureExpr, LexerError> error : errorList)
+        for (Pair<FeatureExpr, LexerError> error : errorList)
             if (error._1.isSatisfiable(fm)) {
                 result = new Choice<LexerResult>(error._1, new One<LexerResult>(error._2), result);
             }

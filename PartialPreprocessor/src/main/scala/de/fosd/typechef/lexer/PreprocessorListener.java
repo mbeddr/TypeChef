@@ -82,15 +82,18 @@ public class PreprocessorListener {
      */
     public void handleWarning(String source, int line, int column, String msg,
                               FeatureExpr featureExpr) throws LexerException {
-        if (featureExpr != null && !featureExpr.isSatisfiable(pp.getFeatureModel()))
+        //do not report warning if the warning cannot occur in valid configurations
+        //that is if (FM => !fexpr) is a tautology
+        if (featureExpr != null && !featureExpr.isSatisfiable(pp.getFeatureModel())) {
             return;
-
-        if (options.isHandleWarningsAsErrors())
+        } else if (options.isHandleWarningsAsErrors()) {
             handleError(source, line, column, msg, featureExpr);
-        else {
+        } else {
             warnings++;
             print((source == null ? "" : source) + ":" + line + ":" + column + ": warning: "
                     + msg, Level.WARNING);
+
+            warningList.add(new Pair<FeatureExpr, LexerFrontend.LexerWarning>(featureExpr, new LexerFrontend.LexerWarning(msg, source, line, column)));
         }
     }
 
@@ -106,33 +109,30 @@ public class PreprocessorListener {
                             FeatureExpr featureExpr) throws LexerException {
         //do not report error if the error cannot occur in valid configurations
         //that is if (FM => !fexpr) is a tautology
-        if (featureExpr != null && !featureExpr.isSatisfiable(pp.getFeatureModel()))
+        if (featureExpr != null && !featureExpr.isSatisfiable(pp.getFeatureModel())) {
             return;
+        } else {
+            errors++;
+            print((source == null ? "" : source) + ":" + line + ":" + column + ": error: " + msg
+                    + "; condition: " + featureExpr, Level.SEVERE);
+            pp.debugPreprocessorDone();
 
-        errors++;
-        print((source == null ? "" : source) + ":" + line + ":" + column + ": error: " + msg
-                + "; condition: " + featureExpr, Level.SEVERE);
-        pp.debugPreprocessorDone();
+            errorList.add(new Pair<FeatureExpr, LexerFrontend.LexerError>(featureExpr, new LexerFrontend.LexerError(msg, source, line, column)));
+            invalidConfigurations = invalidConfigurations.or(featureExpr);
 
-        errorList.add(new Pair<FeatureExpr, LexerFrontend.LexerError>(featureExpr, new LexerFrontend.LexerError(msg, source, line, column)));
-        invalidConfigurations = invalidConfigurations.or(featureExpr);
-        if (invalidConfigurations.isTautology(pp.getFeatureModel()))
-            throw new LexerException("Lexer exception in all configurations. Quitting.");
+            if (invalidConfigurations.isTautology(pp.getFeatureModel())) {
+                throw new LexerException("Lexer exception in all configurations. Quitting.");
+            }
+        }
     }
 
     public void handleSourceChange(Source source, String event) {
     }
 
-
-    static class Pair<A, B> {
-        final B _2;
-        final A _1;
-
-        public Pair(A _1, B _2) {
-            this._1 = _1;
-            this._2 = _2;
-        }
-    }
+    /**
+     * ordered list of warnings occurring in the lexer and their conditions
+     */
+    private final List<Pair<FeatureExpr, LexerFrontend.LexerWarning>> warningList = new ArrayList<Pair<FeatureExpr, LexerFrontend.LexerWarning>>();
 
     /**
      * ordered list of errors occurring in the lexer and their conditions
@@ -145,6 +145,10 @@ public class PreprocessorListener {
 
     List<Pair<FeatureExpr, LexerFrontend.LexerError>> getLexerErrorList() {
         return errorList;
+    }
+
+    List<Pair<FeatureExpr, LexerFrontend.LexerWarning>> getLexerWarningList() {
+        return warningList;
     }
 
 }

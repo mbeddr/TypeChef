@@ -141,7 +141,7 @@ class CParserWrapper extends CParser {
                 case Define(key: String, value: String, fromHeader: Boolean) => {
                     "#define " + key + " " + value
                 }
-                case Pragma(value : String, fromHeader : Boolean) => {
+                case Pragma(value: String, fromHeader: Boolean) => {
                     "#pragma " + value
                 }
                 case _ => {
@@ -259,105 +259,109 @@ class CParserWrapper extends CParser {
 
     private def visitSpecifier(specifier: Specifier): String = {
         "(" + visitAttachables(specifier) + (
-        specifier match {
-            case VoidSpecifier(_) => {
-                "void"
-            }
-            case IntSpecifier(_) => {
-                "int32"
-            }
-            case ShortSpecifier(_) => {
-                "int16"
-            }
-            case FloatSpecifier(_) => {
-                "float"
-            }
-            case Int128Specifier(_) => {
-                "long long"
-            }
-            case CharSpecifier(_) => {
-                "int8"
-            }
-            case DoubleSpecifier(_) => {
-                "double"
-            }
-            case LongSpecifier(_) => {
-                "long"
-            }
-            case ConstSpecifier() => {
-                "const"
-            }
-            case TypedefSpecifier() => {
-                "typedef"
-            }
-            case EnumSpecifier(id: Option[Id], enumerators: Option[List[Opt[Enumerator]]], _) => {
-                "enum" + collectTrueOption(id, visitExpression) + "{" +
-                    (if (enumerators.isDefined)
-                        collectTrueOptions(enumerators.get, visitEnumerator)
-                    else "") +
-                    "}"
-            }
-            case TypeDefTypeSpecifier(name: Id) => {
-                visitExpression(name)
-            }
-            case ExternSpecifier() => {
-                "extern"
-            }
-            case SignedSpecifier() => {
-                "signed"
-            }
-            case UnsignedSpecifier() => {
-                "unsigned"
-            }
-            case StaticSpecifier() => {
-                "static"
-            }
-            case StructOrUnionSpecifier(isUnion: Boolean, name: Option[Id], members: Option[List[Opt[StructDeclaration]]], attributesBeforeBody: List[Opt[AttributeSpecifier]], attributesAfterBody: List[Opt[AttributeSpecifier]]) => {
-                if (isUnion) {
-                    "union " + collectTrueOption(name, visitExpression) + " {" +
-                        (if (members.isDefined) {
-                            collectTrueOptions(members.get, visitStructDeclaration, "\n")
-                        } else {
-                            ""
-                        }) +
-                        "};"
-                } else {
-                    "struct " + collectTrueOption(name, visitExpression) + " {" +
-                        (if (members.isDefined) {
-                            collectTrueOptions(members.get, visitStructDeclaration, "\n")
-                        } else {
-                            ""
-                        }) +
-                        "};"
+            specifier match {
+                case VoidSpecifier(_) => {
+                    "void"
+                }
+                case IntSpecifier(_) => {
+                    "int32"
+                }
+                case ShortSpecifier(_) => {
+                    "int16"
+                }
+                case FloatSpecifier(_) => {
+                    "float"
+                }
+                case Int128Specifier(_) => {
+                    "long long"
+                }
+                case CharSpecifier(_) => {
+                    "int8"
+                }
+                case DoubleSpecifier(_) => {
+                    "double"
+                }
+                case LongSpecifier(_) => {
+                    "long"
+                }
+                case ConstSpecifier() => {
+                    "const"
+                }
+                case TypedefSpecifier() => {
+                    "typedef"
+                }
+                case EnumSpecifier(id: Option[Id], enumerators: Option[List[Opt[Enumerator]]], _) => {
+                    "enum" + collectTrueOption(id, visitExpression) + "{" +
+                        (if (enumerators.isDefined)
+                            collectTrueOptions(enumerators.get, visitEnumerator)
+                        else "") +
+                        "}"
+                }
+                case TypeDefTypeSpecifier(name: Id) => {
+                    visitExpression(name)
+                }
+                case ExternSpecifier() => {
+                    "extern"
+                }
+                case SignedSpecifier() => {
+                    "signed"
+                }
+                case UnsignedSpecifier() => {
+                    "unsigned"
+                }
+                case StaticSpecifier() => {
+                    "static"
+                }
+                case StructOrUnionSpecifier(isUnion: Boolean, name: Option[Id], members: Option[List[Opt[StructDeclaration]]], attributesBeforeBody: List[Opt[AttributeSpecifier]], attributesAfterBody: List[Opt[AttributeSpecifier]]) => {
+                    if (isUnion) {
+                        "union " + collectTrueOption(name, visitExpression) + " {" +
+                            (if (members.isDefined) {
+                                collectTrueOptions(members.get, visitStructDeclaration, "\n")
+                            } else {
+                                ""
+                            }) +
+                            "};"
+                    } else {
+                        "struct " + collectTrueOption(name, visitExpression) + " {" +
+                            (if (members.isDefined) {
+                                collectTrueOptions(members.get, visitStructDeclaration, "\n")
+                            } else {
+                                ""
+                            }) +
+                            "};"
+                    }
+                }
+                case _ => {
+                    "Unknown Specifier " + specifier.getClass.getName
                 }
             }
-            case _ => {
-                "Unknown Specifier " + specifier.getClass.getName
-            }
-        }
-        ) + ")"
+            ) + ")"
     }
 
     private def visitAttachables(node: AST): String = {
-        val tokens = node.tokens
-        val a1 = (for {
-            t <- tokens
-        } yield
-            t match {
-                case NewLine(_) => "(" + t.id + ") nl \n"
-                case Comment(text: String, _) => "(" + t.id + ") //" + text + "\n"
-            }).mkString
+        if (node == null || node.tokens == null) {
+            ""
+        } else {
+            val tokens = node.tokens
+            val a1 = (for {
+                t <- tokens
+            } yield
+                t match {
+                    case NewLine(_) => "(" + t.id + ") nl \n"
+                    case Comment(text: String, _) => "(" + t.id + ") //" + text + "\n"
+                }).mkString
 
-        val a2 = node.blockId
+            val a2 = node.blockId
 
-        val result = a1 + " " + a2 + " "
-        result
+            val result = a1 + " " + a2 + " "
+            result
+        }
     }
 
     private def visitStructDeclaration(declaration: StructDeclaration): String = {
         "(" + visitAttachables(declaration) + (
-        declaration.declaratorList + " " + declaration.qualifierList
-        ) + ")"
+            declaration.declaratorList + " " + declaration.qualifierList
+            ) + ")"
     }
 
     private def visitEnumerator(enumerator: Enumerator): String = {
@@ -366,54 +370,54 @@ class CParserWrapper extends CParser {
 
     private def visitExpression(expression: Expr): String = {
         "(" + visitAttachables(expression) + (
-        expression match {
-            case Constant(value: String) => {
-                value
+            expression match {
+                case Constant(value: String) => {
+                    value
+                }
+                case Id(name: String, _) => {
+                    name //+ " " + token.isHeaderElement
+                }
+                case PostfixExpr(p: Expr, s: PostfixSuffix) => {
+                    visitExpression(p) + visitPostfixSuffix(s)
+                }
+                case ParensExpr(e: Expr) => {
+                    "(" + visitExpression(e) + ")"
+                }
+                case AssignExpr(target: Expr, operation: String, source: Expr) => {
+                    visitExpression(target) + " " + operation + " " + visitExpression(source)
+                }
+                case UnaryExpr(kind: String, e: Expr) => {
+                    kind + visitExpression(e)
+                }
+                case UnaryOpExpr(kind: String, e: Expr) => {
+                    kind + visitExpression(e)
+                }
+                case ExprList(exprs: List[Opt[Expr]]) => {
+                    collectTrueOptions(exprs, visitExpression, ",")
+                }
+                case PointerDerefExpr(e: Expr) => {
+                    "*" + visitExpression(e)
+                }
+                case PointerCreationExpr(e: Expr) => {
+                    "&" + visitExpression(e)
+                }
+                case CastExpr(typeName: TypeName, e: Expr) => {
+                    "(cast)" + visitExpression(e)
+                }
+                case NAryExpr(e: Expr, others: List[Opt[NArySubExpr]]) => {
+                    visitExpression(e) + collectTrueOptions(others, visitNArySubExpr)
+                }
+                case StringLit(name: List[Opt[String]]) => {
+                    collectTrueOptions(name, (e: String) => e)
+                }
+                case Type(p: ParameterDeclaration) => {
+                    visitParameterDeclaration(p)
+                }
+                case _ => {
+                    "Unknown Expression " + expression.getClass.getName
+                }
             }
-            case Id(name: String, _) => {
-                name //+ " " + token.isHeaderElement
-            }
-            case PostfixExpr(p: Expr, s: PostfixSuffix) => {
-                visitExpression(p) + visitPostfixSuffix(s)
-            }
-            case ParensExpr(e: Expr) => {
-                "(" + visitExpression(e) + ")"
-            }
-            case AssignExpr(target: Expr, operation: String, source: Expr) => {
-                visitExpression(target) + " " + operation + " " + visitExpression(source)
-            }
-            case UnaryExpr(kind: String, e: Expr) => {
-                kind + visitExpression(e)
-            }
-            case UnaryOpExpr(kind: String, e: Expr) => {
-                kind + visitExpression(e)
-            }
-            case ExprList(exprs: List[Opt[Expr]]) => {
-                collectTrueOptions(exprs, visitExpression, ",")
-            }
-            case PointerDerefExpr(e: Expr) => {
-                "*" + visitExpression(e)
-            }
-            case PointerCreationExpr(e: Expr) => {
-                "&" + visitExpression(e)
-            }
-            case CastExpr(typeName: TypeName, e: Expr) => {
-                "(cast)" + visitExpression(e)
-            }
-            case NAryExpr(e: Expr, others: List[Opt[NArySubExpr]]) => {
-                visitExpression(e) + collectTrueOptions(others, visitNArySubExpr)
-            }
-            case StringLit(name: List[Opt[String]]) => {
-                collectTrueOptions(name, (e: String) => e)
-            }
-            case Type(p : ParameterDeclaration) => {
-                visitParameterDeclaration(p)
-            }
-            case _ => {
-                "Unknown Expression " + expression.getClass.getName
-            }
-        }
-        ) + ")"
+            ) + ")"
     }
 
     private def visitNArySubExpr(expr: NArySubExpr): String = {

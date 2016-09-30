@@ -23,7 +23,6 @@
 
 package de.fosd.typechef.lexer;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -79,7 +78,7 @@ public class LexerSource extends Source {
       * ppvalid is: false in StringLexerSource, true in FileLexerSource
       */
     public LexerSource(Reader reader, boolean ppvalid, SourceIdentifier identifier) {
-       this(reader, ppvalid, identifier, false);
+        this(reader, ppvalid, identifier, false);
     }
 
     public SourceIdentifier getIdentifier() {
@@ -446,11 +445,11 @@ public class LexerSource extends Source {
             if (c == close) {
                 break;
             } else if (c == '\\') {
-                text.append('\\');
-                if (!include) {
-                    char d = (char) escape(text);
-                    buf.append(d);
-                }
+                // mbeddr - ensure that we keep all backslashes
+                text.append("\\");
+                //char d = (char) escape(text);
+                //buf.append(d);
+                buf.append("\\");
             } else if (c == -1) {
                 unread(c);
                 // error("End of file in string literal after " + buf);

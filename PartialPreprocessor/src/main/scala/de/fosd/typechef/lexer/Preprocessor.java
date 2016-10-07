@@ -1594,11 +1594,16 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
     }
 
     private Token parse_undef() throws IOException, LexerException {
+        Source currentSource = getSource();
         Token tok = source_token_nonwhite();
+
         if (tok.getType() != IDENTIFIER) {
             error(tok, "Expected identifier, not " + tok.getText());
-            if (tok.getType() == NL || tok.getType() == EOF)
+            if (tok.getType() == NL || tok.getType() == EOF) {
                 return tok;
+            } else {
+                return source_skipline(true);
+            }
         } else {
             // Macro m = macros.get(tok.getText());
             // if (m != null) {
@@ -1606,8 +1611,9 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
             macros = macros.undefine(tok.getText(), state
                     .getFullPresenceCondition());
             // }
+
+            return new SimpleToken(Token.UNDEFINE, tok.getText(), currentSource);
         }
-        return source_skipline(true);
     }
 
     /**

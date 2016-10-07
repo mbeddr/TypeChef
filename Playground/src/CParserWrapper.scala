@@ -141,6 +141,9 @@ class CParserWrapper extends CParser {
                 case Define(key: String, value: String, fromHeader: Boolean) => {
                     "#define " + key + " " + value
                 }
+                case Undefine(key: String, fromHeader : Boolean) => {
+                    "#undef " + key
+                }
                 case Pragma(value: String, fromHeader: Boolean) => {
                     "#pragma " + value
                 }

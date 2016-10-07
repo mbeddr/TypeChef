@@ -191,6 +191,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
             })
                 |
                 define |
+                undefine |
                 pragma |
                 asm_expr |
                 declaration |
@@ -775,6 +776,13 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
                 } else {
                     Define(t.getText, null, t.isHeaderElement)
                 }
+            }
+        }
+
+    def undefine: MultiParser[Undefine] =
+        token("undefine", _.isUndefine) ^^ {
+            t => {
+                Undefine(t.getText, t.isHeaderElement)
             }
         }
 

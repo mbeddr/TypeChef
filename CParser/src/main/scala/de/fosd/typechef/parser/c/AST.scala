@@ -369,6 +369,8 @@ case class Include(path: String, fromHeader : Boolean) extends ExternalDef
 
 case class Define(key: String, value: String, fromHeader : Boolean) extends ExternalDef
 
+case class Undefine(key: String, fromHeader : Boolean) extends ExternalDef
+
 case class Pragma(value : String, fromHeader : Boolean) extends ExternalDef
 
 case class EmptyExternalDef() extends ExternalDef

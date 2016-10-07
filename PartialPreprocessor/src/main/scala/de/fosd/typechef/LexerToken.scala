@@ -41,7 +41,7 @@ trait LexerToken {
     def setBlockId(id: String)
 
     // @mbeddr unique identifier of the token
-    def getId() : Long
+    def getId(): Long
 
     /**
      * properties of tokens used by other clients like the C parser
@@ -53,6 +53,7 @@ trait LexerToken {
     def isComment: Boolean
     def isInclude: Boolean
     def isDefine: Boolean
+    def isUndefine: Boolean
     def isPragma: Boolean
 
     /**

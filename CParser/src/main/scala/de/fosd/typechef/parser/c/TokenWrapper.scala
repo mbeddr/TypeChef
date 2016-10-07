@@ -37,6 +37,8 @@ class CToken(val token: LexerToken, val number: Int) extends ProfilingToken with
 
     def isDefine: Boolean = token.isDefine
 
+    def isUndefine: Boolean = token.isUndefine
+
     def isPragma: Boolean = token.isPragma
 
     def isHeaderElement: Boolean = {

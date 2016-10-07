@@ -183,6 +183,11 @@ public abstract class Token implements LexerToken {
     }
 
     @Override
+    public boolean isUndefine() {
+        return getType() == Token.UNDEFINE;
+    }
+
+    @Override
     public boolean isPragma() {
         return getType() == Token.PRAGMA;
     }
@@ -434,19 +439,22 @@ public abstract class Token implements LexerToken {
      * <p/>
      * Please note that not all token types below 255 are used.
      */
-    public static final int _TOKENS = 304;
 
-    public static final int INCLUDE = 305;
+    public static final int INCLUDE = 304;
 
-    public static final int DEFINE = 306;
+    public static final int DEFINE = 305;
 
-    public static final int DEFINE_KEY = 307;
+    public static final int DEFINE_KEY = 306;
 
-    public static final int DEFINE_VALUE = 308;
+    public static final int DEFINE_VALUE = 307;
 
-    public static final int PRAGMA = 309;
+    public static final int PRAGMA = 308;
 
-    public static final int PRAGMA_CONTENT = 310;
+    public static final int PRAGMA_CONTENT = 309;
+
+    public static final int UNDEFINE = 310;
+
+    public static final int _TOKENS = 311;
 
     /**
      * The position-less space token.
@@ -538,6 +546,13 @@ public abstract class Token implements LexerToken {
         names[P_ELIF] = "P_ELIF";
         names[P_ENDIF] = "P_ENDIF";
         names[P_FEATUREEXPR] = "P_FEATUREEXPR";
+        names[INCLUDE] = "INCLUDE";
+        names[DEFINE] = "DEFINE";
+        names[DEFINE_KEY] = "DEFINE_KEY";
+        names[DEFINE_VALUE] = "DEFINE_VALUE";
+        names[PRAGMA] = "PRAGMA";
+        names[PRAGMA_CONTENT] = "PRAGMA_CONTENT";
+        names[UNDEFINE] = "UNDEFINE";
         names[INVALID] = "INVALID";
     }
 

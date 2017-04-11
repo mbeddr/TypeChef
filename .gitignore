@@ -41,6 +41,8 @@ systems
 .idea_modules
 KiamaExp
 TypeChef.iml
+TypeChef.ipr
+TypeChef.iws
 RemoteSystemsTempFiles
 vim73
 superc

@@ -2,6 +2,7 @@ package de.fosd.typechef.parser.c
 
 
 import com.mbeddr.core.importer.PartialCodeChecker
+import com.sun.tools.internal.ws.resources.JavacompilerMessages
 import de.fosd.typechef.VALexer.{FileSource, LexerInput, TextSource}
 import de.fosd.typechef.conditional.{Opt, _}
 import de.fosd.typechef.error.WithPosition
@@ -13,7 +14,8 @@ import de.fosd.typechef.lexer._
 import de.fosd.typechef.parser.{~, _}
 import org.kiama.rewriting.Rewriter._
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters
+import scala.collection.JavaConverters._
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  * based on ANTLR grammar from John D. Mitchell (john@non.net), Jul 12, 1997
@@ -141,15 +143,15 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         val options: LexerFrontend.DefaultLexerOptions = new LexerFrontend.DefaultLexerOptions(lexerSource, false, featureModel)
 
         if (identifier.getFile != null && includes != null) {
-            options.getIncludePaths.addAll(includes)
-            options.getQuoteIncludePath.addAll(includes)
+            options.getIncludePaths.addAll(includes.asJava)
+            options.getQuoteIncludePath.addAll(includes.asJava)
         }
 
         val lexerResult: Conditional[LexerFrontend.LexerResult] = lexerFrontend.run(options, true)
 
         for (opt <- lexerResult.toOptList) {
             if (opt.entry.isInstanceOf[LexerSuccess]) {
-                return CLexerAdapter.prepareTokens(opt.entry.asInstanceOf[LexerSuccess].getTokens)
+                return CLexerAdapter.prepareTokens(opt.entry.asInstanceOf[LexerSuccess].getTokens.asScala)
             }
         }
 
@@ -159,7 +161,7 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
     def parse[T](tokenStream: TokenReader[AbstractToken, CTypeContext], mainProduction: MultiParser[T]): MultiParseResult[T] =
         mainProduction(tokenStream, True)
 
-    def parse[T](tokenStream: TokenReader[AbstractToken, CTypeContext], mainProduction: (TokenReader[AbstractToken, CTypeContext], FeatureExpr) => MultiParseResult[T]): MultiParseResult[T] =
+    def parseC[T](tokenStream: TokenReader[AbstractToken, CTypeContext], mainProduction: (TokenReader[AbstractToken, CTypeContext], FeatureExpr) => MultiParseResult[T]): MultiParseResult[T] =
         mainProduction(tokenStream, True)
 
     def parseAny(tokenStream: TokenReader[AbstractToken, CTypeContext], mainProduction: (TokenReader[AbstractToken, CTypeContext], FeatureExpr) => MultiParseResult[Any]): MultiParseResult[Any] =

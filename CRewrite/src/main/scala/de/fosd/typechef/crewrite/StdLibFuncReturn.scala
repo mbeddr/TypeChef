@@ -37,15 +37,15 @@ sealed abstract class StdLibFuncReturn(env: ASTEnv, dum: DeclUseMap, udm: UseDec
 
         // we track variables with the return value of a stdlib function call that is in function
         val retvar = manytd(query[AST] {
-            case AssignExpr(i@Id(_), "=", source) =>
+            case AssignExpr(i@Id(_, _), "=", source) =>
                 filterAllASTElems[PostfixExpr](source).foreach {
-                    case PostfixExpr(Id(name), FunctionCall(_)) if function.contains(name) =>
+                    case PostfixExpr(Id(name, _), FunctionCall(_)) if function.contains(name) =>
                         res ++= fromCache(i)
                     case _ =>
                 }
             case InitDeclaratorI(AtomicNamedDeclarator(_, i: Id, _), _, Some(init)) =>
                 filterAllASTElems[PostfixExpr](init).foreach {
-                    case PostfixExpr(Id(name), FunctionCall(_)) if function.contains(name) =>
+                    case PostfixExpr(Id(name, _), FunctionCall(_)) if function.contains(name) =>
                         res ++= fromCache(i)
                     case _ =>
                 }
@@ -86,7 +86,7 @@ sealed abstract class StdLibFuncReturn(env: ASTEnv, dum: DeclUseMap, udm: UseDec
     def checkForPotentialCalls(a: AST): List[Id] = {
         var potentialfcalls: List[Id] = List()
         val getfcalls = manytd(query[AST] {
-            case PostfixExpr(i@Id(name), FunctionCall(_)) =>
+            case PostfixExpr(i@Id(name, _), FunctionCall(_)) =>
                 // the function call is in our list of function calls we track
                 // and the call is not part of an AssignExpr or InitDeclarator, which will be handled with
                 // the dataflow variant of this analysis

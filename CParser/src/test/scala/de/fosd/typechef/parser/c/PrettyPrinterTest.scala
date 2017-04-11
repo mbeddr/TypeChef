@@ -291,7 +291,7 @@ class PrettyPrinterTest extends TestHelper {
 
 
     private def parse[T](code: String, production: (TokenReader[CToken, CTypeContext], FeatureExpr) => p.MultiParseResult[T]): Option[T] = {
-        val actual = p.parse(lex(code.stripMargin), production)
+        val actual = p.parseC(lex(code.stripMargin), production)
         (actual: @unchecked) match {
             case p.Success(ast, unparsed) => {
                 assertTrue("parser did not reach end of token stream: " + unparsed, unparsed.atEnd)

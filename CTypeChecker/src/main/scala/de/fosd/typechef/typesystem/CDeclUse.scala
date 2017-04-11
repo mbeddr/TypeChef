@@ -257,7 +257,7 @@ trait CDeclUse extends CDeclUseInterface with CEnv with CEnvCache {
 
     override def addEnumUse(entry: AST, env: Env, feature: FeatureExpr) {
         entry match {
-            case i@Id(name) =>
+            case i@Id(name, _) =>
                 if (env.enumEnv.contains(name)) {
                     val enumDeclarationFeature = env.enumEnv.get(name).get._1
                     val enumDeclarationId = env.enumEnv.get(name).get._2

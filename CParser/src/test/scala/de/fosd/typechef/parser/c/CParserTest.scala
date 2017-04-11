@@ -64,7 +64,7 @@ class CParserTest extends TestHelper {
     }
 
     def assertParseableAST[T](code: String, mainProduction: (TokenReader[CToken, CTypeContext], FeatureExpr) => p.MultiParseResult[T]): Option[T] = {
-        val actual = p.parse(lex(code.stripMargin), mainProduction)
+        val actual = p.parseC(lex(code.stripMargin), mainProduction)
         System.out.println(actual)
         (actual: @unchecked) match {
             case p.Success(ast, unparsed) => {

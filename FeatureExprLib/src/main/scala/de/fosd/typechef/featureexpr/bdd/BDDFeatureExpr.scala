@@ -235,7 +235,7 @@ class BDDFeatureExpr(private[featureexpr] val bdd: BDD) extends FeatureExpr {
     private def bddAllSat: Iterator[Array[Byte]] = FExprBuilder.synchronized {toScalaAllSat(bdd.allsat())}
 
     private def toScalaAllSat(allsat: java.util.List[_]): Iterator[Array[Byte]] =
-        scala.collection.JavaConversions.asScalaIterator(allsat.asInstanceOf[java.util.List[Array[Byte]]].iterator())
+        scala.collection.JavaConverters.asScalaIterator(allsat.asInstanceOf[java.util.List[Array[Byte]]].iterator())
 
     /**
      * input allsat format
@@ -426,6 +426,7 @@ class BDDFeatureExpr(private[featureexpr] val bdd: BDD) extends FeatureExpr {
         return Some(enabled, disabled)
     }
     private def writeReplace(): Object = new FeatureExprSerializationProxy(this.toTextExpr)
+    protected def indent(level: Int): String = "\t" * level
 }
 
 class SingleBDDFeatureExpr(id: Int) extends BDDFeatureExpr(lookupFeatureBDD(id)) with SingleFeatureExpr {

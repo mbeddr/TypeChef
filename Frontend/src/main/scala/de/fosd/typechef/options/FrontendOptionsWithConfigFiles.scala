@@ -11,6 +11,9 @@ class FrontendOptionsWithConfigFiles extends FrontendOptions {
     // elsewhere.
     ////////////////////////////////////////
     val predefSettings = new Properties()
+    predefSettings.setProperty("systemRoot", File.separator)
+    predefSettings.setProperty("systemIncludes", "usr" + File.separator + "include")
+    predefSettings.setProperty("predefMacros", "")
     val settings = new Properties(predefSettings)
 
     def systemRoot = settings.getProperty("systemRoot")
@@ -28,30 +31,21 @@ class FrontendOptionsWithConfigFiles extends FrontendOptions {
     var preIncludeDirs: Seq[String] = Nil
     var postIncludeDirs: Seq[String] = Nil
 
-    def initSettings {
-        predefSettings.setProperty("systemRoot", File.separator)
-        predefSettings.setProperty("systemIncludes", "usr" + File.separator + "include")
-        predefSettings.setProperty("predefMacros", "")
-    }
 
     def loadPropList(key: String) = for (x <- settings.getProperty(key, "").split(",")) yield x.trim
 
     def loadSettings(configPath: String) = {
         settings.load(new FileInputStream(configPath))
         preIncludeDirs = loadPropList("preIncludes") ++ preIncludeDirs
-//        println("preIncludes: " + preIncludeDirs)
-//        println("systemIncludes: " + systemIncludes)
         postIncludeDirs = postIncludeDirs ++ loadPropList("postIncludes")
-//        println("postIncludes: " + postIncludeDirs)
     }
 
-    override def parseOptions(args: Array[String]) = {
-        initSettings
-        super.parseOptions(args)
-    }
 
 
     private final val SYSINCL: Char = Options.genOptionId()
+    private final val Op_preIncludes: Char = Options.genOptionId()
+    private final val Op_postIncludes: Char = Options.genOptionId()
+    private final val Op_predefMacros: Char = Options.genOptionId()
 
     protected override def getOptionGroups() = {
         import Options.OptionGroup
@@ -66,6 +60,12 @@ class FrontendOptionsWithConfigFiles extends FrontendOptions {
                 "Header files with platform macros (create with 'cpp -dM -std=gnu99 -'). Default: 'platform.h'."),
             new Option("systemIncludes", LongOpt.REQUIRED_ARGUMENT, SYSINCL, "dir",
                 "System include directory. Default: '$systemRoot/usr/include'."),
+            new Option("preIncludes", LongOpt.REQUIRED_ARGUMENT, Op_preIncludes, "dir",
+                "Extra include directories, before system includes, relative to $systemRoot"),
+            new Option("postIncludes", LongOpt.REQUIRED_ARGUMENT, Op_postIncludes, "dir",
+                "Extra include directories, after system includes, relative to $systemRoot"),
+            new Option("predefMacros", LongOpt.REQUIRED_ARGUMENT, Op_predefMacros, "file",
+                "Header with compiler-defined macros (e.g., generated with `gcc -dM   -x c - -E`)"),
             new Option("settingsFile", LongOpt.REQUIRED_ARGUMENT, 'c', "dir",
                 "Property file specifying system root, platform headers, and system include directories.")
         ))
@@ -89,21 +89,31 @@ class FrontendOptionsWithConfigFiles extends FrontendOptions {
             checkDirectoryExists(g.getOptarg)
             setSystemIncludes(g.getOptarg)
             true
+        } else if (c == Op_preIncludes) {
+            preIncludeDirs = g.getOptarg.split(",") ++ preIncludeDirs
+            true
+        } else if (c == Op_postIncludes) {
+            postIncludeDirs = postIncludeDirs ++ g.getOptarg.split(",")
+            true
+        } else if (c == Op_predefMacros) {
+            setPredefMacroDef(g.getOptarg)
+            true
         } else
             super.interpretOption(c, g)
     }
 
     override def getIncludePaths() = {
+        def adjustPath = (path: String) =>
+            if (path != null && !("" equals path))
+                List(systemRoot + File.separator + path)
+            else
+                List()
+
         val r = new ArrayList[String](super.getIncludePaths)
-        val r2 = (preIncludeDirs ++ List(systemIncludes) ++ postIncludeDirs).flatMap(
-            (path: String) =>
-                if (path != null && !("" equals path))
-                    List(systemRoot + File.separator + path)
-                else
-                    List()
-        )
-        for (a <- r2)
+        for (a <- (systemIncludes +: postIncludeDirs).flatMap(adjustPath))
             r.add(a)
+        for (a<-preIncludeDirs.reverse.flatMap(adjustPath))
+            r.add(0, a)
         r
     }
 

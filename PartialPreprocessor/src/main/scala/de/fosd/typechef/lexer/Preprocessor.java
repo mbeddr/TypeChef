@@ -28,7 +28,6 @@ import de.fosd.typechef.VALexer;
 import de.fosd.typechef.featureexpr.FeatureExpr;
 import de.fosd.typechef.featureexpr.FeatureExprTree;
 import de.fosd.typechef.featureexpr.FeatureModel;
-import de.fosd.typechef.lexer.MacroConstraint.MacroConstraintKind;
 import de.fosd.typechef.lexer.macrotable.MacroContext;
 import de.fosd.typechef.lexer.macrotable.MacroExpansion;
 import de.fosd.typechef.lexer.macrotable.MacroFilter;
@@ -87,8 +86,8 @@ import static de.fosd.typechef.lexer.Token.*;
 /**
  * A C Preprocessor. The Preprocessor outputs a token stream which does not need
  * re-lexing for C or C++. Alternatively, the output text may be reconstructed
- * by concatenating the {@link Token#getText() text} values of the returned
- * {@link Token Tokens}. (See {@link CppReader}, which does this.)
+ * by concatenating the {Token#getText() text} values of the returned
+ * {Token Tokens}. (See { CppReader}, which does this.)
  * XXX: the above is now incorrect, because getText is not a valid operation on tokens which would produce huge strings.
  */
 
@@ -175,9 +174,9 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
     PreprocessorListener listener;
     private PartialCodeChecker codeChecker;
     private SourceIdentifier identifier;
-
-    private List<MacroConstraint> macroConstraints;
     private Map<VirtualFile, FeatureExpr> includedFileMap;
+    private List<MacroConstraint> macroConstraints;
+    private Map<String, FeatureExpr> includedPragmaOnceFiles;
 
     public Preprocessor(MacroFilter macroFilter, FeatureModel fm, PartialCodeChecker codeChecker, SourceIdentifier identifier) {
         this.featureModel = fm;
@@ -203,6 +202,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         this.identifier = identifier;
         this.includedFileMap = new HashMap<VirtualFile, FeatureExpr>();
         this.macroConstraints = new ArrayList<MacroConstraint>();
+        this.includedPragmaOnceFiles = new HashMap<String, FeatureExpr>();
     }
 
     public Preprocessor(MacroFilter macroFilter, FeatureModel fm) {
@@ -219,7 +219,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
     }
 
     /**
-     * Equivalent to 'new Preprocessor(new {@link FileLexerSource}(file))'
+     * Equivalent to 'new Preprocessor(new {FileLexerSource}(file))'
      */
     public Preprocessor(MacroFilter macroFilter, File file, FeatureModel fm) throws IOException {
         this(macroFilter, new FileLexerSource(file), fm);
@@ -1644,6 +1644,21 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                 this.includedFileMap.put(file, currentCondition.or(condition));
             }
         }
+
+        if (this.includedPragmaOnceFiles.containsKey(file.getPath())) {
+            // This file has already been included once with the preprocessor directive #pragma once
+            // We include the file only if we have NOT already included the file under a condition
+            // which contains also the current condition
+            FeatureExpr condition = this.includedPragmaOnceFiles.get(file.getPath());
+            FeatureExpr currentCondition = this.state.getFullPresenceCondition();
+
+            if (currentCondition.andNot(condition).isSatisfiable())
+                sourceManager.push_source(file.getSource(), true);
+
+        } else {
+            sourceManager.push_source(file.getSource(), true);
+        }
+
         return true;
     }
 
@@ -1830,9 +1845,20 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
     protected void pragma(Token nameTok, List<Token> value) throws IOException,
             LexerException {
         String pragmaName = nameTok.getText();
-        if (!"pack".equals(pragmaName)) {
+        // found directive #pragma once -> add the current file with the current condition to a map containing all headers
+        // already included with the directive #pragma once to avoid duplicate header inclusion
+        if (pragmaName.equalsIgnoreCase("once"))
+            updateIncludedPragmaOnceFiles(sourceManager.getSource().getPath(), this.state.getFullPresenceCondition());
+        else if (!"pack".equals(pragmaName)) {
             warning(nameTok, "Unknown #" + "pragma: " + pragmaName);
         }
+    }
+
+    private void updateIncludedPragmaOnceFiles(String path, FeatureExpr condition) {
+        if (this.includedPragmaOnceFiles.containsKey(path))
+            this.includedPragmaOnceFiles.put(path, condition.or(this.includedPragmaOnceFiles.get(path)));
+        else
+            this.includedPragmaOnceFiles.put(path, condition);
     }
 
     private Token parse_pragma() throws IOException, LexerException {
@@ -2148,7 +2174,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         }
     }
 
-    public ExprOrValue parse_featureExprOrValue(int priority, boolean expectExpr) throws IOException,
+    private ExprOrValue parse_featureExprOrValue(int priority, boolean expectExpr) throws IOException,
             LexerException {
 
         /*

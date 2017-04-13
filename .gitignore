@@ -16,8 +16,10 @@ src_managed/
 project/boot/
 project/plugins/project/
 debugsource.txt
-tokenstream.txt
+Tokenstream.txt
 *.log
+Typechef.ipr
+Typechef.iws
 *.dbg
 *.i
 *.pi.ast

@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ArtifactManager">
+    <artifact type="jar" name="TypeChef:jar">
+      <output-path>$PROJECT_DIR$/out/artifacts</output-path>
+      <root id="archive" name="TypeChef.jar">
+        <element id="module-output" name="ConditionalLib" />
+        <element id="module-output" name="FeatureExprLib" />
+        <element id="module-output" name="CRewrite" />
+        <element id="module-output" name="CParser" />
+        <element id="module-output" name="ErrorLib" />
+        <element id="module-output" name="ParserFramework" />
+        <element id="module-output" name="PartialCodeChecker" />
+        <element id="module-output" name="PartialPreprocessor" />
+        <element id="module-output" name="CTypeChecker" />
+        <element id="module-output" name="TypeChef" />
+        <element id="module-output" name="Frontend" />
+        <element id="module-output" name="JavaParser" />
+        <element id="extracted-dir" path="$PROJECT_DIR$/requiredExternalJars/dsprofile_2.11-0.4.0.jar" path-in-jar="/" />
+        <element id="extracted-dir" path="$PROJECT_DIR$/requiredExternalJars/kiama_2.11-1.8.0.jar" path-in-jar="/" />
+        <element id="extracted-dir" path="$PROJECT_DIR$/requiredExternalJars/org.ow2.sat4j.core-2.3.5.jar" path-in-jar="/" />
+        <element id="extracted-dir" path="$PROJECT_DIR$/requiredExternalJars/scala-library-2.11.7.jar" path-in-jar="/" />
+        <element id="extracted-dir" path="$PROJECT_DIR$/requiredExternalJars/scala-parser-combinators_2.11-1.0.4.jar" path-in-jar="/" />
+      </root>
+    </artifact>
+  </component>
+  <component name="ClientPropertiesManager">
+    <properties class="javax.swing.AbstractButton">
+      <property name="hideActionText" class="java.lang.Boolean" />
+    </properties>
+    <properties class="javax.swing.JComponent">
+      <property name="html.disable" class="java.lang.Boolean" />
+    </properties>
+    <properties class="javax.swing.JEditorPane">
+      <property name="JEditorPane.w3cLengthUnits" class="java.lang.Boolean" />
+      <property name="JEditorPane.honorDisplayProperties" class="java.lang.Boolean" />
+      <property name="charset" class="java.lang.String" />
+    </properties>
+    <properties class="javax.swing.JList">
+      <property name="List.isFileList" class="java.lang.Boolean" />
+    </properties>
+    <properties class="javax.swing.JPasswordField">
+      <property name="JPasswordField.cutCopyAllowed" class="java.lang.Boolean" />
+    </properties>
+    <properties class="javax.swing.JSlider">
+      <property name="Slider.paintThumbArrowShape" class="java.lang.Boolean" />
+      <property name="JSlider.isFilled" class="java.lang.Boolean" />
+    </properties>
+    <properties class="javax.swing.JTable">
+      <property name="Table.isFileList" class="java.lang.Boolean" />
+      <property name="JTable.autoStartsEdit" class="java.lang.Boolean" />
+      <property name="terminateEditOnFocusLost" class="java.lang.Boolean" />
+    </properties>
+    <properties class="javax.swing.JToolBar">
+      <property name="JToolBar.isRollover" class="java.lang.Boolean" />
+    </properties>
+    <properties class="javax.swing.JTree">
+      <property name="JTree.lineStyle" class="java.lang.String" />
+    </properties>
+    <properties class="javax.swing.text.JTextComponent">
+      <property name="caretAspectRatio" class="java.lang.Double" />
+      <property name="caretWidth" class="java.lang.Integer" />
+    </properties>
+  </component>
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel target="1.6">
+      <module name="ConditionalLib" target="1.6" />
+      <module name="CParser" target="1.6" />
+      <module name="CRewrite" target="1.6" />
+      <module name="CTypeChecker" target="1.6" />
+      <module name="ErrorLib" target="1.6" />
+      <module name="FeatureExprLib" target="1.6" />
+      <module name="Frontend" target="1.6" />
+      <module name="JavaParser" target="1.6" />
+      <module name="ParserFramework" target="1.6" />
+      <module name="PartialCodeChecker" target="1.6" />
+      <module name="PartialPreprocessor" target="1.6" />
+      <module name="TypeChef" target="1.6" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="InspectionProjectProfileManager">
+    <profile version="1.0">
+      <option name="myName" value="Project Default" />
+    </profile>
+    <version value="1.0" />
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_STRING" value="-Xlint:unchecked" />
+  </component>
+  <component name="KotlinCommonCompilerArguments">
+    <option name="languageVersion" value="1.1" />
+    <option name="apiVersion" value="1.1" />
+  </component>
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CParser.iml" filepath="$PROJECT_DIR$/.idea/modules/CParser.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CParser-build.iml" filepath="$PROJECT_DIR$/.idea/modules/CParser-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CRewrite.iml" filepath="$PROJECT_DIR$/.idea/modules/CRewrite.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CRewrite-build.iml" filepath="$PROJECT_DIR$/.idea/modules/CRewrite-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CTypeChecker.iml" filepath="$PROJECT_DIR$/.idea/modules/CTypeChecker.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CTypeChecker-build.iml" filepath="$PROJECT_DIR$/.idea/modules/CTypeChecker-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ConditionalLib.iml" filepath="$PROJECT_DIR$/.idea/modules/ConditionalLib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ConditionalLib-build.iml" filepath="$PROJECT_DIR$/.idea/modules/ConditionalLib-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ErrorLib.iml" filepath="$PROJECT_DIR$/.idea/modules/ErrorLib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ErrorLib-build.iml" filepath="$PROJECT_DIR$/.idea/modules/ErrorLib-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/FeatureExprLib.iml" filepath="$PROJECT_DIR$/.idea/modules/FeatureExprLib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/FeatureExprLib-build.iml" filepath="$PROJECT_DIR$/.idea/modules/FeatureExprLib-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Frontend.iml" filepath="$PROJECT_DIR$/.idea/modules/Frontend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Frontend-build.iml" filepath="$PROJECT_DIR$/.idea/modules/Frontend-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/JavaParser.iml" filepath="$PROJECT_DIR$/.idea/modules/JavaParser.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/JavaParser-build.iml" filepath="$PROJECT_DIR$/.idea/modules/JavaParser-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ParserFramework.iml" filepath="$PROJECT_DIR$/.idea/modules/ParserFramework.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ParserFramework-build.iml" filepath="$PROJECT_DIR$/.idea/modules/ParserFramework-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/PartialCodeChecker.iml" filepath="$PROJECT_DIR$/.idea/modules/PartialCodeChecker.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/PartialCodeChecker-build.iml" filepath="$PROJECT_DIR$/.idea/modules/PartialCodeChecker-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/PartialPreprocessor.iml" filepath="$PROJECT_DIR$/.idea/modules/PartialPreprocessor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/PartialPreprocessor-build.iml" filepath="$PROJECT_DIR$/.idea/modules/PartialPreprocessor-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Playground2/Playground2.iml" filepath="$PROJECT_DIR$/Playground2/Playground2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/TypeChef.iml" filepath="$PROJECT_DIR$/.idea/modules/TypeChef.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/TypeChef-build.iml" filepath="$PROJECT_DIR$/.idea/modules/TypeChef-build.iml" />
+    </modules>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" default="false" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+  <component name="ScalaCompilerConfiguration">
+    <profile name="SBT 2" modules="TypeChef,ConditionalLib,CParser,CRewrite,CTypeChecker,ErrorLib,FeatureExprLib,Frontend,JavaParser,ParserFramework,PartialCodeChecker,PartialPreprocessor">
+      <option name="postfixOps" value="true" />
+      <option name="implicitConversions" value="true" />
+      <option name="deprecationWarnings" value="true" />
+      <option name="uncheckedWarnings" value="true" />
+      <option name="featureWarnings" value="true" />
+      <option name="optimiseBytecode" value="true" />
+      <parameters>
+        <parameter value="-target:jvm-1.6" />
+        <parameter value="-Yinline-warnings" />
+        <parameter value="-Xfatal-warnings" />
+      </parameters>
+    </profile>
+  </component>
+  <component name="ScalaSbtSettings">
+    <option name="linkedExternalProjectsSettings">
+      <SbtProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="jdk" value="1.8" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/CParser" />
+            <option value="$PROJECT_DIR$/CParser/project" />
+            <option value="$PROJECT_DIR$/CRewrite" />
+            <option value="$PROJECT_DIR$/CRewrite/project" />
+            <option value="$PROJECT_DIR$/CTypeChecker" />
+            <option value="$PROJECT_DIR$/CTypeChecker/project" />
+            <option value="$PROJECT_DIR$/ConditionalLib" />
+            <option value="$PROJECT_DIR$/ConditionalLib/project" />
+            <option value="$PROJECT_DIR$/ErrorLib" />
+            <option value="$PROJECT_DIR$/ErrorLib/project" />
+            <option value="$PROJECT_DIR$/FeatureExprLib" />
+            <option value="$PROJECT_DIR$/FeatureExprLib/project" />
+            <option value="$PROJECT_DIR$/Frontend" />
+            <option value="$PROJECT_DIR$/Frontend/project" />
+            <option value="$PROJECT_DIR$/JavaParser" />
+            <option value="$PROJECT_DIR$/JavaParser/project" />
+            <option value="$PROJECT_DIR$/ParserFramework" />
+            <option value="$PROJECT_DIR$/ParserFramework/project" />
+            <option value="$PROJECT_DIR$/PartialCodeChecker" />
+            <option value="$PROJECT_DIR$/PartialCodeChecker/project" />
+            <option value="$PROJECT_DIR$/PartialPreprocessor" />
+            <option value="$PROJECT_DIR$/PartialPreprocessor/project" />
+            <option value="$PROJECT_DIR$/project" />
+          </set>
+        </option>
+        <option name="resolveSbtClassifiers" value="true" />
+        <option name="sbtVersion" value="0.13.6" />
+      </SbtProjectSettings>
+    </option>
+  </component>
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+  </component>
+  <component name="libraryTable">
+    <library name="SBT: com.google.code.findbugs:jsr305:2.0.3:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/com.google.code.findbugs/jsr305/jars/jsr305-2.0.3.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/com.google.code.findbugs/jsr305/srcs/jsr305-2.0.3-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: com.google.guava:guava:17.0:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/com.google.guava/guava/bundles/guava-17.0.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/com.google.guava/guava/srcs/guava-17.0-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: com.googlecode.kiama:kiama_2.11:1.8.0:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/com.googlecode.kiama/kiama_2.11/jars/kiama_2.11-1.8.0.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/com.googlecode.kiama/kiama_2.11/srcs/kiama_2.11-1.8.0-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: com.novocode:junit-interface:0.11:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/com.novocode/junit-interface/jars/junit-interface-0.11.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/com.novocode/junit-interface/srcs/junit-interface-0.11-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: de.fosd.typechef:javabdd_repackaged:1.0b2:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/de.fosd.typechef/javabdd_repackaged/jars/javabdd_repackaged-1.0b2.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/de.fosd.typechef/javabdd_repackaged/srcs/javabdd_repackaged-1.0b2-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: gnu.getopt:java-getopt:1.0.13:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/gnu.getopt/java-getopt/jars/java-getopt-1.0.13.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/gnu.getopt/java-getopt/srcs/java-getopt-1.0.13-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: jline:jline:2.12:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/jline/jline/jars/jline-2.12.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/jline/jline/srcs/jline-2.12-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: junit:junit:4.12:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/junit/junit/jars/junit-4.12.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/junit/junit/srcs/junit-4.12-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: org.apache.ant:ant-launcher:1.8.2:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.apache.ant/ant-launcher/jars/ant-launcher-1.8.2.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="SBT: org.apache.ant:ant:1.8.2:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.apache.ant/ant/jars/ant-1.8.2.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="SBT: org.apache.logging.log4j:log4j-api:2.0-beta4:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.apache.logging.log4j/log4j-api/jars/log4j-api-2.0-beta4.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.apache.logging.log4j/log4j-api/srcs/log4j-api-2.0-beta4-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: org.apache.logging.log4j:log4j-core:2.0-beta4:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.apache.logging.log4j/log4j-core/jars/log4j-core-2.0-beta4.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.apache.logging.log4j/log4j-core/srcs/log4j-core-2.0-beta4-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: org.bitbucket.inkytonik.dsinfo:dsinfo_2.11:0.4.0:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.bitbucket.inkytonik.dsinfo/dsinfo_2.11/jars/dsinfo_2.11-0.4.0.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.bitbucket.inkytonik.dsinfo/dsinfo_2.11/srcs/dsinfo_2.11-0.4.0-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: org.bitbucket.inkytonik.dsprofile:dsprofile_2.11:0.4.0:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.bitbucket.inkytonik.dsprofile/dsprofile_2.11/jars/dsprofile_2.11-0.4.0.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.bitbucket.inkytonik.dsprofile/dsprofile_2.11/srcs/dsprofile_2.11-0.4.0-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: org.hamcrest:hamcrest-core:1.3:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.hamcrest/hamcrest-core/jars/hamcrest-core-1.3.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.hamcrest/hamcrest-core/srcs/hamcrest-core-1.3-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: org.ow2.sat4j:org.ow2.sat4j.core:2.3.5:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.ow2.sat4j/org.ow2.sat4j.core/jars/org.ow2.sat4j.core-2.3.5.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.ow2.sat4j/org.ow2.sat4j.core/srcs/org.ow2.sat4j.core-2.3.5-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: org.rogach:scallop_2.11:0.9.5:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.rogach/scallop_2.11/jars/scallop_2.11-0.9.5.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.rogach/scallop_2.11/srcs/scallop_2.11-0.9.5-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: org.scala-lang.modules:scala-parser-combinators_2.11:1.0.4:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-lang.modules/scala-parser-combinators_2.11/bundles/scala-parser-combinators_2.11-1.0.4.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-lang.modules/scala-parser-combinators_2.11/srcs/scala-parser-combinators_2.11-1.0.4-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: org.scala-lang.modules:scala-xml_2.11:1.0.5:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-lang.modules/scala-xml_2.11/bundles/scala-xml_2.11-1.0.5.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-lang.modules/scala-xml_2.11/srcs/scala-xml_2.11-1.0.5-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: org.scala-lang:scala-library:2.11.7:jar" type="Scala">
+      <properties>
+        <compiler-classpath>
+          <root url="file://$USER_HOME$/.ivy2/cache/jline/jline/jars/jline-2.12.1.jar" />
+          <root url="file://$USER_HOME$/.ivy2/cache/org.scala-lang.modules/scala-parser-combinators_2.11/bundles/scala-parser-combinators_2.11-1.0.4.jar" />
+          <root url="file://$USER_HOME$/.ivy2/cache/org.scala-lang.modules/scala-xml_2.11/bundles/scala-xml_2.11-1.0.4.jar" />
+          <root url="file://$USER_HOME$/.ivy2/cache/org.scala-lang/scala-compiler/jars/scala-compiler-2.11.7.jar" />
+          <root url="file://$USER_HOME$/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.11.7.jar" />
+          <root url="file://$USER_HOME$/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.11.7.jar" />
+        </compiler-classpath>
+      </properties>
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.11.7.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-lang/scala-library/srcs/scala-library-2.11.7-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: org.scala-lang:scala-reflect:2.11.2:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.11.2.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-lang/scala-reflect/srcs/scala-reflect-2.11.2-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: org.scala-lang:scala-reflect:2.11.4:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.11.4.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-lang/scala-reflect/srcs/scala-reflect-2.11.4-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: org.scala-sbt:test-interface:1.0:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-sbt/test-interface/jars/test-interface-1.0.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-sbt/test-interface/srcs/test-interface-1.0-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: org.scalacheck:scalacheck_2.11:1.12.0:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.scalacheck/scalacheck_2.11/jars/scalacheck_2.11-1.12.0.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.scalacheck/scalacheck_2.11/srcs/scalacheck_2.11-1.12.0-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: org.scalatest:scalatest_2.11:2.2.5:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.scalatest/scalatest_2.11/bundles/scalatest_2.11-2.2.5.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.scalatest/scalatest_2.11/srcs/scalatest_2.11-2.2.5-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: org.scoverage:scalac-scoverage-plugin_2.11:1.1.1:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.scoverage/scalac-scoverage-plugin_2.11/jars/scalac-scoverage-plugin_2.11-1.1.1.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.scoverage/scalac-scoverage-plugin_2.11/srcs/scalac-scoverage-plugin_2.11-1.1.1-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SBT: org.scoverage:scalac-scoverage-runtime_2.11:1.1.1:jar">
+      <CLASSES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.scoverage/scalac-scoverage-runtime_2.11/jars/scalac-scoverage-runtime_2.11-1.1.1.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$USER_HOME$/.ivy2/cache/org.scoverage/scalac-scoverage-runtime_2.11/srcs/scalac-scoverage-runtime_2.11-1.1.1-sources.jar!/" />
+      </SOURCES>
+    </library>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ProjectJDKs.UI">
+        <settings>
+          <last-edited>1.8</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>

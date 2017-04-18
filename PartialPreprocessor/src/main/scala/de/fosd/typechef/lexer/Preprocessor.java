@@ -1628,23 +1628,6 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
             return false;
         if (getFeature(Feature.DEBUG_VERBOSE))
             System.err.println("pp: including " + file);
-
-        // @mbeddr only include the header file for the given c file, nothing else
-        boolean sameUnit = this.identifier.sameUnit(new SourceIdentifier(file.getPath()));
-
-        if (sameUnit) {
-            FeatureExpr currentCondition = state.getFullPresenceCondition();
-            FeatureExpr condition = this.includedFileMap.get(file);
-
-            if (condition == null) {
-                sourceManager.push_source(file.getSource(), true);
-                this.includedFileMap.put(file, currentCondition);
-            } else if (currentCondition.andNot(condition).isSatisfiable()) {
-                sourceManager.push_source(file.getSource(), true);
-                this.includedFileMap.put(file, currentCondition.or(condition));
-            }
-        }
-
         if (this.includedPragmaOnceFiles.containsKey(file.getPath())) {
             // This file has already been included once with the preprocessor directive #pragma once
             // We include the file only if we have NOT already included the file under a condition

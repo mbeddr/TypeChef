@@ -18,8 +18,8 @@ project/plugins/project/
 debugsource.txt
 Tokenstream.txt
 *.log
-Typechef.ipr
-Typechef.iws
+*.ipr
+*.iws
 *.dbg
 *.i
 *.pi.ast

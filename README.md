@@ -4,6 +4,7 @@ TypeChef
 [![Build Status](https://travis-ci.org/ckaestne/TypeChef.svg?branch=master)](https://travis-ci.org/ckaestne/TypeChef)
 [![Coverage](https://coveralls.io/repos/ckaestne/TypeChef/badge.png?branch=master)](https://coveralls.io/github/ckaestne/TypeChef)
 
+**For instructions on how to import the project using IntelliJ follow the instructions at the end**
 
 TypeChef is a research project with the goal of analyzing 
 ifdef variability in C code with the goal of finding
@@ -298,3 +299,43 @@ License
 -------
 
 TypeChef is published as open source under LGPL 3.0. See [LICENSE](TypeChef/blob/master/LICENSE).
+
+Importing as a Project in IntelliJ 2017.1
+-----------------------------------------
+
+
+* Clone the repository and install the 2017.1 version of IntelliJ (latest as of 11.04.2017) 
+
+* Open IntelliJ and make sure SCALA is enabled in the Plugins section. You can do this either by opening INtelliJ and clicking on File-> Settings-> Plugins or by simply using the Configure on the bottom right of the opening Dialog when you open IntelliJ for the first time. In the Plugin Search box, type in "Scala" and make sure the checkbox next to Scala is checked. **You will be required to restart IntelliJ after this.** 
+
+* If SCALA is not installed, then click on "Install Jetbrains Plugins" in the same Plugin Dialog box and choose SCALA
+
+> If you are using a Windows machine, make sure all Firewall is turned off. Otherwise, Windows firewall may prevent Intellij from being able to contact the Jetbrains repository. It is also recommended that you uninstall any existing installation of SCALA and use the IntelliJ plugin shipped version of SCALA to avoid any conflicts.
+
+* After installing SCALA in your IntelliJ and restarting IntelliJ, choose the "Import Project" option. 
+
+<a href="https://github.com/mbeddr/TypeChef/blob/master/opsnProject1.PNG"><img  width="50%" height="50%" alt="Open Project 1" src="https://github.com/mbeddr/TypeChef/blob/master/opsnProject1.PNG" /></a>
+
+* Choose the source directory of the cloned repository
+
+<a href="https://github.com/mbeddr/TypeChef/blob/master/oprnProject2.PNG"><img width="50%" height="50%" alt="Open Project 1" src="https://github.com/mbeddr/TypeChef/blob/master/oprnProject2.PNG" /></a>
+
+* In the next dialog, choose "Import Projects from external model" and then choose "SBT"
+
+<a href="https://github.com/mbeddr/TypeChef/blob/master/openProject3.PNG"><img width="50%" height="50%" alt="Open Project 1" src="https://github.com/mbeddr/TypeChef/blob/master/openProject3.PNG" /></a>
+
+* In the next dialog, make sure both the "Library sources" and the "SBT Sources" are checked and make sure the Project format is ".ipr(file based)"
+
+<a href="https://github.com/mbeddr/TypeChef/blob/master/openProject4.PNG"><img width="50%" height="50%" alt="Open Project 1" src="https://github.com/mbeddr/TypeChef/blob/master/openProject4.PNG" /></a>
+
+* After a few minutes of waiting, In the next menu, you will be asked to choose the modules to load. Choose all. The next step will take a few minutes to load all the required JARs. Be patient.
+
+* Once the loading is complete, Build the project. This should take a while too when you are doing it for the first time. 
+
+* If your build fails because of issue with dependencies related to Partialcodechecker from mbeddr's project, goto the module settings of the PartialCodeChecker and mark the "src" folder as "Sources"
+
+<a href="https://github.com/mbeddr/TypeChef/blob/master/errorMbeddrPartialCodeCheckerNotFound.PNG"><img width="50%" height="50%" alt="Open Project 1" src="https://github.com/mbeddr/TypeChef/blob/master/errorMbeddrPartialCodeCheckerNotFound.PNG" /></a>
+
+<a href="https://github.com/mbeddr/TypeChef/blob/master/solnMbeddrPartialCodeCheckerNotFound.PNG"><img width="50%" height="50%" alt="Open Project 1" src="https://github.com/mbeddr/TypeChef/blob/master/solnMbeddrPartialCodeCheckerNotFound.PNG" /></a>
+
+* Once the import of project and successful build of project is done, close your IntelliJ and open the TypeChef.ipr file in a text editor and paste the contents of the file artifactdefinition.txt as the first <component> in the ipr xml tree. Ideally, you should paste it between the line that looks like "<project version=...." and "<<component name=...". 

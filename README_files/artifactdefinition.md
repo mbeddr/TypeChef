@@ -1,7 +1,7 @@
 <component name="ArtifactManager">
     <artifact type="jar" name="TypeChef:jar">
       <output-path>$PROJECT_DIR$/out/artifacts</output-path>
-      <root id="archive" name="TypeChef_jar.jar">
+      <root id="archive" name="TypeChef.jar">
         <element id="module-output" name="ConditionalLib" />
         <element id="module-output" name="FeatureExprLib" />
         <element id="module-output" name="CRewrite" />

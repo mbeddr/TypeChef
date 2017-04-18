@@ -338,4 +338,4 @@ Importing as a Project in IntelliJ 2017.1
 
 <a href="https://github.com/mbeddr/TypeChef/blob/master/solnMbeddrPartialCodeCheckerNotFound.PNG"><img width="50%" height="50%" alt="Open Project 1" src="https://github.com/mbeddr/TypeChef/blob/master/solnMbeddrPartialCodeCheckerNotFound.PNG" /></a>
 
-* Once the import of project and successful build of project is done, close your IntelliJ and open the TypeChef.ipr file in a text editor and paste the contents of the file artifactdefinition.txt as the first <component> in the ipr xml tree. Ideally, you should paste it between the line that looks like "<project version=...." and "<<component name=...". 
+* Once the import of project and successful build of project is done, close your IntelliJ and open the TypeChef.ipr file in a text editor and paste the contents of the file artifactdefinition.txt as the first <component> in the ipr xml tree. Ideally, you should paste it between the line that looks like "<project version=....>" and "<component name=...>". 

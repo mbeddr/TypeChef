@@ -33,6 +33,7 @@ public abstract class LexerOptions extends Options implements ILexerOptions {
     private final static char PP_XTC = genOptionId();
     private final static char PP_ADJUSTLINES = genOptionId();
 
+
     @Override
     public String getEncoding() {
         return Charset.defaultCharset().name();
@@ -249,6 +250,16 @@ public abstract class LexerOptions extends Options implements ILexerOptions {
     @Override
     public List<String> getIncludePaths() {
         return new ArrayList<String>(systemIncludePath);
+    }
+
+    @Override
+    public void addIncludePath(String path) {
+
+    }
+
+    @Override
+    public void addQuoteIncludePath(String path) {
+
     }
 
     @Override

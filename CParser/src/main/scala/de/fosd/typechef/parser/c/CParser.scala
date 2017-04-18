@@ -143,8 +143,10 @@ class CParser(featureModel: FeatureModel = null, debugOutput: Boolean = false) e
         val options: LexerFrontend.DefaultLexerOptions = new LexerFrontend.DefaultLexerOptions(lexerSource, false, featureModel)
 
         if (identifier.getFile != null && includes != null) {
-            options.getIncludePaths.addAll(includes.asJava)
-            options.getQuoteIncludePath.addAll(includes.asJava)
+            for(path <- includes) {
+                options.addIncludePath(path)
+                options.addQuoteIncludePath(path)
+            }
         }
 
         val lexerResult: Conditional[LexerFrontend.LexerResult] = lexerFrontend.run(options, true)

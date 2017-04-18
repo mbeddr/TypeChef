@@ -4,6 +4,7 @@ out/
 bin
 *.class
 PlayGround2/
+PlayGround3/
 *.orig
 *~
 .metadata/

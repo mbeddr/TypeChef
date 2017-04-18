@@ -537,18 +537,29 @@ public class LexerFrontend {
             return undefMacros;
         }
 
-        private List<String> includePaths = new ArrayList<String>();
+        // @mbeddr - make the list unique by using a linked hashset
+        private Set<String> includePaths = new LinkedHashSet<String>();
 
         @Override
         public List<String> getIncludePaths() {
-            return includePaths;
+            return Collections.unmodifiableList(new ArrayList<String>(this.includePaths));
         }
 
-        private List<String> quoteIncludePaths = new ArrayList<String>();
+        @Override
+        public void addIncludePath(String path) {
+            includePaths.add(path);
+        }
+
+        @Override
+        public void addQuoteIncludePath(String path) {
+            quoteIncludePaths.add(path);
+        }
+
+        private Set<String> quoteIncludePaths = new LinkedHashSet<String>();
 
         @Override
         public List<String> getQuoteIncludePath() {
-            return quoteIncludePaths;
+            return Collections.unmodifiableList(new ArrayList<String>(this.quoteIncludePaths));
         }
 
         @Override
@@ -774,6 +785,16 @@ public class LexerFrontend {
         @Override
         public boolean isHandleWarningsAsErrors() {
             return false;
+        }
+
+        @Override
+        public void addIncludePath(String path) {
+
+        }
+
+        @Override
+        public void addQuoteIncludePath(String path) {
+
         }
     }
 }

@@ -72,6 +72,12 @@ import static de.fosd.typechef.lexer.Token.*;
  * * 	expand macros after #include
  * * 	expand macros in expression of #if and #elif, but not in defined(X)
  * * 	no expansion in other # directives, never expand the identifier after #
+ * <p>
+ * when to expand macros:
+ * *	always expand macros in pure text, do not reexpand expanded tokens
+ * * 	expand macros after #include
+ * * 	expand macros in expression of #if and #elif, but not in defined(X)
+ * * 	no expansion in other # directives, never expand the identifier after #
  */
 
 /**
@@ -174,7 +180,6 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
     PreprocessorListener listener;
     private PartialCodeChecker codeChecker;
     private SourceIdentifier identifier;
-    private Map<VirtualFile, FeatureExpr> includedFileMap;
     private List<MacroConstraint> macroConstraints;
     private Map<String, FeatureExpr> includedPragmaOnceFiles;
 
@@ -200,7 +205,6 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         this.listener = null;
         this.codeChecker = codeChecker;
         this.identifier = identifier;
-        this.includedFileMap = new HashMap<VirtualFile, FeatureExpr>();
         this.macroConstraints = new ArrayList<MacroConstraint>();
         this.includedPragmaOnceFiles = new HashMap<String, FeatureExpr>();
     }
@@ -1623,23 +1627,30 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
      */
     private boolean include(VirtualFile file) throws IOException,
             LexerException {
-        // System.out.println("Try to include " + file);
-        if (!file.isFile())
+
+        if (!file.isFile()) {
             return false;
-        if (getFeature(Feature.DEBUG_VERBOSE))
+        }
+        if (getFeature(Feature.DEBUG_VERBOSE)) {
             System.err.println("pp: including " + file);
-        if (this.includedPragmaOnceFiles.containsKey(file.getPath())) {
-            // This file has already been included once with the preprocessor directive #pragma once
-            // We include the file only if we have NOT already included the file under a condition
-            // which contains also the current condition
-            FeatureExpr condition = this.includedPragmaOnceFiles.get(file.getPath());
-            FeatureExpr currentCondition = this.state.getFullPresenceCondition();
+        }
+        // @mbeddr only include the header file for the given c file, nothing else
+        boolean sameUnit = this.identifier.sameUnit(new SourceIdentifier(file.getPath()));
 
-            if (currentCondition.andNot(condition).isSatisfiable())
+        if (sameUnit) {
+            if (this.includedPragmaOnceFiles.containsKey(file.getPath())) {
+                // This file has already been included once with the preprocessor directive #pragma once
+                // We include the file only if we have NOT already included the file under a condition
+                // which contains also the current condition
+                FeatureExpr condition = this.includedPragmaOnceFiles.get(file.getPath());
+                FeatureExpr currentCondition = this.state.getFullPresenceCondition();
+
+                if (currentCondition.andNot(condition).isSatisfiable())
+                    sourceManager.push_source(file.getSource(), true);
+
+            } else {
                 sourceManager.push_source(file.getSource(), true);
-
-        } else {
-            sourceManager.push_source(file.getSource(), true);
+            }
         }
 
         return true;

@@ -22,7 +22,13 @@ public interface ILexerOptions {
 
     List<String> getIncludePaths();
 
+    // @mbeddr To protect the modification of the includePaths
+    void addIncludePath(String path);
+
     List<String> getQuoteIncludePath();
+
+    // @mbeddr To protect the modification of the quoteIncludePaths
+    void addQuoteIncludePath(String path);
 
     MacroFilter getMacroFilter();
 

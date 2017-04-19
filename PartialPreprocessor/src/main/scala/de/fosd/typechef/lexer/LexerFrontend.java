@@ -547,12 +547,12 @@ public class LexerFrontend {
 
         @Override
         public void addIncludePath(String path) {
-            includePaths.add(path);
+            includePaths.add(SourceIdentifier.normalize(path));
         }
 
         @Override
         public void addQuoteIncludePath(String path) {
-            quoteIncludePaths.add(path);
+            quoteIncludePaths.add(SourceIdentifier.normalize(path));
         }
 
         private Set<String> quoteIncludePaths = new LinkedHashSet<String>();

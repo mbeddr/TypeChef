@@ -55,36 +55,36 @@ import static de.fosd.typechef.lexer.Token.*;
  * * when applying a macro all alternative expansions are considered
  * <p/>
  * <p/>
- * when to expand macros:
- * *	always expand macros in pure text, do not reexpand expanded tokens
- * * 	expand macros after #include
- * * 	expand macros in expression of #if and #elif, but not in defined(X)
+ * when to expand macrosForExpansion:
+ * *	always expand macrosForExpansion in pure text, do not reexpand expanded tokens
+ * * 	expand macrosForExpansion after #include
+ * * 	expand macrosForExpansion in expression of #if and #elif, but not in defined(X)
  * * 	no expansion in other # directives, never expand the identifier after #
  * <p/>
- * when to expand macros:
- * *	always expand macros in pure text, do not reexpand expanded tokens
- * * 	expand macros after #include
- * * 	expand macros in expression of #if and #elif, but not in defined(X)
+ * when to expand macrosForExpansion:
+ * *	always expand macrosForExpansion in pure text, do not reexpand expanded tokens
+ * * 	expand macrosForExpansion after #include
+ * * 	expand macrosForExpansion in expression of #if and #elif, but not in defined(X)
  * * 	no expansion in other # directives, never expand the identifier after #
  * <p/>
- * when to expand macros:
- * *	always expand macros in pure text, do not reexpand expanded tokens
- * * 	expand macros after #include
- * * 	expand macros in expression of #if and #elif, but not in defined(X)
+ * when to expand macrosForExpansion:
+ * *	always expand macrosForExpansion in pure text, do not reexpand expanded tokens
+ * * 	expand macrosForExpansion after #include
+ * * 	expand macrosForExpansion in expression of #if and #elif, but not in defined(X)
  * * 	no expansion in other # directives, never expand the identifier after #
  * <p>
- * when to expand macros:
- * *	always expand macros in pure text, do not reexpand expanded tokens
- * * 	expand macros after #include
- * * 	expand macros in expression of #if and #elif, but not in defined(X)
+ * when to expand macrosForExpansion:
+ * *	always expand macrosForExpansion in pure text, do not reexpand expanded tokens
+ * * 	expand macrosForExpansion after #include
+ * * 	expand macrosForExpansion in expression of #if and #elif, but not in defined(X)
  * * 	no expansion in other # directives, never expand the identifier after #
  */
 
 /**
- * when to expand macros:
- * *	always expand macros in pure text, do not reexpand expanded tokens
- * * 	expand macros after #include
- * * 	expand macros in expression of #if and #elif, but not in defined(X)
+ * when to expand macrosForExpansion:
+ * *	always expand macrosForExpansion in pure text, do not reexpand expanded tokens
+ * * 	expand macrosForExpansion after #include
+ * * 	expand macrosForExpansion in expression of #if and #elif, but not in defined(X)
  * * 	no expansion in other # directives, never expand the identifier after #
  *
  */
@@ -160,11 +160,14 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
 
     private final FeatureModel featureModel;
     /* The fundamental engine. */
-    private MacroContext<MacroData> macros;
+    // @mbeddr The two list of macros refer to the ones to be expanded (for the Mbeddr variability language parseable expressions)
+    // and the rest that need to be evaluated as part of the Original Typechef pre-processor evaluation
+    private MacroContext<MacroData> macrosForExpansion;
+    private MacroContext<MacroData> macrosForEvaluation;
     State state;
 
     protected MacroContext<MacroData> getMacros() {
-        return macros;
+        return macrosForExpansion;
     }
 
     /* Miscellaneous support. */
@@ -185,11 +188,12 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
 
     public Preprocessor(MacroFilter macroFilter, FeatureModel fm, PartialCodeChecker codeChecker, SourceIdentifier identifier) {
         this.featureModel = fm;
-        macros = new MacroContext<MacroData>(featureModel, macroFilter);
+        macrosForExpansion = new MacroContext<MacroData>(featureModel, macroFilter);
+        macrosForEvaluation = new MacroContext<MacroData>(featureModel, macroFilter);
         for (String name : new String[]{
                 "__LINE__", "__FILE__", "__BASE_FILE__", "__COUNTER__", "__TIME__", "__DATE__"
         }) {
-            macros = macros.define(name, FeatureExprLib.True(), new MacroData(INTERNAL));
+            macrosForExpansion = macrosForExpansion.define(name, FeatureExprLib.True(), new MacroData(INTERNAL));
         }
 
         state = new State();
@@ -428,8 +432,8 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
      * The given {@link MacroData} object encapsulates both the name and the
      * expansion.
      * <p/>
-     * There can be multiple macros. They can have different features. Newer
-     * macros replace older macros if they cover the same features.
+     * There can be multiple macrosForExpansion. They can have different features. Newer
+     * macrosForExpansion replace older macrosForExpansion if they cover the same features.
      *
      * @param feature
      * @param name
@@ -443,12 +447,20 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                     .getFullPresenceCondition());
         if (this.getSource() != null)
             logAddMacro(name, feature, m, this.getSource());
-        macros = macros.define(name, feature, m);
     }
 
+    public void addMacrosForExpansion(String name, FeatureExpr feature, MacroData m) throws LexerException{
+        addMacro(name, feature, m);
+        macrosForExpansion = macrosForExpansion.define(name, feature, m);
+    }
+
+    public void addMacrosForEvaluation(String name, FeatureExpr feature, MacroData m) throws LexerException{
+        addMacro(name, feature, m);
+        macrosForEvaluation = macrosForEvaluation.define(name, feature, m);
+    }
 
     public void removeMacro(String name, FeatureExpr feature) {
-        macros = macros.undefine(name, feature);
+        macrosForExpansion = macrosForExpansion.undefine(name, feature);
     }
 
     /**
@@ -810,7 +822,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         List<Argument> args;
         assert macroExpansions.length > 0;
 
-        // check compatible macros. We allow a object-like macro to exist together with function-like macros, and check
+        // check compatible macrosForExpansion. We allow a object-like macro to exist together with function-like macrosForExpansion, and check
         // arity of all function-like definitions. Non-variadic function-like definitions are currently restricted to
         // have the same arity; otherwise, each macro invocation would be required to use conditional compilation.
 
@@ -839,7 +851,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
             if (macro.isFunctionLike() && !areAllVariadic) {
                 if (!macro.isVariadic() && macro.getArgCount() != arity) {
                     error(origInvokeTok,
-                            "Alternative non-variadic macros with different arities are not yet supported: "
+                            "Alternative non-variadic macrosForExpansion with different arities are not yet supported: "
                                     + macro + " vs. "
                                     + firstMacro);
                 }
@@ -930,7 +942,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                     sourceManager.push_source(createMacroTokenSource(macroName,
                             args, macroExpansions[0], origInvokeTok, inlineCppExpression), true);
 
-                    // expand all alternative macros
+                    // expand all alternative macrosForExpansion
                 } else {
                     if (inlineCppExpression)
                         macro_expandAlternativesInline(macroName, macroExpansions,
@@ -984,7 +996,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
             ParseParamException {
         Token tok;
         List<Argument> args;
-        // attempt to parse all alternative macros in parallel (when all have
+        // attempt to parse all alternative macrosForExpansion in parallel (when all have
         // the same parameters)
         if (firstMacro.isFunctionLike()) {
             OPEN:
@@ -1105,7 +1117,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
     }
 
     /**
-     * Compares macro arity against the count of actual arguments. For variadic macros, a new argument list is produced with
+     * Compares macro arity against the count of actual arguments. For variadic macrosForExpansion, a new argument list is produced with
      * the right argument count (i.e. the macro arity), by concatenating variadic arguments or producing an empty one.
      * Otherwise, the original list is returned.
      *
@@ -1169,7 +1181,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
             throws IOException, LexerException, ParseParamException {
         List<Source> resultList = new ArrayList<Source>();
         //push_state();
-        //state.putLocalFeature(macroExpansion.getFeature(), macros);
+        //state.putLocalFeature(macroExpansion.getFeature(), macrosForExpansion);
         //XXX: here, the current status is not saved in the created macro token source. The caller will not understand the needed ifdef directives.
         //My God. So this change is useless. The produced #if directives are then not parsed by expanded_token, leading to breakage.
         resultList.add(createMacroTokenSource(macroName, args, macroExpansion, origInvokeTok, inline));
@@ -1392,7 +1404,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                             assert !seenParamName; // PG: let's check this.
                             if (!seenParamName) {
                                 // This trick correctly implements the semantics of
-                                // C99 variadic macros as described by the standard
+                                // C99 variadic macrosForExpansion as described by the standard
                                 // (6.3.10.1).
                                 args.add("__VA_ARGS__");
                             }
@@ -1492,7 +1504,9 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         // proper expressions, so that those wont be inlined
         if (currentSource.forceMacroExpansion() || !(codeChecker != null && codeChecker.canParseExpression(m.getText()))) {
             logger.info("#define " + name + " " + m);
-            addMacro(name, state.getFullPresenceCondition(), m);
+            addMacrosForExpansion(name, state.getFullPresenceCondition(), m);
+        } else{
+            addMacrosForEvaluation(name, state.getFullPresenceCondition(), m);
         }
 
         if (currentSource.forceMacroExpansion()) {
@@ -1609,10 +1623,10 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                 return source_skipline(true);
             }
         } else {
-            // Macro m = macros.get(tok.getText());
+            // Macro m = macrosForExpansion.get(tok.getText());
             // if (m != null) {
             /* XXX error if predefined */
-            macros = macros.undefine(tok.getText(), state
+            macrosForExpansion = macrosForExpansion.undefine(tok.getText(), state
                     .getFullPresenceCondition());
             // }
 
@@ -2019,12 +2033,20 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                 hack_definedCounter++;
             if (tok.getType() == IDENTIFIER
                     && (!hack_definedActivated || hack_definedCounter != 1)) {
-                MacroExpansion<MacroData>[] m = macros.getApplicableMacroExpansions(tok
+                MacroExpansion<MacroData>[] m = macrosForExpansion.getApplicableMacroExpansions(tok
+                        .getText(), state.getFullPresenceCondition());
+                MacroExpansion<MacroData>[] mForEvaluation = macrosForEvaluation.getApplicableMacroExpansions(tok
                         .getText(), state.getFullPresenceCondition());
                 if (m.length > 0
                         && tok.mayExpand()
                         && sourceManager.getSource().mayExpand(tok.getText())
                         && macro_expandToken(tok.getText(), m, tok,
+                        inlineCppExpression))
+                    continue;
+                if (mForEvaluation.length > 0
+                        && tok.mayExpand()
+                        && sourceManager.getSource().mayExpand(tok.getText())
+                        && macro_expandToken(tok.getText(), mForEvaluation, tok,
                         inlineCppExpression))
                     continue;
                 return tok;
@@ -2406,7 +2428,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
         } else
             // System.out.println("Found macro");
             if (!(la.getSource().isNormalizedExternalFeatureExpr() || referToExternalDefinitionsOnly))
-                lhs = FeatureExprLib.l().createDefinedMacro(la.getText(), macros);
+                lhs = FeatureExprLib.l().createDefinedMacro(la.getText(), macrosForExpansion);
             else
                 /*
                  * when expression was created by expanding a macro (or by reading
@@ -2621,7 +2643,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
 
                 case IDENTIFIER:
                     // apply macro (in visible code)
-                    MacroExpansion<MacroData>[] m = macros.getApplicableMacroExpansions(tok
+                    MacroExpansion<MacroData>[] m = macrosForExpansion.getApplicableMacroExpansions(tok
                             .getText(), state.getFullPresenceCondition());
                     if (m.length == 0)
                         return tok;
@@ -2716,12 +2738,12 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                             expr_token = null;
                             if (isParentActive()) {
                                 FeatureExpr localFeatureExpr = parse_featureExpr();
-                                state.putLocalFeature(localFeatureExpr, macros);
+                                state.putLocalFeature(localFeatureExpr, macrosForExpansion);
                                 tok = expr_token(true); /* unget */
                                 if (tok.getType() != NL)
                                     source_skipline(isParentActive());
                             } else {
-                                state.putLocalFeature(FeatureExprLib.False(), macros);
+                                state.putLocalFeature(FeatureExprLib.False(), macrosForExpansion);
                                 source_skipline(false);
                             }
 
@@ -2742,7 +2764,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                                 FeatureExpr localFeaturExpr = isActive() ? parse_featureExpr() : FeatureExprLib.False();
                                 state = oldState;
                                 state.processElIf();
-                                state.putLocalFeature(localFeaturExpr, macros);
+                                state.putLocalFeature(localFeaturExpr, macrosForExpansion);
                                 tok = expr_token(true); /* unget */
 
                                 if (tok.getType() != NL)
@@ -2778,7 +2800,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                                         .getText());
                                 state.putLocalFeature(
                                         isParentActive() ? localFeatureExpr2
-                                                : FeatureExprLib.False(), macros);
+                                                : FeatureExprLib.False(), macrosForExpansion);
 
                                 if (tok.getType() != NL)
                                     source_skipline(isParentActive());
@@ -2799,7 +2821,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                                         .getText());
                                 state.putLocalFeature(
                                         isParentActive() ? localFeatureExpr3
-                                                : FeatureExprLib.False(), macros);
+                                                : FeatureExprLib.False(), macrosForExpansion);
                                 if (tok.getType() != NL)
                                     source_skipline(isParentActive());
 
@@ -2850,7 +2872,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
     }
 
     private FeatureExpr parse_ifdefExpr(String feature) {
-        return FeatureExprLib.l().createDefinedMacro(feature, macros);
+        return FeatureExprLib.l().createDefinedMacro(feature, macrosForExpansion);
     }
 
     private Token getNextNonwhiteToken() throws IOException, LexerException {
@@ -2932,7 +2954,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
             s = s.getParent();
         }
 
-        buf.append(macros.toString() + "\n");
+        buf.append(macrosForExpansion.toString() + "\n");
 
         return buf.toString();
     }

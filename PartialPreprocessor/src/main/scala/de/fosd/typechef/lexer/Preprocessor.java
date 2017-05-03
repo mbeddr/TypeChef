@@ -28,6 +28,7 @@ import de.fosd.typechef.VALexer;
 import de.fosd.typechef.featureexpr.FeatureExpr;
 import de.fosd.typechef.featureexpr.FeatureExprTree;
 import de.fosd.typechef.featureexpr.FeatureModel;
+import de.fosd.typechef.lexer.macrotable.Macro;
 import de.fosd.typechef.lexer.macrotable.MacroContext;
 import de.fosd.typechef.lexer.macrotable.MacroExpansion;
 import de.fosd.typechef.lexer.macrotable.MacroFilter;
@@ -438,7 +439,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
      * @param feature
      * @param name
      */
-    public void addMacro(String name, FeatureExpr feature, MacroData m)
+    private MacroContext<MacroData> addMacro(String name, FeatureExpr feature, MacroData m, MacroContext<MacroData> macroContext)
             throws LexerException {
         // System.out.println("Macro " + m);
         /* Already handled as a source error in macro(). */
@@ -447,16 +448,15 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                     .getFullPresenceCondition());
         if (this.getSource() != null)
             logAddMacro(name, feature, m, this.getSource());
+        return macroContext.define(name, feature, m);
     }
 
-    public void addMacrosForExpansion(String name, FeatureExpr feature, MacroData m) throws LexerException{
-        addMacro(name, feature, m);
-        macrosForExpansion = macrosForExpansion.define(name, feature, m);
+    private void addMacrosForExpansion(String name, FeatureExpr feature, MacroData m) throws LexerException{
+        macrosForExpansion = addMacro(name, feature, m, macrosForExpansion);
     }
 
-    public void addMacrosForEvaluation(String name, FeatureExpr feature, MacroData m) throws LexerException{
-        addMacro(name, feature, m);
-        macrosForEvaluation = macrosForEvaluation.define(name, feature, m);
+    private void addMacrosForEvaluation(String name, FeatureExpr feature, MacroData m) throws LexerException{
+        macrosForEvaluation = addMacro(name, feature, m, macrosForEvaluation);
     }
 
     public void removeMacro(String name, FeatureExpr feature) {
@@ -480,7 +480,7 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                     break;
                 m.addToken(tok);
             }
-            addMacro(name, feature, m);
+            addMacro(name, feature, m, macrosForExpansion);
         } catch (IOException e) {
             throw new LexerException(e);
         }
@@ -2033,21 +2033,21 @@ public class Preprocessor extends DebuggingPreprocessor implements Closeable, VA
                 hack_definedCounter++;
             if (tok.getType() == IDENTIFIER
                     && (!hack_definedActivated || hack_definedCounter != 1)) {
-                MacroExpansion<MacroData>[] m = macrosForExpansion.getApplicableMacroExpansions(tok
+                MacroExpansion<MacroData>[] applicableMacroExpansions = macrosForExpansion.getApplicableMacroExpansions(tok
                         .getText(), state.getFullPresenceCondition());
-                MacroExpansion<MacroData>[] mForEvaluation = macrosForEvaluation.getApplicableMacroExpansions(tok
+                MacroExpansion<MacroData>[] applicableMacroEvaluations = macrosForEvaluation.getApplicableMacroExpansions(tok
                         .getText(), state.getFullPresenceCondition());
-                if (m.length > 0
+                boolean isExpansionsApplicable = applicableMacroExpansions.length > 0
                         && tok.mayExpand()
                         && sourceManager.getSource().mayExpand(tok.getText())
-                        && macro_expandToken(tok.getText(), m, tok,
-                        inlineCppExpression))
-                    continue;
-                if (mForEvaluation.length > 0
+                        && macro_expandToken(tok.getText(), applicableMacroExpansions, tok,
+                        inlineCppExpression);
+                boolean isEvaluationsAppicable = applicableMacroEvaluations.length > 0
                         && tok.mayExpand()
                         && sourceManager.getSource().mayExpand(tok.getText())
-                        && macro_expandToken(tok.getText(), mForEvaluation, tok,
-                        inlineCppExpression))
+                        && macro_expandToken(tok.getText(), applicableMacroEvaluations, tok,
+                        inlineCppExpression);
+                if (isExpansionsApplicable || isEvaluationsAppicable)
                     continue;
                 return tok;
             }
